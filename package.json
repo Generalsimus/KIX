@@ -1,0 +1,59 @@
+{
+    "name": "kix-js",
+    "version": "1.0.4",
+    "description": "JS FRAMEWORK",
+    "main": "index.js",
+    "errors_for_me": [
+        "obieqtis keyiebis gageba ar mogviwevs shemdegistvis shevcvli"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Generalsimus/KIX.git"
+    },
+    "bin": {
+        "kix": "./index.js",
+        "KIX": "./index.js"
+    },
+    "keywords": [
+        "kix",
+        "kix-js",
+        "kixjs",
+        "js-kix",
+        "jskix",
+        "kid",
+        "kidjs",
+        "kid-js",
+        "kid-js-lib",
+        "js",
+        "javascript",
+        "jskid",
+        "kix",
+        "dom",
+        "jsdom",
+        "kixdom",
+        "kixjs"
+    ],
+    "preferGlobal": true,
+    "author": "GENERALSIMUS",
+    "license": "MIT",
+    "dependencies": {
+        "@babel/core": "^7.12.9",
+        "@babel/preset-env": "^7.12.7",
+        "babel-preset-minify": "^0.5.1",
+        "consola": "^2.15.0",
+        "express": "^4.17.1",
+        "global-modules": "^2.0.0",
+        "jsdom": "^16.4.0",
+        "mime-types": "^2.1.27",
+        "node-sass": "^5.0.0",
+        "open": "^7.3.0",
+        "prompts": "^2.4.0",
+        "source-map": "^0.7.3",
+        "typescript": "^4.1.2",
+        "ws": "^7.4.0"
+    },
+    "devDependencies": {}
+}
