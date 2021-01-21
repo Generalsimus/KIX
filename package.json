@@ -1,6 +1,6 @@
 {
     "name": "kix-js",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "JS FRAMEWORK",
     "main": "index.js",
     "errors_for_me": [
@@ -39,6 +39,10 @@
     "preferGlobal": true,
     "author": "GENERALSIMUS",
     "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Generalsimus/KIX/issues"
+    },
+    "homepage": "https://kixjs.ml",
     "dependencies": {
         "@babel/core": "^7.12.9",
         "@babel/preset-env": "^7.12.7",
