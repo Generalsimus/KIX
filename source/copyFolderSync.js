@@ -2,14 +2,18 @@ var fs = require("fs");
 const path = require("path");
 
 
-module.exports = function copyFolderSync(from, to, noDir = [], copy_files) {
+module.exports = function copyFolderSync(from, to, noDir = [], copy_files = {}) {
     // console.log(from, to, noDir)
+
     if (copy_files[to]) {
         // console.log(`${to} Compiled`);
-        fs.writeFileSync(to, copy_files[to]);
+        
     } else if (noDir.indexOf(from) < 0) {
 
+
         const stat = fs.lstatSync(from);
+
+        console.log(from, to, stat.isFile(), stat.isSymbolicLink(), stat.isDirectory())
 
         if (stat.isFile()) {
             fs.copyFileSync(from, to)
