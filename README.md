@@ -44,8 +44,8 @@ KD_T(document.body, HTML);
 MIT
 
 <!-- Refs -->
-[standard-js-src]: https://flat.badgen.net/badge/code%20style/standard/green
-[standard-js-href]: https://standardjs.com
+[standard-js-src]: https://flat.badgen.net/badge/license/MIT/green
+[standard-js-href]: https://github.com/Generalsimus/KIX/blob/master/LICENSE
 
 [npm-version-src]: https://flat.badgen.net/npm/v/kix-js/latest
 [npm-version-href]: https://www.npmjs.com/package/kix-js
