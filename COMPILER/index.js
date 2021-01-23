@@ -53,7 +53,7 @@ global.Compiler = function (DATA) {
     Location: location,
     VISITED: false,
     CHANGE_LISTENER: false,
-    File_Ext: File_Ext, 
+    File_Ext: File_Ext,
     ERRORS: [],
     CODE_SCRIPT: CODE_SCRIPT || " ",
     externalSource: false,
@@ -137,7 +137,8 @@ function Run_Compiler(DATA, FILE_LOCATION) {
 
   var DATA = Compiler({
     ...DATA,
-    Import_Location: FILE_LOCATION.replace(DATA.Run_Dir, ""),
+    Import_Location: path.relative(DATA.Run_Dir, FILE_LOCATION),
+    // .replace(DATA.Run_Dir, ""),
     File_Start_Dir: DATA.Run_Dir,
     File_Start_loc: FILE_LOCATION,
     IMPORTS_INDEX: 0
