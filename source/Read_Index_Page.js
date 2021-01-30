@@ -27,9 +27,9 @@ module.exports = function (runed_dir, WebSocket_URL) {
     var DEV_MODE_SCRIPT = fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL);
 
     watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE.js'] = function (res) {
-        res.header("Cache-Control", "public, max-age=31536000"); 
-        
-        return DEV_MODE_SCRIPT
+        res.header("Cache-Control", "public, max-age=31536000");
+
+        return fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL)
     }
 
 
@@ -151,15 +151,18 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
             switch (json_message.method) {
                 case "get_error_files":
+
                     var send_Object = {
                         ...json_message,
                         method: "create_error_code",
                         data: []
                     }
+
                     json_message.data.forEach(async function (element, index) {
                         var PATH_FILE = path.resolve(runed_dir + element.path),
                             FILE = DATA.Files[PATH_FILE];
 
+                        // console.log(PATH_FILE, Object.keys(DATA.Files))
                         if (FILE && FILE.DATA.COMPIL_SCRIPT) {
                             const { line_coll: [error_line, error_column], error_cod } = element;
                             var Consumer = FILE.DATA.SourceMapConsumer = FILE.DATA.SourceMapConsumer || await new SourceMapConsumer(FILE.DATA.COMPIL_SCRIPT.sourceMapText)

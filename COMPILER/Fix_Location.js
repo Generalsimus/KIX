@@ -19,7 +19,8 @@ module.exports = function (DATA) {
         //     basedir: DATA.File_Start_Dir
         // }))
         if (path.extname(ret)) {
-            return ret
+
+            return path.resolve(ret)
         }
 
         for (var ext of EXT_LIST) {

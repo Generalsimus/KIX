@@ -21,6 +21,7 @@ const SourceFile_Map_Object = require("./Modifer/SourceFile_Map_Object");
 global.Compiler = function (DATA) {
   var location = Fix_Location(DATA);
 
+  
 
   if (DATA.Files[location] && DATA.Files[location].DATA.File_Ext != "FILE_NOT_EXIST") {
     return DATA.Files[location].DATA
