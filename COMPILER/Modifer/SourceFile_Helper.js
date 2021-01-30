@@ -15,7 +15,7 @@ var SAVE_LOG = [],
     };
 
 console.save = function () {
-    return
+    // return
     console.clear();
 
     var i = 0;
