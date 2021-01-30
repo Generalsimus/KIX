@@ -4,6 +4,7 @@
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![bundle phobia][bundle-phobia-src]][bundle-phobia-href]
+[![git phobia][git-phobia-src]][git-phobia-href]
  
 
 
@@ -54,3 +55,6 @@ MIT
 
 [bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix-js?&style=flat-square&color=red
 [bundle-phobia-href]: https://packagephobia.com/result?p=kix-js
+
+[git-phobia-src]: https://img.shields.io/github/stars/Generalsimus/KIX?style=social
+[git-phobia-href]: https://github.com/Generalsimus/KIX
