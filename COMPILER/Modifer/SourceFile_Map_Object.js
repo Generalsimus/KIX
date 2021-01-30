@@ -1,11 +1,11 @@
 const fs = require("fs")
 const ts = require("typescript")
 const Clone_Json = require("./Clone_Json")
-const Transpile_Module = require("./Transpile_Module")
+const { Transpile_Module } = require("./Transpile_Module")
 const SyntaxKind = ts.SyntaxKind
 // const { Find_One, Find_Mult } = require("./Selectors_List")
 const path = require("path")
-const { Import_File, Find_One, Find_Mult } = require("./SourceFile_Helper")
+const { Import_File, Find_One, Find_Mult, PROPERTY_Access_Expression } = require("./SourceFile_Helper")
 
 
 
@@ -13,23 +13,31 @@ function CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, children)
     const Events_Prop_Array = [];
 
     return Clone_Json.CREATE_Object([tagName, ...attributes.properties].flatMap((v, i) => {
-        function PROPERTY(expression, attributes, Inside_Map = {}) {
+        function PROPERTY(expression, attributes) {
 
             if (expression.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(expression.kind)) {
                 return Clone_Json.CREATE_TEXT(expression.text)
             }
 
-            var ret = Create_CTX_VISITOR({ ...DATA, Inside_Map: Inside_Map }, CTX)(expression)
+
+            var CHILD_DATA = {
+                ...DATA, Inside_Map: "in"
+            }
+            // var ret = Create_CTX_VISITOR(CHILD_DATA, CTX)(expression)
+            var ret = VISITOR(expression, CHILD_DATA, VISITOR, CTX)
             // var ret = VISITOR.bind({ ...DATA, Inside_Map: Inside_Map })(expression)
 
-            Inside_Map = Object.keys(Inside_Map).map(v => {
-                return Clone_Json.CREATE_Property(v, Inside_Map[v])
-            })
 
-            return Inside_Map.length ? Clone_Json.CREATE_Call_FUNCTION('KD_g', [
-                Clone_Json.CREATE_Function([Clone_Json.CREATE_Return(ret)]),
-                Clone_Json.CREATE_Object(Inside_Map),
-                Clone_Json.CREATE_This()
+            // Inside_Map = Object.keys(Inside_Map).map(v => {
+            //     return Clone_Json.CREATE_Property(v, Inside_Map[v])
+            // })
+
+            return CHILD_DATA.Inside_Map == true ? Clone_Json.CREATE_Call_FUNCTION('KD_G', [
+                // Clone_Json.CREATE_Arrow_Function(ret, ["din"])
+                Clone_Json.CREATE_Arrow_Function(ret, [DATA.REGISTER_PROP_NAME])
+                // ,
+                // Clone_Json.CREATE_Object(Inside_Map),
+                // Clone_Json.CREATE_This()
             ]) : ret
         }
 
@@ -110,6 +118,7 @@ var MODIFERS = {
             children
         } = NODE;
 
+        // return  
         return CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, children)
     },
     JsxSelfClosingElement: function (NODE, DATA, VISITOR, CTX) {
@@ -120,47 +129,30 @@ var MODIFERS = {
 
         return CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, [])
     },
-    PropertyAccessExpression: function (NODE, DATA, VISITOR, CTX) {
-
-        const check_node = (NODE, Inside_Map) => {
-            // console.log(SyntaxKind[NODE.kind])
-
-            return ["PropertyAccessExpression", "Identifier", "ThisKeyword"].includes(SyntaxKind[NODE.kind]) ? Inside_Map : false
-        };
-
-        function register_prop(NODE, Inside_Map) {
-            if (Inside_Map) {
-
-                if (NODE.expression) {
-
-                    if (register_prop(NODE.expression, Inside_Map) && NODE.name && NODE.name.escapedText) {
-                        Inside_Map[NODE.name.escapedText] = NODE.expression;
-                    } else {
-                        return false
-                    }
-                }
-
-                return ["PropertyAccessExpression", "Identifier", "ThisKeyword"].includes(SyntaxKind[NODE.kind]) ? true : false
-            }
-
-        }
-
-        register_prop(NODE, DATA.Inside_Map)
+    PropertyAccessExpression: PROPERTY_Access_Expression,
+    ElementAccessExpression: PROPERTY_Access_Expression,
+    ArrowFunction: function (NODE, DATA, VISITOR, CTX) {
 
 
-        return ts.visitEachChild(NODE, Create_CTX_VISITOR({ ...DATA, Inside_Map: false }, CTX), CTX)
-        // return Create_CTX_VISITOR({ ...DATA, Inside_Map: false }, CTX)(NODE)
+        return ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, { ...DATA, Inside_Map: false }, VISITOR, CTX), CTX)
+        // return VISITOR(NODE, { ...DATA, Inside_Map: { ON: false, IN: true } }, VISITOR, CTX)
+        // return ts.visitEachChild(NODE, Create_CTX_VISITOR(, CTX), CTX)
+        // return ts.visitEachChild(NODE, VISITOR.bind({ ...DATA, Inside_Map: false }), CTX)
     },
     FunctionExpression: function (NODE, DATA, VISITOR, CTX) {
 
 
-        return ts.visitEachChild(NODE, Create_CTX_VISITOR({ ...DATA, Inside_Map: false }, CTX), CTX)
+        return ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, { ...DATA, Inside_Map: false }, VISITOR, CTX), CTX)
+        // return VISITOR(NODE, { ...DATA, Inside_Map: { ON: false, IN: true } }, VISITOR, CTX)
+        // return ts.visitEachChild(NODE, Create_CTX_VISITOR(, CTX), CTX)
         // return ts.visitEachChild(NODE, VISITOR.bind({ ...DATA, Inside_Map: false }), CTX)
     },
     ClassExpression: function (NODE, DATA, VISITOR, CTX) {
         // Create_CTX_VISITOR({ ...DATA, Inside_Map: false },CTX)
         // return Create_CTX_VISITOR({ ...DATA, Inside_Map: false }, CTX)(NODE)
-        return ts.visitEachChild(NODE, Create_CTX_VISITOR({ ...DATA, Inside_Map: false }, CTX), CTX)
+        return ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, { ...DATA, Inside_Map: false }, VISITOR, CTX), CTX)
+        // return VISITOR(NODE, { ...DATA, Inside_Map: { ON: false, IN: true } }, VISITOR, CTX)
+        // return ts.visitEachChild(NODE, Create_CTX_VISITOR({ ...DATA, Inside_Map: { ON: false, IN: true } }, CTX), CTX)
         // return ts.visitEachChild(NODE, VISITOR.bind({ ...DATA, Inside_Map: false }), CTX)
     },
     ImportDeclaration: function (NODE, DATA, VISITOR, CTX) {
@@ -219,7 +211,10 @@ var MODIFERS = {
             })
         }
         // return undefined
-        return [ts.visitEachChild(NODE, VISITOR, CTX)].concat(new_Statement)
+
+
+        return [ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX)].concat(new_Statement)
+        // return [ts.visitEachChild(NODE, VISITOR, CTX)].concat(new_Statement)
     },
     FunctionDeclaration: function (NODE, DATA, VISITOR, CTX) {
         if (NODE.modifiers) {
@@ -228,12 +223,15 @@ var MODIFERS = {
                 if (typeof obj == "object") {
                     if (SyntaxKind[obj.kind] == "DefaultKeyword" || ((SyntaxKind[obj.kind] == "ExportKeyword" && ((NODE.name || {}).escapedText || {}).length))) {
                         NODE.kind = SyntaxKind["FunctionExpression"];
-                        return Clone_Json.CREATE_Access_Object_Property("exports", SyntaxKind[obj.kind] == "ExportKeyword" ? NODE.name : "default", ts.visitEachChild(NODE, VISITOR, CTX))
+                        return Clone_Json.CREATE_Access_Object_Property("exports", SyntaxKind[obj.kind] == "ExportKeyword" ? NODE.name : "default", ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX))
                     }
                 }
             }
         }
-        return ts.visitEachChild(NODE, VISITOR, CTX)
+
+        return ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX)
+        // return VISITOR(NODE, DATA, VISITOR, CTX)
+        // return ts.visitEachChild(NODE, VISITOR, CTX)
     },
     ClassDeclaration: function (NODE, DATA, VISITOR, CTX) {
         if (NODE.modifiers) {
@@ -242,12 +240,15 @@ var MODIFERS = {
                 if (typeof obj == "object") {
                     if (SyntaxKind[obj.kind] == "DefaultKeyword" || ((SyntaxKind[obj.kind] == "ExportKeyword" && ((NODE.name || {}).escapedText || {}).length))) {
                         NODE.kind = SyntaxKind["ClassExpression"];
-                        return Clone_Json.CREATE_Access_Object_Property("exports", SyntaxKind[obj.kind] == "ExportKeyword" ? NODE.name : "default", ts.visitEachChild(NODE, VISITOR, CTX))
+                        return Clone_Json.CREATE_Access_Object_Property("exports", SyntaxKind[obj.kind] == "ExportKeyword" ? NODE.name : "default", ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX))
                     }
                 }
             }
         }
-        return ts.visitEachChild(NODE, VISITOR, CTX)
+
+        return ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX)
+        // return VISITOR(NODE, DATA, VISITOR, CTX)
+        // return ts.visitEachChild(NODE, VISITOR, CTX)
     },
     ExportDeclaration: function (NODE, DATA, VISITOR, CTX) {
         // console.log(NODE)
@@ -282,7 +283,13 @@ var MODIFERS = {
     },
     ExportAssignment: function (NODE, DATA, VISITOR, CTX) {
         const { expression } = NODE;
-        return ts.visitEachChild(Clone_Json.CREATE_Access_Object_Property("exports", "default", expression), VISITOR, CTX)
+
+
+
+
+        return ts.visitEachChild(Clone_Json.CREATE_Access_Object_Property("exports", "default", expression), (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX)
+        // return VISITOR(Clone_Json.CREATE_Access_Object_Property("exports", "default", expression), DATA, VISITOR, CTX)
+        //     // return ts.visitEachChild(, VISITOR, CTX)
 
     },
     SourceFile: function (NODE, DATA, VISITOR, CTX) {
@@ -295,9 +302,10 @@ var MODIFERS = {
                     statements = DATA.Files[PATH].statements;
 
                 if (!PATH_DATA.VISITED) {
-                    var vist = Create_CTX_VISITOR(PATH_DATA, CTX)
-
-                    statements = statements.flatMap(node => vist(node) || []);
+                    // var vist = Create_CTX_VISITOR(PATH_DATA, CTX)
+                    // var vist = Create_CTX_VISITOR(PATH_DATA, CTX)
+                    // VISITOR(PATH_DATA,)
+                    statements = statements.flatMap(node => VISITOR(node, PATH_DATA, VISITOR, CTX) || []);
 
                     DATA.Files[PATH].statements = statements;
                     PATH_DATA.VISITED = true;
@@ -333,25 +341,29 @@ var MODIFERS = {
 
 
 // console.log(ts.getDefaultCompilerOptions())
-function Create_CTX_VISITOR(DATA, CTX) {
+// function Create_CTX_VISITOR(DATA, CTX) {
 
-    VISITOR = function (NODE) {
-        var DATA = this;
+//     VISITOR = function (NODE) {
+//         var DATA = this;
 
-        // console.log(DATA.Location)
-        if (DATA.externalSource) {
-            NODE = ts.setSourceMapRange(ts.getMutableClone(NODE), {
-                source: DATA.externalSource,
-                pos: NODE.pos,
-                end: NODE.end
-            })
-        }
-        var new_NODE = MODIFERS[SyntaxKind[NODE.kind]] ? MODIFERS[SyntaxKind[NODE.kind]](NODE, DATA, VISITOR, CTX) : ts.visitEachChild(NODE, VISITOR, CTX)
+//         // console.log(DATA.Location)
+//         if (DATA.externalSource) {
+//             NODE = ts.setSourceMapRange(ts.getMutableClone(NODE), {
+//                 source: DATA.externalSource,
+//                 pos: NODE.pos,
+//                 end: NODE.end
+//             })
+//         }
+//         var new_NODE = MODIFERS[SyntaxKind[NODE.kind]] ? MODIFERS[SyntaxKind[NODE.kind]](NODE, DATA, VISITOR, CTX) : ts.visitEachChild(NODE, VISITOR, CTX)
 
-        return new_NODE;
-    }.bind(DATA)
-    return VISITOR
-}
+//         return new_NODE;
+//     }.bind(DATA)
+//     return VISITOR
+// }
+
+// function VISITOR(DATA, NODE, CTX) {
+
+// }
 
 module.exports = function (DATA) {
     const SourceFile = DATA.SourceFile || ts.createSourceFile("APP.js", " ", ts.ScriptTarget.Latest)
@@ -377,6 +389,9 @@ module.exports = function (DATA) {
             target: "ES2020",
             sourceMap: true,
             // inlineSourceMap: true,
+            // lib: ["ES2015"],
+
+
             inlineSources: true,
             removeComments: true,
             // mapRoot: 'kix/',
@@ -387,11 +402,31 @@ module.exports = function (DATA) {
                 removeComments: true,
             },
         fileName: path.relative(DATA.Run_Dir, DATA.Location),
-        // outFile: "/sadas/asd/asd.js",
+        // outFile: "/sadas/asd/asd.js",2
         transformers: {
             before: [
                 (CTX) => {
-                    return Create_CTX_VISITOR(DATA, CTX)
+                    return function (NODE) {
+                        function VISITOR(NODE, DATA, VISITOR, CTX) {
+
+                            // console.log(DATA)
+                            if (DATA.externalSource) {
+                                NODE = ts.setSourceMapRange(ts.getMutableClone(NODE), {
+                                    source: DATA.externalSource,
+                                    pos: NODE.pos,
+                                    end: NODE.end
+                                })
+                            }
+                            // console.log(SyntaxKind[NODE.kind])
+                            var new_NODE = MODIFERS[SyntaxKind[NODE.kind]] ? MODIFERS[SyntaxKind[NODE.kind]](NODE, DATA, VISITOR, CTX) : ts.visitEachChild(NODE, (NODE) => VISITOR(NODE, DATA, VISITOR, CTX), CTX)
+
+                            return new_NODE
+                        }
+
+                        return VISITOR(NODE, DATA, VISITOR, CTX)
+                        // return ts.visitEachChild(NODE, () => VISITOR_CREATOR(NODE, DATA, VISITOR_CREATOR, CTX), CTX)
+                    }
+                    // return Create_CTX_VISITOR(DATA, CTX)
 
                 }
             ]

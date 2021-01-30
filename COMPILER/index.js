@@ -5,7 +5,7 @@ const consola = require('consola')
 
 // const { SourceMapConsumer } = require("source-map")
 
-const JS = require("./Modifer/IMPORTS_FILES/JS")
+const JS_JSX_TS_TSX = require("./Modifer/IMPORTS_FILES/JS_JSX_TS_TSX")
 const CSS = require("./Modifer/IMPORTS_FILES/CSS")
 const BASE64 = require("./Modifer/IMPORTS_FILES/BASE64")
 const JS_JSON = require("./Modifer/IMPORTS_FILES/JS_JSON")
@@ -15,7 +15,7 @@ const FILE_NOT_EXIST = require("./Modifer/IMPORTS_FILES/FILE_NOT_EXIST")
 const Clone_Json = require("./Modifer/Clone_Json")
 const { Import_File } = require("./Modifer/SourceFile_Helper")
 const Fix_Location = require("./Fix_Location")
-const SourceFile_Map_Object = require("./Modifer/SourceFile_Map_Object")
+const SourceFile_Map_Object = require("./Modifer/SourceFile_Map_Object");
 
 
 global.Compiler = function (DATA) {
@@ -27,20 +27,19 @@ global.Compiler = function (DATA) {
   }
   if (fs.existsSync(location)) {
     var CODE_SCRIPT = fs.readFileSync(location, "utf8");
-    if (DATA.DEVELOPER_MOD && !DATA.CHANGE_LISTENER) {
+    if (!DATA.WATCHED) {
+      // DATA.WATCHED = true
+
       fs.watch(location, (method) => {
 
-        console.save()
-        // console.log(method)
         delete DATA.Files[location]
-        Object.assign(DATA, { CHANGE_LISTENER: true })
-        Import_File(DATA.import_text, DATA, true, DATA)
 
-        consola.success(path.relative(DATA.Run_Dir, DATA.Location) + `\x1b[32m COMPILED\x1b[0m`)
-
+        Import_File(DATA.Import_Location, DATA, DATA)
         DATA.RESET_REQUEST_FILE()
         KD_RESTART_PAGE()
-        // console.log("changeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        consola.success(path.relative(DATA.Run_Dir, DATA.Location) + `\x1b[32m COMPILED\x1b[0m`)
+  
+
       })
     }
     var File_Ext = path.extname(location).replace('.', '').toUpperCase();
@@ -52,7 +51,8 @@ global.Compiler = function (DATA) {
   Object.assign(DATA, {
     Location: location,
     VISITED: false,
-    CHANGE_LISTENER: false,
+    // CHANGE_LISTENER: false,
+    // WATCHED: false,
     File_Ext: File_Ext,
     ERRORS: [],
     CODE_SCRIPT: CODE_SCRIPT || " ",
@@ -71,7 +71,10 @@ global.Compiler = function (DATA) {
       var statements = FILE_NOT_EXIST(DATA)
       break;
     case 'JS':
-      var statements = JS(DATA)
+    case 'JSX':
+    case 'TS':
+    case 'TSX':
+      var statements = JS_JSX_TS_TSX(DATA)
       break;
     case 'JSON':
       var statements = JS_JSON(DATA)
@@ -138,9 +141,10 @@ function Run_Compiler(DATA, FILE_LOCATION) {
   var DATA = Compiler({
     ...DATA,
     Import_Location: path.relative(DATA.Run_Dir, FILE_LOCATION),
-    // .replace(DATA.Run_Dir, ""),
+    // .replace(DATA.Run_Dir, ""), 
     File_Start_Dir: DATA.Run_Dir,
     File_Start_loc: FILE_LOCATION,
+    REGISTER_PROP_NAME: `KD_${new Date().getTime()}_PROP_REGIST_22_${new Date().getTime()}_22_RATOR_PROP_${new Date().getTime()}_KD`,
     IMPORTS_INDEX: 0
   })
 
@@ -173,6 +177,7 @@ function Run_Compiler(DATA, FILE_LOCATION) {
 
   }
   // console.save("COMPILED", "green")(0)
+  // console.log(COMPIL_SCRIPT.outputText)
   return { code: COMPIL_SCRIPT.outputText, DATA }
 }
 

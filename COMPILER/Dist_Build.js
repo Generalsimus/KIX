@@ -39,7 +39,7 @@ module.exports = (runed_dir) => {
                 return "/" + base + (i || '')
             })());
 
-        document.querySelectorAll("script[KD_script]").forEach(({ src }) => {
+        document.querySelectorAll("script[kix_app]").forEach(({ src }) => {
 
             var URL = new dom.window.URL(src, 'http://e'),
                 full_src = path.resolve(runed_dir + '/' + URL.pathname);

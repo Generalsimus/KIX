@@ -1,22 +1,18 @@
 const ts = require("typescript")
+const path = require("path")
+const {
+    Program_Host
+} = require("../Transpile_Module")
 
-// function Create_Source(CODE_SCRIPT) {
-//     return ts.createSourceFile(
-//         "APP.jsx",
-//         CODE_SCRIPT,
-//         ts.ScriptTarget.Latest
-//     )
-// }
 
 module.exports = function (DATA) {
     const SourceFile = ts.createSourceFile(
-        "APP.js",
+        path.basename(DATA.Location),
         DATA.CODE_SCRIPT,
         ts.ScriptTarget.Latest);
 
-    // console.log(SourceFile)
 
-    // throw new Error("ddd")
+
     // CREATE ERRORS Diagnostics 
     for (var Diagnostic of SourceFile.parseDiagnostics) {
         const lineAndChar = Diagnostic.file.getLineAndCharacterOfPosition(
@@ -26,18 +22,16 @@ module.exports = function (DATA) {
         const character = lineAndChar.character + 1;
         const FIX_path = DATA.Location.replace(DATA.Run_Dir, "").replace("\\", "/")
 
-        // console.log(DATA.SOCKET_ERRORS)
+        
 
         DATA.ERRORS.push({
-            data: [
-                {
-                    code: DATA.CODE_SCRIPT,
-                    error_cod: `${Diagnostic.messageText} (${FIX_path}:${line}:${character})`,
-                    line_coll: [line, character],
-                    path: FIX_path,
+            data: [{
+                code: DATA.CODE_SCRIPT,
+                error_cod: `${Diagnostic.messageText} (${FIX_path}:${line}:${character})`,
+                line_coll: [line, character],
+                path: FIX_path,
 
-                }
-            ],
+            }],
             general_error: Diagnostic.messageText,
             method: "create_error_code"
         })

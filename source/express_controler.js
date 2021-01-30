@@ -5,6 +5,9 @@ const http = require("http")
 const server = http.createServer(app);
 const open = require("open");
 const Read_Index_Page = require("./Read_Index_Page")
+var mime = require('mime-types')
+
+
 
 var WS = new WebSocket({ server, path: "/KD/K_KD_Socket_KD_K" });
 
@@ -38,10 +41,12 @@ module.exports = function (runed_dir) {
     app.use(function (req, res, next) {
 
         res.header("Cache-Control", "no-cache");
-        res.header("content-type", "charset=utf-8");
+
 
         var V_Dir = watch_directory[req._parsedUrl.pathname];
         if (V_Dir) {
+            // console.log(req._parsedUrl.pathname, mime.lookup(req._parsedUrl.pathname))
+            res.header("content-type", mime.lookup(req._parsedUrl.pathname) || "text/html");
             res.end(V_Dir(res))
         } else {
             next();

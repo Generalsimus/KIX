@@ -7,4 +7,4 @@ var HTML = <div class="contain">
    </svg></a>
 </div>
 
-KD_T(document.body, HTML);
+KD_(document.body, HTML);

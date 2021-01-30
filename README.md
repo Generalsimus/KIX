@@ -34,7 +34,7 @@ var HTML = <div>
     <h1>KIX :)</h1> 
 </div>
 
-KD_T(document.body, HTML);  
+KD_(document.body, HTML);  
 ```
 
 

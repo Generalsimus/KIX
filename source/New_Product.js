@@ -73,9 +73,15 @@ module.exports = (arguments, i, runed_dir) => {
                             "start": "kix start",
                             "build": "kix build",
                         },
-                        "babel_targets": {
-                            "chrome": "89"
-                        },
+                        "babel_targets": [
+                            ">0.2%",
+                            "not dead",
+                            "not op_mini all"
+                        ],
+                        // CSS_
+                        // ">0.2%",
+                        // "not dead",
+                        // "not op_mini all"
                         "dependencies": {},
                         "devDependencies": {}
                     }), null, "\t"),

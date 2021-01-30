@@ -69,6 +69,9 @@ module.exports = {
       ARGS
     )
   },
+  CREATE_JSX_REGISTRATOR: function () {
+    return this.CREATE_Call_FUNCTION("KD_G", [this.CREATE_Arrow_Function()])
+  },
   CREATE_Throw_Statement: function (ARG) {
     return factory.createThrowStatement(ARG)
   },
@@ -193,5 +196,23 @@ module.exports = {
       undefined,
       arguments
     ))
+  },
+  CREATE_Arrow_Function: function (RETURN_BODY = [], ARGS = []) {
+    return factory.createArrowFunction(
+      undefined,
+      undefined,
+      ARGS.map(par => factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        undefined,
+        factory.createIdentifier(par),
+        undefined,
+        undefined,
+        undefined
+      )),
+      undefined,
+      factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+      RETURN_BODY
+    )
   }
 };

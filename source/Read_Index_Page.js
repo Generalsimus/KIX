@@ -18,6 +18,7 @@ module.exports = function (runed_dir, WebSocket_URL) {
             Run_Dir: runed_dir,
             Global_DATA: { IMPORTS_INDEX: 0 },
             Files: {},
+            // WATCH_FILES: {},
             DEVELOPER_MOD: true,
         },
         DIAGNOSTICS_ERROR = {};
@@ -25,11 +26,10 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
     var DEV_MODE_SCRIPT = fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL);
 
-    watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE'] = function (res) {
-        // res.header("Cache-Control", "public, max-age=31536000"); 
-        res.header("content-type", "application/javascript; charset=utf-8");
-        // return DEV_MODE_SCRIPT
-        return fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL)
+    watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE.js'] = function (res) {
+        res.header("Cache-Control", "public, max-age=31536000"); 
+        
+        return DEV_MODE_SCRIPT
     }
 
 
@@ -39,7 +39,7 @@ module.exports = function (runed_dir, WebSocket_URL) {
         global.watch_directory = {
             "/": watch_directory['/'],
             "/index.html": watch_directory['/'],
-            '/KIX_SCRIPT_CONTROLER_DEV_MODE': watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE']
+            '/KIX_SCRIPT_CONTROLER_DEV_MODE.js': watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE.js']
         };
 
 
@@ -51,12 +51,12 @@ module.exports = function (runed_dir, WebSocket_URL) {
         // APP_socket_connector(WebSocket_URL)    
         document.head[document.head.firstElementChild ? "insertBefore" : "appendChild"](
             Object.assign(document.createElement('script'),
-                { src: `http://${WebSocket_URL}/KIX_SCRIPT_CONTROLER_DEV_MODE` }),
+                { src: `http://${WebSocket_URL}/KIX_SCRIPT_CONTROLER_DEV_MODE.js` }),
             document.head.firstElementChild
         )
         // document.head.appendChild(node_script())
 
-        document.querySelectorAll("script[KD_script]").forEach(function ({ src }) {
+        document.querySelectorAll("script[kix_app]").forEach(function ({ src }) {
             var URL = new dom.window.URL(src, 'http://e'),
                 full_src = path.resolve(runed_dir + URL.pathname);
 

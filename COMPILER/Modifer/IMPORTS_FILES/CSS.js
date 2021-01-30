@@ -106,8 +106,8 @@ module.exports = function (DATA) {
 
         return [
             Clone_Json.CREATE_Variable([Clone_Json.CREATE_Declaration('style',
-                Clone_Json.CREATE_Call_FUNCTION("KD_T", [
-                    Clone_Json.CREATE_Call_FUNCTION("KD_T", [
+                Clone_Json.CREATE_Call_FUNCTION("KD_", [
+                    Clone_Json.CREATE_Call_FUNCTION("KD_", [
                         Clone_Json.CREATE_Access_Property(Clone_Json.CREATE_Identifier('document'), 'head'),
                         Clone_Json.CREATE_Object([
                             Clone_Json.CREATE_Property('style', Clone_Json.CREATE_TEXT(''))
@@ -118,7 +118,7 @@ module.exports = function (DATA) {
                     // Clone_Json.CREATE_TEXT(result.css.toString())
                 ])
             )]),
-            Clone_Json.CREATE_Call_FUNCTION("KD_T", [
+            Clone_Json.CREATE_Call_FUNCTION("KD_", [
                 Clone_Json.CREATE_Access_Property(Clone_Json.CREATE_Identifier('style'), Clone_Json.CREATE_Call_FUNCTION('Parent', [])),
                 Clone_Json.CREATE_TEXT(RES_CSS.match(/\r?\n?[^\r\n]*$/)[0])
                 // Clone_Json.CREATE_Identifier(style)
@@ -152,7 +152,7 @@ module.exports = function (DATA) {
         });
 
         return [
-            Clone_Json.CREATE_Access_Object_Property("exports", 'default', Clone_Json.CREATE_Call_FUNCTION("KD_T", [Clone_Json.CREATE_Identifier('KD_style'), Clone_Json.CREATE_TEXT(result.css.toString())]))
+            Clone_Json.CREATE_Access_Object_Property("exports", 'default', Clone_Json.CREATE_Call_FUNCTION("KD_", [Clone_Json.CREATE_Identifier('KD_style'), Clone_Json.CREATE_TEXT(result.css.toString())]))
         ]
     }
 
