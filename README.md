@@ -3,7 +3,6 @@
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![package phobia][package-phobia-src]][package-phobia-href]
 [![bundle phobia][bundle-phobia-src]][bundle-phobia-href]
  
 
@@ -44,17 +43,14 @@ KD_(document.body, HTML);
 MIT
 
 <!-- Refs -->
-[standard-js-src]: https://flat.badgen.net/badge/license/MIT/green
+[standard-js-src]: https://img.shields.io/badge/license-MIT-brightgreen?&style=flat-square
 [standard-js-href]: https://github.com/Generalsimus/KIX/blob/master/LICENSE
 
-[npm-version-src]: https://flat.badgen.net/npm/v/kix-js/latest
+[npm-version-src]: https://img.shields.io/npm/v/kix-js?&style=flat-square
 [npm-version-href]: https://www.npmjs.com/package/kix-js
 
-[npm-downloads-src]: https://flat.badgen.net/npm/dt/kix-js
+[npm-downloads-src]: https://img.shields.io/npm/dt/kix-js?&style=flat-square
 [npm-downloads-href]: https://www.npmjs.com/package/kix-js
 
-[package-phobia-src]: https://flat.badgen.net/packagephobia/install/kix-js
-[package-phobia-href]: https://packagephobia.com/result?p=kix-js
-
-[bundle-phobia-src]: https://flat.badgen.net/bundlephobia/minzip/kix-js
+[bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix-js?&style=flat-square
 [bundle-phobia-href]: https://packagephobia.com/result?p=kix-js
