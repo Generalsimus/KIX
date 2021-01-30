@@ -52,5 +52,5 @@ MIT
 [npm-downloads-src]: https://img.shields.io/npm/dt/kix-js?&style=flat-square
 [npm-downloads-href]: https://www.npmjs.com/package/kix-js
 
-[npm-downloads-src]: https://img.shields.io/bundlephobia/min/kix-js?&style=flat-square&color=red
+[bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix-js?&style=flat-square&color=red
 [bundle-phobia-href]: https://packagephobia.com/result?p=kix-js
