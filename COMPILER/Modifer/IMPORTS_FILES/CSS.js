@@ -150,12 +150,18 @@ module.exports = function (DATA) {
             // data: DATA.CODE_SCRIPT,
             outFile: 'o.css'
         });
-
+        // Clone_Json.CREATE_Access_Object_Property("KD_", 'style',)
+        // Clone_Json.CREATE_Access_Property("KD_", 'style')
+        
         return [
-            Clone_Json.CREATE_Access_Object_Property("exports", 'default', Clone_Json.CREATE_Call_FUNCTION("KD_", [Clone_Json.CREATE_Identifier('KD_style'), Clone_Json.CREATE_TEXT(result.css.toString())]))
+            Clone_Json.CREATE_Access_Object_Property("exports", 'default', Clone_Json.CREATE_Call_FUNCTION("KD_", [
+                
+                Clone_Json.CREATE_Access_Property(Clone_Json.CREATE_Identifier("KD_"), 'style'),
+                
+                Clone_Json.CREATE_TEXT(result.css.toString())]))
         ]
     }
-
+// createPropertyAccessExpression
 
 
     var RES_CSS = result.css.toString()

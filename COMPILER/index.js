@@ -27,18 +27,18 @@ global.Compiler = function (DATA) {
   }
   if (fs.existsSync(location)) {
     var CODE_SCRIPT = fs.readFileSync(location, "utf8");
-    if (!DATA.WATCHED) {
+    if (DATA.DEVELOPER_MOD && !DATA.WATCHED) {
       // DATA.WATCHED = true
 
       fs.watch(location, (method) => {
-
+        console.save()
         delete DATA.Files[location]
 
         Import_File(DATA.Import_Location, DATA, DATA)
         DATA.RESET_REQUEST_FILE()
         KD_RESTART_PAGE()
         consola.success(path.relative(DATA.Run_Dir, DATA.Location) + `\x1b[32m COMPILED\x1b[0m`)
-  
+
 
       })
     }
