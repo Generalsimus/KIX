@@ -21,7 +21,7 @@ const SourceFile_Map_Object = require("./Modifer/SourceFile_Map_Object");
 global.Compiler = function (DATA) {
   var location = Fix_Location(DATA);
 
-  
+
 
   if (DATA.Files[location] && DATA.Files[location].DATA.File_Ext != "FILE_NOT_EXIST") {
     return DATA.Files[location].DATA
@@ -53,12 +53,13 @@ global.Compiler = function (DATA) {
     Location: location,
     VISITED: false,
     // CHANGE_LISTENER: false,
+    // SourceMapConsumer: false,
+    // SourceMap_VQL: undefined,
     // WATCHED: false,
     File_Ext: File_Ext,
     ERRORS: [],
     CODE_SCRIPT: CODE_SCRIPT || " ",
     externalSource: false,
-    SourceMapConsumer: false,
     Import_Name: Clone_Json.CREATE_Access_ElementAccess(
       Clone_Json.CREATE_Identifier("imports"),
       DATA.IMPORTS_INDEX

@@ -1,11 +1,9 @@
 {
     "name": "kix-js",
-    "version": "1.0.20",
+    "version": "1.0.21",
     "description": "JS FRAMEWORK",
     "main": "index.js",
-    "errors_for_me": [
-        "obieqtis keyiebis gageba ar mogviwevs shemdegistvis shevcvli"
-    ],
+    "errors_for_me": [],
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -55,7 +53,7 @@
         "open": "^7.3.0",
         "prompts": "^2.4.0",
         "resolve": "^1.19.0",
-        "source-map": "^0.7.3",
+        "source-map": "^0.7.3", 
         "typescript": "^4.1.2",
         "ws": "^7.4.0"
     },

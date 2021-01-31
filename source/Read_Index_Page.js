@@ -5,8 +5,10 @@ const Run_Compiler = require("../COMPILER/index");
 // const APP_socket_connector = require("./APP");
 const path = require('path');
 // const SourceMap = require("../COMPILER/Create_SourceMap");
-const ts = require("typescript")
-const websock_controler = require("./websock_controler")
+// const ts = require("typescript")
+// const websock_controler = require("./websock_controler")
+
+// const { decode } = require('sourcemap-codec');
 const { SourceMapConsumer } = require("source-map")
 
 
@@ -134,6 +136,8 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
     var extrac_url = /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi
 
+    var Consumer,
+        source_map;
     WS_Sock.on('connection', function (ws) {
         // DATA.Global_DATA.SOCKET_ERRORS.forEach(function (error) {
         //     ws.send(JSON.stringify(error))
@@ -158,6 +162,8 @@ module.exports = function (runed_dir, WebSocket_URL) {
                         data: []
                     }
 
+
+
                     json_message.data.forEach(async function (element, index) {
                         var PATH_FILE = path.resolve(runed_dir + element.path),
                             FILE = DATA.Files[PATH_FILE];
@@ -165,14 +171,28 @@ module.exports = function (runed_dir, WebSocket_URL) {
                         // console.log(PATH_FILE, Object.keys(DATA.Files))
                         if (FILE && FILE.DATA.COMPIL_SCRIPT) {
                             const { line_coll: [error_line, error_column], error_cod } = element;
-                            var Consumer = FILE.DATA.SourceMapConsumer = FILE.DATA.SourceMapConsumer || await new SourceMapConsumer(FILE.DATA.COMPIL_SCRIPT.sourceMapText)
 
+                            // decode
+                            let sourceMapText = FILE.DATA.COMPIL_SCRIPT.sourceMapText
+                            Consumer = source_map == sourceMapText ? Consumer : await new SourceMapConsumer(FILE.DATA.COMPIL_SCRIPT.sourceMapText)
+                            // decoded_vql = source_map == sourceMapText ? decoded_vql : decode(JSON.parse(sourceMapText).mappings)
+                            source_map = sourceMapText
+                            // if()
+                            // var decoded_vql = FILE.DATA.SourceMap_VQL || (FILE.DATA.SourceMap_VQL = decode(JSON.parse(FILE.DATA.COMPIL_SCRIPT.sourceMapText).mappings))
                             const { line, column, source } = Consumer.originalPositionFor({
                                 line: error_line,
                                 column: error_column
                             });
-                            // extrac_url
 
+                            // const [ERROR_COLLUMN, SOURCES_INDEX, ORIGINAL_LINE, ORIGINAL_COLL] = decoded_vql[error_line].reduce((v1, v2) => {
+
+                            //     // console.log(v1[0], v2[0], v1[0] == v2[0] ? v2 : (v1[0] > v2[0] ? v2 : v1))
+
+                            //     return v1[0] == error_column ? v1 : (v2[0] == error_column) ? v2 : (v1[0] > v2[0] ? v2 : v1)
+                            // })
+                            // console.log(line, column, decoded_vql[error_line],  error_line, error_column)
+                            // extrac_url
+                            // console.log(error_line, error_column, line, column)
                             var new_PATH = path.resolve(path.dirname(PATH_FILE) + "/" + source)
 
                             // console.log(element, error_cod.replace(extrac_url, `/${path.relative(DATA.Run_Dir, new_PATH)}:${line}:${column}`))
