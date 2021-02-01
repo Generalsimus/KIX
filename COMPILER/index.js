@@ -157,7 +157,7 @@ function Run_Compiler(DATA, FILE_LOCATION) {
 
 
 
-  var map_file_url = path.relative(DATA.Run_Dir, DATA.Location).replaceAll("\\", "/")
+  var map_file_url = path.relative(DATA.Run_Dir, DATA.Location).replace(/\\/g,"/")
 
   // console.log(COMPIL_SCRIPT)
 
