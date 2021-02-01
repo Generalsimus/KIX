@@ -73,7 +73,7 @@ module.exports = (runed_dir) => {
         var new_inde_HTML_LOCATION = path.resolve(copy_location + "/index.html");
         document.head[document.head.firstElementChild ? "insertBefore" : "appendChild"](
             Object.assign(document.createElement('script'),
-                { src: `https://unpkg.com/kid-js-lib@1.2.12/kid_script.min.js` }),
+                { src: `https://unpkg.com/kid-js-lib@1.2.13/kid_script.min.js` }),
             document.head.firstElementChild
         );
         copy_files[new_inde_HTML_LOCATION] = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
