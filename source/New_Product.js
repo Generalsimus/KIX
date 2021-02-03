@@ -2,10 +2,13 @@ const prompts = require('prompts');
 var fs = require("fs");
 const URL = require("url").URL;
 const copyFolderSync = require("./copyFolderSync")
-
+const path = require("path")
 
 var valid_folder = /^[^\u0022\u003C\u003E\u007C\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A\u000B\u000C\u000D\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F\u003A\u002A\u003F\u005C\u002F]*$/;
 
+function finish_log() {
+
+}
 
 module.exports = (arguments, i, runed_dir) => {
 
@@ -94,7 +97,11 @@ module.exports = (arguments, i, runed_dir) => {
 
 
             } else {
+                // \x1b[37m 
+// console.clear()
+                // console.log('\x1b[37m%s\x1b[0m', `Created a new KIX app in `, '\x1b[32m', path.resolve(runed_dir + '/' + name));
                 console.log('\x1b[32m%s\x1b[0m', `Project "${name}" Created`);
+                // Creating a new React app in C:\Users\totor\OneDrive\Desktop\sdsd.
             }
         })
     }

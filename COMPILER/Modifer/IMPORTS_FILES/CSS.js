@@ -8,7 +8,7 @@ const URL = require('url');
 
 function RESOLVE_URL(url, DATA) {
     var TEST_LOCAL_PATH = /^(\.)+[.\s]?(\/)/,
-        FIX_URL = (url) => path.relative(DATA.Run_Dir, path.dirname(DATA.Location) + "/" + url).replaceAll("\\", "/");
+        FIX_URL = (url) => path.relative(DATA.Run_Dir, path.dirname(DATA.Location) + "/" + url).replace(/\\/g,"/");
 
     if (TEST_LOCAL_PATH.test(url)) {
         url = FIX_URL(url)
@@ -86,7 +86,7 @@ module.exports = function (DATA) {
             var RES_CSS = result.css.toString()
         } catch (error) {
             var RES_CSS = " ",
-                FILE_PATH = "/" + path.relative(DATA.Run_Dir, DATA.Location).replace("\\", "/");
+                FILE_PATH = "/" + path.relative(DATA.Run_Dir, DATA.Location).replace(/\\/g,"/");
             DATA.ERRORS.push({
                 data: [
                     {

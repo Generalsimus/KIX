@@ -129,6 +129,16 @@ var MODIFERS = {
 
         return CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, [])
     },
+    JsxFragment: function (NODE, DATA, VISITOR, CTX) {
+
+        // console.log(NODE.children.map(v => v))
+        return VISITOR(Clone_Json.CREATE_ARRAY((NODE.children || []).map(node => {
+            if (node.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(node.kind)) {
+                return Clone_Json.CREATE_TEXT(node.text)
+            }
+            return node
+        })), DATA, VISITOR, CTX)
+    },
     PropertyAccessExpression: PROPERTY_Access_Expression,
     ElementAccessExpression: PROPERTY_Access_Expression,
     ArrowFunction: function (NODE, DATA, VISITOR, CTX) {
@@ -368,7 +378,15 @@ var MODIFERS = {
 module.exports = function (DATA) {
     const SourceFile = DATA.SourceFile || ts.createSourceFile("APP.js", " ", ts.ScriptTarget.Latest)
 
-
+    // fs.writeFile(
+    //     "response_JS_JS.js",
+    //     JSON.stringify(SourceFile.statements), {
+    //     encoding: "utf-8"
+    // },
+    //     (err) => {
+    //         console.log("save SourceFile.json");
+    //     }
+    // );
     // console.log(path.relative(DATA.Run_Dir, DATA.Location))
 
     // DATA.Global_DATA.SOCKET_ERRORS = []

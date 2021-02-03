@@ -20,7 +20,7 @@ module.exports = function (DATA) {
         );
         const line = lineAndChar.line + 1;
         const character = lineAndChar.character + 1;
-        const FIX_path = DATA.Location.replace(DATA.Run_Dir, "").replace("\\", "/")
+        const FIX_path = DATA.Location.replace(DATA.Run_Dir, "").replace(/\\/g,"/")
 
         
 
@@ -43,7 +43,7 @@ module.exports = function (DATA) {
         SourceFile: SourceFile,
         // Diagnostics: SourceFile.parseDiagnostics,
         externalSource: DATA.File_Start_loc == DATA.Location ? false : ts.createSourceMapSource(
-            DATA.Location.replace(DATA.Run_Dir, "").replace("\\", "/").slice(1),
+            DATA.Location.replace(DATA.Run_Dir, "").replace(/\\/g,"/").slice(1),
             DATA.CODE_SCRIPT
         )
     })

@@ -10,7 +10,7 @@ module.exports = function (DATA) {
             DATA.CODE_SCRIPT,
             ts.ScriptTarget.JSON),
         externalSource: ts.createSourceMapSource(
-            DATA.Location.replace(DATA.Run_Dir, "").replace("\\", "/").slice(1),
+            DATA.Location.replace(DATA.Run_Dir, "").replace(/\\/g,"/").slice(1),
             DATA.CODE_SCRIPT
         )
     })
