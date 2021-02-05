@@ -7,62 +7,70 @@ const SyntaxKind = ts.SyntaxKind
 const path = require("path")
 const { Import_File, Find_One, Find_Mult, PROPERTY_Access_Expression } = require("./SourceFile_Helper")
 
+function JSX_CHILDREN_REGISTRATOR(expression, attributes, DATA, VISITOR, CTX) {
 
+    if (expression.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(expression.kind)) {
+        return Clone_Json.CREATE_TEXT(expression.text)
+    }
+
+
+    var CHILD_DATA = {
+        ...DATA, Inside_Map: "in"
+    }
+    // var ret = Create_CTX_VISITOR(CHILD_DATA, CTX)(expression)
+    var ret = VISITOR(expression, CHILD_DATA, VISITOR, CTX)
+    // var ret = VISITOR.bind({ ...DATA, Inside_Map: Inside_Map })(expression)
+
+
+    // Inside_Map = Object.keys(Inside_Map).map(v => {
+    //     return Clone_Json.CREATE_Property(v, Inside_Map[v])
+    // })
+
+    return CHILD_DATA.Inside_Map == true ? Clone_Json.CREATE_Call_FUNCTION('KD_G', [
+        // Clone_Json.CREATE_Arrow_Function(ret, ["din"])
+        Clone_Json.CREATE_Arrow_Function(ret, [DATA.REGISTER_PROP_NAME])
+        // ,
+        // Clone_Json.CREATE_Object(Inside_Map),
+        // Clone_Json.CREATE_This()
+    ]) : ret
+}
+
+
+function FLAT_JSX_CHILDS(CHILDREN, DATA, VISITOR, CTX) {
+    CHILDREN = CHILDREN.flatMap((child, index) => {
+
+        if (SyntaxKind[child.kind] == "JsxExpression" && !child.expression) {
+            // console.log(child)
+            return []
+        }
+        // // აკეთებს ტრიმს ტეგში მყოფი პირველი და ბოლო ტეგისთვის 
+        // if (v.text && [0, children.length - 1].includes(index)) {
+        //     var v_text = v.text[children.length == 1 ? "trim" : (index ? "trimRight" : "trimLeft")]()
+        //     if (!v_text.length) {
+        //         return []
+        //     }
+        //     v.text = v_text;
+        // }
+        // /////////////////////////////////////////////////////////
+        return JSX_CHILDREN_REGISTRATOR(child.expression || child, undefined, DATA, VISITOR, CTX)
+        // return PROPERTY(child.expression || child);
+    })
+    return CHILDREN.length > 1 ? Clone_Json.CREATE_ARRAY(CHILDREN) : CHILDREN[0] || Clone_Json.CREATE_TEXT('')
+
+}
 
 function CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, children) {
     const Events_Prop_Array = [];
 
     return Clone_Json.CREATE_Object([tagName, ...attributes.properties].flatMap((v, i) => {
-        function PROPERTY(expression, attributes) {
 
-            if (expression.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(expression.kind)) {
-                return Clone_Json.CREATE_TEXT(expression.text)
-            }
-
-
-            var CHILD_DATA = {
-                ...DATA, Inside_Map: "in"
-            }
-            // var ret = Create_CTX_VISITOR(CHILD_DATA, CTX)(expression)
-            var ret = VISITOR(expression, CHILD_DATA, VISITOR, CTX)
-            // var ret = VISITOR.bind({ ...DATA, Inside_Map: Inside_Map })(expression)
-
-
-            // Inside_Map = Object.keys(Inside_Map).map(v => {
-            //     return Clone_Json.CREATE_Property(v, Inside_Map[v])
-            // })
-
-            return CHILD_DATA.Inside_Map == true ? Clone_Json.CREATE_Call_FUNCTION('KD_G', [
-                // Clone_Json.CREATE_Arrow_Function(ret, ["din"])
-                Clone_Json.CREATE_Arrow_Function(ret, [DATA.REGISTER_PROP_NAME])
-                // ,
-                // Clone_Json.CREATE_Object(Inside_Map),
-                // Clone_Json.CREATE_This()
-            ]) : ret
-        }
 
 
         if (!i) {
-            var CHILDREN = children.flatMap((child, index) => {
-
-                if (SyntaxKind[child.kind] == "JsxExpression" && !child.expression) {
-                    // console.log(child)
-                    return []
-                }
-                // აკეთებს ტრიმს ტეგში მყოფი პირველი და ბოლო ტეგისთვის 
-                if (v.text && [0, children.length - 1].includes(index)) {
-                    var v_text = v.text[children.length == 1 ? "trim" : (index ? "trimRight" : "trimLeft")]()
-                    if (!v_text.length) {
-                        return []
-                    }
-                    v.text = v_text;
-                }
-                /////////////////////////////////////////////////////////
-
-                return PROPERTY(child.expression || child);
-            })
-            CHILDREN = CHILDREN.length > 1 ? Clone_Json.CREATE_ARRAY(CHILDREN) : CHILDREN[0] || Clone_Json.CREATE_TEXT('')
+            var CHILDREN = FLAT_JSX_CHILDS(children, DATA, VISITOR, CTX)
         }
+
+
         // გენერირდება ობიექტის ფროფერთის სახელი 
         var property_identifer = (v.name || v)
         ////////////////////////////////////////// 
@@ -72,7 +80,13 @@ function CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, children)
             case "Identifier":
                 var prop_name = property_identifer.escapedText;
 
-                var return_prop_value = i ? PROPERTY(v.initializer ? (v.initializer.expression || v.initializer) : Clone_Json.CREATE_TEXT(""), prop_name) : CHILDREN
+                // var return_prop_value = 
+                var return_prop_value = i ?
+                    JSX_CHILDREN_REGISTRATOR(
+                        v.initializer ? (v.initializer.expression || v.initializer) : Clone_Json.CREATE_TEXT(""),
+                        prop_name, DATA, VISITOR, CTX)
+
+                    : CHILDREN
 
 
                 if (i) {
@@ -129,17 +143,12 @@ var MODIFERS = {
 
         return CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, [])
     },
-    JsxFragment: function (NODE, DATA, VISITOR, CTX) {
-        // console.log(NODE)
-        // console.log(NODE.children.map(v => v))
-        return VISITOR(Clone_Json.CREATE_ARRAY((NODE.children || []).map(onode => {
-            let node = onode.expression || onode
+    JsxFragment: function ({ children }, DATA, VISITOR, CTX) {
 
-            if (node.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(node.kind)) {
-                return Clone_Json.CREATE_TEXT(node.text)
-            }
-            return node
-        })), DATA, VISITOR, CTX)
+
+
+
+        return FLAT_JSX_CHILDS(children, DATA, VISITOR, CTX)
     },
     PropertyAccessExpression: PROPERTY_Access_Expression,
     ElementAccessExpression: PROPERTY_Access_Expression,

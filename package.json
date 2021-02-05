@@ -1,6 +1,6 @@
 {
     "name": "kix-js",
-    "version": "1.0.32",
+    "version": "1.0.33",
     "description": "JS FRAMEWORK",
     "main": "index.js",
     "errors_for_me": [],
