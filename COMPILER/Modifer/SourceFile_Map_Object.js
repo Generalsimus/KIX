@@ -130,9 +130,11 @@ var MODIFERS = {
         return CREATE_JSX_TAG(NODE, DATA, VISITOR, CTX, tagName, attributes, [])
     },
     JsxFragment: function (NODE, DATA, VISITOR, CTX) {
-
+        // console.log(NODE)
         // console.log(NODE.children.map(v => v))
-        return VISITOR(Clone_Json.CREATE_ARRAY((NODE.children || []).map(node => {
+        return VISITOR(Clone_Json.CREATE_ARRAY((NODE.children || []).map(onode => {
+            let node = onode.expression || onode
+
             if (node.text && [SyntaxKind["StringLiteral"], SyntaxKind["JsxText"]].includes(node.kind)) {
                 return Clone_Json.CREATE_TEXT(node.text)
             }

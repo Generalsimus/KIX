@@ -31,7 +31,7 @@ module.exports = function (runed_dir, WebSocket_URL) {
     watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE.js'] = function (res) {
         res.header("Cache-Control", "public, max-age=31536000");
 
-        return fs.readFileSync(__dirname + "/JSkid/kid_script.dev.min.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL)
+        return fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL)
     }
 
 
