@@ -337,7 +337,8 @@ var MODIFERS = {
                 Array.prototype.push.apply(DATA.SOCKET_ERRORS, PATH_DATA.ERRORS)
                 ////////////////
 
-
+                // console.log(keys)
+                // console.log(PATH_DATA.File_Ext)
                 keys[PATH] = true;
                 for (var newPATH in DATA.Files[PATH].FILES_PATH) {
                     Generate_statements(newPATH, STATEMENTS, keys)
@@ -349,9 +350,9 @@ var MODIFERS = {
 
             return STATEMENTS;
         }
-
+        DATA.LOCKED_FILES = {}
         Clone_Json.CREATE_Auto_Call_Function()
-        NODE.statements = [Clone_Json.CREATE_Auto_Call_Function([Clone_Json.CREATE_ARRAY()], Generate_statements(DATA.Location), ["imports"])];
+        NODE.statements = [Clone_Json.CREATE_Auto_Call_Function([Clone_Json.CREATE_ARRAY()], Generate_statements(DATA.Location, [], DATA.LOCKED_FILES), ["imports"])];
 
 
 

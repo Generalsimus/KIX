@@ -1,26 +1,29 @@
 #!/usr/bin/env node
-const copyFolderSync = require("./source/copyFolderSync");
-const Dist_Build = require('./COMPILER/Dist_Build')
-const prompts = require('prompts');
-const New_Product = require("./source/New_Product")
 
+const yargs_parser = require('yargs-parser')
 
 
 var runed_dir = process.cwd(),
-  arguments = process.argv.slice(2),
+  arguments = yargs_parser(process.argv.slice(2)),
   i = 0;
+global.COMMANDS = arguments
 
-while (i < arguments.length) {
-  switch (arguments[i]) {
+
+while (i < arguments._.length) {
+  // console.log(arguments._[i])
+  switch (arguments._[i].toLocaleLowerCase()) {
     case "new":
- 
-      i = New_Product(arguments, i, runed_dir); 
+      i++
+
+      require("./source/New_Product")(arguments._[i], runed_dir);
       break;
     case "start":
+    case "serve":
       require("./source/express_controler.js")(runed_dir);
       break;
     case "build":
-      Dist_Build(runed_dir);
+    case "dist":
+      require('./COMPILER/Dist_Build')(runed_dir);
       break;
   }
   i++;

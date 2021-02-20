@@ -151,25 +151,24 @@ module.exports = {
   CREATE_This: function () {
     return factory.createThis()
   },
-  CREATE_Export: function (PROPERTY, VARIABLE) {
-
-    return factory.createExpressionStatement(this.CREATE_Call_FUNCTION("KD_E", [
-      this.CREATE_Identifier("KD_export"),
-      factory.createStringLiteral(PROPERTY),
-      factory.createFunctionExpression(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        [],
-        undefined,
-        factory.createBlock(
-          [factory.createReturnStatement(typeof VARIABLE == 'string' ? this.CREATE_Identifier(VARIABLE) : VARIABLE)],
-          true
-        )
-      )
-    ]))
-  },
+  // CREATE_Export: function (PROPERTY, VARIABLE) {
+  //   return factory.createExpressionStatement(this.CREATE_Call_FUNCTION("KD_E", [
+  //     this.CREATE_Identifier("KD_export"),
+  //     factory.createStringLiteral(PROPERTY),
+  //     factory.createFunctionExpression(
+  //       undefined,
+  //       undefined,
+  //       undefined,
+  //       undefined,
+  //       [],
+  //       undefined,
+  //       factory.createBlock(
+  //         [factory.createReturnStatement(typeof VARIABLE == 'string' ? this.CREATE_Identifier(VARIABLE) : VARIABLE)],
+  //         true
+  //       )
+  //     )
+  //   ]))
+  // },
   CREATE_Access_Object_Property: function (object, property, value) {
     return factory.createExpressionStatement(
       factory.createBinaryExpression(

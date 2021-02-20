@@ -51,6 +51,8 @@ global.Compiler = function (DATA) {
 
   Object.assign(DATA, {
     Location: location,
+    PARENT_Location: DATA.Location,
+    PARENT_CODE_SCRIPT: DATA.CODE_SCRIPT,
     VISITED: false,
     // CHANGE_LISTENER: false,
     // SourceMapConsumer: false,
@@ -157,7 +159,7 @@ function Run_Compiler(DATA, FILE_LOCATION) {
 
 
 
-  var map_file_url = path.relative(DATA.Run_Dir, DATA.Location).replace(/\\/g,"/")
+  var map_file_url = path.relative(DATA.Run_Dir, DATA.Location).replace(/\\/g, "/")
 
   // console.log(COMPIL_SCRIPT)
 

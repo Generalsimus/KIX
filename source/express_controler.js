@@ -2,10 +2,12 @@ const express = require('express');
 const app = express();
 const WebSocket = require("ws").Server;
 const http = require("http")
+const path = require("path")
 const server = http.createServer(app);
 const open = require("open");
 const Read_Index_Page = require("./Read_Index_Page")
-var mime = require('mime-types')
+const consola = require("consola")
+const mime = require('mime-types')
 
 
 
@@ -54,13 +56,29 @@ module.exports = function (runed_dir) {
 
     });
 
+    app.use(function (req, res, next) {
+
+        // console.log(path.resolve(runed_dir + "/" + req._parsedUrl.pathname))
+        const request_file = path.resolve(runed_dir + "/" + req._parsedUrl.pathname)
+        // console.log(LOCKED_FILES)
+        for (var file of LOCKED_FILES) {
+            if (request_file in file) {
+                consola.error(`File Already Imported (${req._parsedUrl.pathname})`)
+                res.end(`File Already Imported (${req._parsedUrl.pathname})`)
+                return;
+            }
+        }
+        next();
+
+
+    });
     app.use("/", express.static(runed_dir));
 
     app.use(function (req, res) {
         res.end(watch_directory["/"]())
     });
 
-    const listener = server.listen(process.env.PORT || 0, () => {
+    const listener = server.listen(COMMANDS.PORT || 0, () => {
         var url = `localhost:${listener.address().port}`,
             http_url = `http://${url}`;
         Read_Index_Page(runed_dir, url)

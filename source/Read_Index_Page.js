@@ -1,6 +1,9 @@
 const fs = require("fs");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+const consola = require("consola")
+
+const CustomError = require("../COMPILER/Helpers/Custom_Error");
 const Run_Compiler = require("../COMPILER/index");
 // const APP_socket_connector = require("./APP");
 const path = require('path');
@@ -57,8 +60,8 @@ module.exports = function (runed_dir, WebSocket_URL) {
             document.head.firstElementChild
         )
         // document.head.appendChild(node_script())
-
-        document.querySelectorAll("script[kix_app]").forEach(function ({ src }) {
+        global.LOCKED_FILES = []
+        document.querySelectorAll('script[lang="kix"]').forEach(function ({ src }, index) {
             var URL = new dom.window.URL(src, 'http://e'),
                 full_src = path.resolve(runed_dir + URL.pathname);
 
@@ -77,7 +80,8 @@ module.exports = function (runed_dir, WebSocket_URL) {
                         RESET_REQUEST_FILE: create_code_SCRIPT
                     }, full_src)
 
-
+                    // console.log(File_DATA.DATA.LOCKED_FILES)
+                    LOCKED_FILES[index] = File_DATA.DATA.LOCKED_FILES
                     DIAGNOSTICS_ERROR[URL.pathname] = File_DATA.DATA.SOCKET_ERRORS;
                     // console.log("restart", Math.random())
                     var file_code_SCRIPT = File_DATA.code
@@ -88,7 +92,9 @@ module.exports = function (runed_dir, WebSocket_URL) {
                 create_code_SCRIPT()
 
             } else {
-                new Error(`NOT EXIST ${src} in ${runed_dir}`)
+                consola.error(`Error: Cannot find module: (${src})`)
+
+                // new Error(`NOT EXIST ${src} in ${runed_dir}`)
 
             }
         })
@@ -108,7 +114,8 @@ module.exports = function (runed_dir, WebSocket_URL) {
             KD_RESTART_PAGE()
         })
     } else {
-        console.error(new Error(`NOT EXIST index.html in ${runed_dir}`))
+        consola.error(`NOT EXIST index.html in ${runed_dir}`)
+        // console.error(new Error(`NOT EXIST index.html in ${runed_dir}`))
     }
     watch_directory['/'] = watch_directory['/index.html'] = function () {
         return index_HTML;
@@ -143,7 +150,30 @@ module.exports = function (runed_dir, WebSocket_URL) {
         //     ws.send(JSON.stringify(error))
         // })
         for (var error_path in DIAGNOSTICS_ERROR) {
+
+            // consola.error(
+            //     new CustomError(
+            //         send_Object.general_error,
+            //         undefined,
+            //         200,
+            //         "\n " + send_Object.data.map(v => {
+            //             return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
+            //         }).join("\n")
+            //     )
+            // )
+
             DIAGNOSTICS_ERROR[error_path].forEach(function (error) {
+                // console.log(error)
+                consola.error(
+                    new CustomError(
+                        error.general_error,
+                        undefined,
+                        200,
+                        "\n " + error.data.map(v => {
+                            return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
+                        }).join("\n")
+                    )
+                )
                 ws.send(JSON.stringify(error))
             })
         }
@@ -206,6 +236,20 @@ module.exports = function (runed_dir, WebSocket_URL) {
                             }
 
                             if (index == json_message.data.length - 1 && send_Object.data.length) {
+                                // console.log(send_Object )
+                                // general_error:
+
+                                consola.error(
+                                    new CustomError(
+                                        send_Object.general_error,
+                                        undefined,
+                                        200,
+                                        "\n " + send_Object.data.map(v => {
+                                            // console.log(` at (${path.resolve(runed_dir + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`)
+                                            return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
+                                        }).join("\n")
+                                    )
+                                )
 
                                 ws.send(JSON.stringify(send_Object))
                             }

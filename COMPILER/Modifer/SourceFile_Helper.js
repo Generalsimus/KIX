@@ -66,6 +66,7 @@ module.exports = {
     Find_Mult: Find_Mult,
     Find_One: Find_One,
     Import_File: function (Import_Location, DATA, priority_DATA) {
+        // consola.error(`File Already Imported (${req._parsedUrl.pathname})`)
 
         // გენერირდება DATA ფაილი იმპორტირებული ფაილისთვის  
         var import_DATA = Compiler({
@@ -78,6 +79,7 @@ module.exports = {
         });
         //////////////////////////////////////////////////////  
 
+      
         DATA.Files[DATA.Location].FILES_PATH[import_DATA.Location] = import_DATA;
         return import_DATA
     },
