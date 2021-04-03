@@ -5,8 +5,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![bundle phobia][bundle-phobia-src]][bundle-phobia-href] 
  
-
-[![NPM](https://nodei.co/npm/kix-js.png)](https://nodei.co/npm/kix-js/)
+ 
 
 
 ```bash
