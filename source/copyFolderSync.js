@@ -7,7 +7,7 @@ module.exports = function copyFolderSync(from, to, noDir = [], copy_files = {}) 
 
     if (copy_files[to]) {
         // console.log(`${to} Compiled`);
-        fs.writeFileSync(to, copy_files[to]);
+        fs.writeFileSync(copy_files[to]?.TO || to, copy_files[to]?.CODE || copy_files[to]);
     } else if (noDir.indexOf(from) < 0) {
 
 

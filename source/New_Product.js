@@ -23,31 +23,6 @@ module.exports = function (product_name, runed_dir) {
                 return `FOLDER NAMED "${PROJECT_NAME}" EXIST`
             } else {
 
-                var P_K_G = {
-                    name: PROJECT_NAME,
-                    version: "1.0.0",
-                    private: true,
-                    scripts: {
-                        "start": "kix start",
-                        "build": "kix build"
-                    },
-                    babel_targets: [
-                        ">0.2%",
-                        "not dead",
-                        "not op_mini all"
-                    ],
-                    dependencies: {
-                    }
-                }
-
-                copyFolderSync(__dirname + "/../DEMO_TEMPLATE", dir);
-                fs.writeFile(dir + "/package.json", JSON.stringify(P_K_G, null, "\t"),
-                    { encoding: "utf-8" }, (e) => {
-                        console.clear();
-                        console.log('\x1b[32m%s\x1b[0m', `Project "${PROJECT_NAME}" Created`);
-                        consola.info(`Location: `, dir)
-                    }
-                );
 
                 // console.log('\x1b[32m%s\x1b[0m', `Project "${PROJECT_NAME}" Created`);
 
@@ -58,6 +33,48 @@ module.exports = function (product_name, runed_dir) {
         }
 
     }
+    function COPY_TEMPLATE(PROJECT_NAME) {
+        var dir = path.resolve((COMMANDS.DIR || runed_dir) + "/" + PROJECT_NAME);
+        prompts([{
+            type: 'select',
+            name: 'value',
+            message: 'Pick a color',
+            choices: [
+                // description: 'This option has a description'
+                { title: 'Javascript Template ', value: 'JS', description: 'RECOMMENDED'},
+                { title: 'Typescript Template ', value: 'TS' }
+            ],
+            // initial: 0
+            // onRender:function(state){
+            //     console.log(arguments)
+            // }
+        }]).then(function ({ value }) {
+            var P_K_G = {
+                name: PROJECT_NAME,
+                version: "1.0.0",
+                private: true,
+                scripts: {
+                    start: "kix start",
+                    build: "kix build"
+                },
+                compilerOptions: {
+                    target: "es2020"
+                },
+                dependencies: {
+                }
+            }
+
+            copyFolderSync(__dirname + "/../DEMO_TEMPLATE/" + value + "/", dir);
+            fs.writeFile(dir + "/package.json", JSON.stringify(P_K_G, null, "\t"),
+                { encoding: "utf-8" }, (e) => {
+                    console.clear();
+                    console.log('\x1b[32m%s\x1b[0m', `Project "${PROJECT_NAME}" Created`);
+                    consola.info(`Location: `, dir)
+                }
+            );
+        })
+    }
+
 
     if (!fs.existsSync(COMMANDS.DIR || runed_dir)) {
         // Directory Does Not
@@ -67,6 +84,9 @@ module.exports = function (product_name, runed_dir) {
         var res = CREATE_PROJECT(product_name);
         if (res != true) {
             console.log('\x1b[31m%s\x1b[0m', res)
+        } else {
+
+            COPY_TEMPLATE(product_name)
         }
     } else {
         prompts([{
@@ -79,7 +99,9 @@ module.exports = function (product_name, runed_dir) {
                 return CREATE_PROJECT(value)
                 // return /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(value) ? true : 'Input contains invalid characters!'
             }
-        }])
+        }]).then(function ({ value }) {
+            COPY_TEMPLATE(value)
+        })
     }
 }
 

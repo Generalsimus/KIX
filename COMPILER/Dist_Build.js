@@ -1,4 +1,4 @@
-const Run_Compiler = require('./index');
+// const Run_Compiler = require('./index');/
 const jsdom = require("jsdom");
 const {
     JSDOM
@@ -12,6 +12,9 @@ const babel_preset_env = require("@babel/preset-env");
 const consola = require("consola");
 // const { IndexKind } = require('typescript');
 
+const CREATE_PROGRAM = require("./CREATE_PROGRAM")
+
+const remapping = require("@ampproject/remapping")
 
 
 
@@ -22,12 +25,26 @@ const consola = require("consola");
 module.exports = (runed_dir) => {
     var P_K_Location = runed_dir + '/package.json',
         P_K_G = fs.existsSync(P_K_Location) ? require(P_K_Location) : null,
+        // DATA = {
+        //     Run_Dir: runed_dir,
+        //     Global_DATA: {
+        //         IMPORTS_INDEX: 0
+        //     },
+        //     Files: {},
+        //     DEVELOPER_MOD: false,
+        // },
         DATA = {
             Run_Dir: runed_dir,
-            Global_DATA: {
-                IMPORTS_INDEX: 0
-            },
-            Files: {},
+            Global_DATA: { IMPORTS_INDEX: 0 },
+            Files_THRE: {},
+            PROGRAMS: {},
+            // MODULE_THRE: {},
+            // FILE_MODULE_THRE: {},
+            // STATEMENTS_LIST: {},
+            // SAVE_MODULES: {
+            //     kix: path.resolve(__dirname + "/JSkid/kid_script.js")
+            // },
+            Files: [],
             DEVELOPER_MOD: false,
         },
         copy_files = {};
@@ -59,82 +76,54 @@ module.exports = (runed_dir) => {
         // return
 
 
-        document.querySelectorAll('script[lang="kix"]').forEach(({
-            src
-        }) => {
+        document.querySelectorAll('script[lang="kix"]').forEach((ELEMENT) => {
 
-            var URL = new dom.window.URL(src, 'http://e'),
-                full_src = path.resolve(runed_dir + '/' + URL.pathname);
+            var URL = new dom.window.URL(ELEMENT.src, 'http://e'),
+                full_src = path.resolve(runed_dir + '/' + decodeURIComponent(URL.pathname));
 
             if (fs.existsSync(full_src)) {
-                var Compiled = Run_Compiler(DATA, full_src)
 
 
-                var JS_file_location = path.resolve(copy_location + Compiled.DATA.Location.replace(runed_dir, ''));
+                var JS_file_location = path.resolve(copy_location + full_src.replace(runed_dir, ''));
 
 
                 // console.log(babel)
                 // @babel/plugin-transform-runtime
-                var t = (P_K_G || {}).babel_targets,
-                    BabelCode = babel.transformSync(Compiled.code, {
-                        // filename: "o.js",
-                        code: true,
-                        presets: [
-                            // [require("@babel/preset-react"), {
-                            //     // "targets": t
-                            // }],
-                            ...(t ? [
-                                [babel_preset_env, {
-                                    // helpers: false,
-                                    // "useBuiltIns": "entry",
-                                    // "corejs": 3,
-                                    // "modules": false,
-                                    // "useBuiltIns": "entry",
-                                    // "corejs": 3,
-                                    // "useBuiltIns": "usage",
-                                    // modules: false,
-                                    // useESModules: true,
-                                    "targets": t
-                                    // "targets": ["last 1 chrome version"]
-                                }]
-                            ] : []),
-                            // [
-                            //     require("@babel/preset-env"),
-                            //     {
-                            //         // "useBuiltIns": "entry"
-                            //     }
-                            // ]
-                            [babel_preset_minify, {}]
-                            // [require("@babel/preset-react"),{}],
-                        ],
-                        // helpers: false,
-                        plugins: [
-                            // require("@babel/plugin-transform-regenerator")
-                            // [require("@babel/plugin-transform-async-to-generator", {
-                            //     // absoluteRuntime:true,
-                            //     // modules: "amd",
-                            //     // "regenerator": true,
-                            //     // "corejs": 3 // or 2; if polyfills needed
-                            //     // @babel/plugin-proposal-async-generator-functions
-                            // })],
+                var PROGRAM = CREATE_PROGRAM(full_src, {
+                    ...DATA,
+                    RESET_REQUEST_FILE: function () {
+                        let thisob = DATA.PROGRAMS[full_src]
+                        thisob.RESULT = thisob.PROGRAM.Emit()
+                        KD_RESTART_PAGE()
+                    }
+                })
 
-                            // [require("@babel/runtime"), {
-                            //     "helpers": false,
-                            //     "polyfill": false,
-                            //     "regenerator": true,
-                            //     "moduleName": "babel-runtime"
-                            // }]
-                        ],
-                        // optional: ["runtime"],
 
-                        babelrc: false,
-                        configFile: false,
-                        sourceType: 'script'
-                    });
-                // console.log(BabelCode)
-                // console.log(BabelCode.options)
-                copy_files[JS_file_location] = BabelCode.code
+                DATA.Files = DATA.Files.concat(PROGRAM.getServices().getProgram().getSourceFiles().map(v => v.originalFileName))
+                PROGRAM.Emit()
 
+                // console.log(PROGRAM.getCode())
+                // const TRANSFORMED_MAP = JSON.parse(PROGRAM.getMap()) 
+
+                const BABEL_CODE = babel.transformSync(PROGRAM.getCode(), {
+                    // filename: TRANSFORMED_MAP.file + ".js",
+                    code: true,
+                    presets: [[babel_preset_minify, {}]],
+                    babelrc: false,
+                    configFile: false,
+                    sourceType: 'script',
+                    sourceMap: true
+                });
+
+
+
+                let new_Location = JS_file_location + ([".ts", ".tsx"].includes(path.extname(JS_file_location)) ? ".js" : "")
+
+                ELEMENT.src = "/" + path.relative(copy_location, new_Location).replace(/\\/g, "/");;
+                copy_files[JS_file_location] = {
+                    TO: new_Location,
+                    CODE: BABEL_CODE.code
+                };
 
 
             }
@@ -144,7 +133,7 @@ module.exports = (runed_dir) => {
         var new_inde_HTML_LOCATION = path.resolve(copy_location + "/index.html"),
             KID_ENGINE_LOCATION = ((url) => {
                 do {
-                    url = path.dirname(Object.keys(copy_files)[0]) + "/" + (Math.round(Math.random() * 100000000000 + 10000000000)) + "_kid.js"
+                    url = copy_location + "/" + (Math.round(Math.random() * 100000000000 + 10000000000)) + "_kid.js"
                 } while (fs.existsSync(url))
 
                 return url
@@ -162,6 +151,7 @@ module.exports = (runed_dir) => {
         copy_files[new_inde_HTML_LOCATION] = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
         //////////////////////////
 
+        // consola.log(Object.keys(DATA.Files))
 
         copyFolderSync(runed_dir, copy_location, [
             runed_dir + '/node_modules',
@@ -169,9 +159,9 @@ module.exports = (runed_dir) => {
             runed_dir + '/package-lock.json',
             runed_dir + '/package.json',
             new_inde_HTML_LOCATION,
-            copy_location
-
-        ].map(v => path.resolve(v)).concat(Object.keys(DATA.Files)),
+            copy_location,
+            ...DATA.Files
+        ].map(v => path.resolve(v)),
             copy_files);
 
         // აკოპირებს ქიქსის

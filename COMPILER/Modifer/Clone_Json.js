@@ -42,7 +42,7 @@ module.exports = {
     )
 
   },
-  CREATE_File_Imported: function (DATA, body, NAME) {
+  CREATE_File_Imported: function (IMPORTS_INDEX, body, NAME) {
     // const externalCssSource = ts.createSourceMapSource(
     //   DATA.Location,
     //   DATA.CODE_SCRIPT
@@ -53,7 +53,7 @@ module.exports = {
     return factory.createExpressionStatement(factory.createBinaryExpression(
       this.CREATE_Access_ElementAccess(
         this.CREATE_Identifier("imports"),
-        DATA.IMPORTS_INDEX
+        IMPORTS_INDEX
       ),
       ts.createToken(ts.SyntaxKind.EqualsToken),
       this.CREATE_Auto_Call_Function([this.CREATE_Object([])], [...body,
@@ -65,6 +65,7 @@ module.exports = {
   CREATE_Call_FUNCTION: function (NAME, ARGS) {
     return factory.createCallExpression(
       this.CREATE_Identifier(NAME),
+      // ts.createUniqueName('hello'),
       undefined,
       ARGS
     )
@@ -139,6 +140,13 @@ module.exports = {
       typeof PROPERTY == 'string' ? this.CREATE_Identifier(PROPERTY) : PROPERTY
     )
   },
+  // CREATE_Call_Property_Expression: function (PROPERTY,FUNCTION_NAME,BODY) {
+  //   return factory.createCallExpression(
+  //     PROPERTY,
+  //     undefined,
+  //     []
+  //   )
+  // },
   CREATE_Access_ElementAccess: function (Object, INDEX) {
     return factory.createElementAccessExpression(
       Object,
@@ -170,15 +178,14 @@ module.exports = {
   //   ]))
   // },
   CREATE_Access_Object_Property: function (object, property, value) {
-    return factory.createExpressionStatement(
-      factory.createBinaryExpression(
+    return factory.createBinaryExpression(
         factory.createPropertyAccessExpression(
           this.CREATE_Identifier(object),
           this.CREATE_Identifier(property)
         ),
         ts.createToken(ts.SyntaxKind.EqualsToken),
         value
-      ))
+      ) 
   },
   CREATE_Object_Property: function (object, property, value) {
     return factory.createPropertyAccessExpression(
@@ -196,7 +203,18 @@ module.exports = {
       arguments
     ))
   },
+  CREATE_Property_Registrator: function (CHILD_DATA, ret) {
+    let KD_G_prop = ts.createUniqueName('KD_G')
+    let attr_prop = ts.createUniqueName('attr')
+    let NODE_prop = ts.createUniqueName('NODE')
+
+    return this.CREATE_Arrow_Function(this.CREATE_Call_FUNCTION(KD_G_prop, [
+      this.CREATE_Arrow_Function(ret, [CHILD_DATA.REGISTER_PROP_NAME])
+    ]), [NODE_prop, attr_prop, KD_G_prop])
+  },
   CREATE_Arrow_Function: function (RETURN_BODY = [], ARGS = []) {
+
+    // console.log(ARGS)
     return factory.createArrowFunction(
       undefined,
       undefined,
@@ -204,7 +222,7 @@ module.exports = {
         undefined,
         undefined,
         undefined,
-        factory.createIdentifier(par),
+        this.CREATE_Identifier(par),
         undefined,
         undefined,
         undefined

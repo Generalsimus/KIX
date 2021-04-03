@@ -2,28 +2,32 @@ const fs = require("fs");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const consola = require("consola")
-
+const ts = require("typescript");
 const CustomError = require("../COMPILER/Helpers/Custom_Error");
-const Run_Compiler = require("../COMPILER/index");
-// const APP_socket_connector = require("./APP");
+const CREATE_PROGRAM = require("../COMPILER/CREATE_PROGRAM");
 const path = require('path');
-// const SourceMap = require("../COMPILER/Create_SourceMap");
-// const ts = require("typescript")
-// const websock_controler = require("./websock_controler")
+const Chalk = require("chalk");
+const HighLight = require("./HighLight")
+const log_save = require("../COMPILER/Helpers/Console_save")
 
-// const { decode } = require('sourcemap-codec');
-const { SourceMapConsumer } = require("source-map")
+
 
 
 module.exports = function (runed_dir, WebSocket_URL) {
     global.watch_directory = {};
-
+    // console.log(path.resolve(__dirname + "/JSkid/kid_script.js"))
     var index_location = runed_dir + '/index.html',
         DATA = {
             Run_Dir: runed_dir,
             Global_DATA: { IMPORTS_INDEX: 0 },
-            Files: {},
-            // WATCH_FILES: {},
+            Files_THRE: {},
+            PROGRAMS: {},
+            // MODULE_THRE: {},
+            // FILE_MODULE_THRE: {},
+            // STATEMENTS_LIST: {},
+            // SAVE_MODULES: {
+            //     kix: path.resolve(__dirname + "/JSkid/kid_script.js")
+            // },
             DEVELOPER_MOD: true,
         },
         DIAGNOSTICS_ERROR = {};
@@ -33,13 +37,13 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
     watch_directory['/KIX_SCRIPT_CONTROLER_DEV_MODE.js'] = function (res) {
         res.header("Cache-Control", "public, max-age=31536000");
-
-        return fs.readFileSync(__dirname + "/JSkid/kid_script.dev.js", "utf8").replace("${{{KIX_SCRIPT_CONTROLER_DEV_MODE}}}", WebSocket_URL)
+        res.end(DEV_MODE_SCRIPT);
+        // return
     }
 
 
     function create_index_HTML() {
-        console.save()
+        // console.save()
 
         global.watch_directory = {
             "/": watch_directory['/'],
@@ -61,38 +65,63 @@ module.exports = function (runed_dir, WebSocket_URL) {
         )
         // document.head.appendChild(node_script())
         global.LOCKED_FILES = []
-        document.querySelectorAll('script[lang="kix"]').forEach(function ({ src }, index) {
-            var URL = new dom.window.URL(src, 'http://e'),
-                full_src = path.resolve(runed_dir + URL.pathname);
+        document.querySelectorAll('script[lang="kix"]').forEach(function (ELEMENT, index) {
 
-            // var file_code_SCRIPT = `ERROR: ${full_src} not found`
+            var URL = new dom.window.URL(ELEMENT.src, 'http://e'),
+                full_src = path.resolve(runed_dir + decodeURIComponent(URL.pathname)),
+                HOST_LOCATION = [".ts", ".tsx"].includes(path.extname(full_src).toLocaleLowerCase()) ? full_src + ".js" : full_src,
+                REQUEST_url = URL.pathname;
 
-            // watch_directory[URL.pathname] = function () {
-            //     return file_code_SCRIPT
-            // }
-            // console.log(src, URL.pathname, full_src)
             if (fs.existsSync(full_src) && URL.pathname != "/") {
-
+                ELEMENT.src = REQUEST_url;
 
                 function create_code_SCRIPT() {
-                    var File_DATA = Run_Compiler({
-                        ...DATA,
-                        RESET_REQUEST_FILE: create_code_SCRIPT
-                    }, full_src)
+                    // var RESULT;
+                    // PROGRAM,
+                    // RESTART = function () {
+                    //     RESULT = PROGRAM.getResult()
+                    //     KD_RESTART_PAGE()
+                    // },
+                    // PROGRAM = CREATE_PROGRAM(full_src, {
+                    //     ...DATA,
+                    //     RESET_REQUEST_FILE: RESTART
+                    // })
 
-                    // console.log(File_DATA.DATA.LOCKED_FILES)
-                    LOCKED_FILES[index] = File_DATA.DATA.LOCKED_FILES
-                    DIAGNOSTICS_ERROR[URL.pathname] = File_DATA.DATA.SOCKET_ERRORS;
-                    // console.log("restart", Math.random())
-                    var file_code_SCRIPT = File_DATA.code
-                    watch_directory[URL.pathname] = function () {
-                        return file_code_SCRIPT
+                    const HOST = DATA.PROGRAMS[full_src] || (DATA.PROGRAMS[full_src] = {
+                        RESTART: function () {
+                            this.PROGRAM.Emit()
+                            KD_RESTART_PAGE()
+                        },
+                        PROGRAM: CREATE_PROGRAM(full_src, {
+                            ...DATA,
+                            HOST_LOCATION: HOST_LOCATION,
+                            REQUEST_url: REQUEST_url,
+                            RESET_REQUEST_FILE: function () {
+                                let thisob = DATA.PROGRAMS[full_src]
+                                thisob.RESULT = thisob.PROGRAM.Emit()
+                                KD_RESTART_PAGE()
+                            }
+                        })
+                    })
+                    HOST.RESTART()
+                    DIAGNOSTICS_ERROR[HOST_LOCATION] = HOST
+                    // setInterval(() => {
+                    //     RESTART()
+                    // }, 1000)
+                    // console.log(REQUEST_url)
+                    watch_directory[URL.pathname] = function (res) {
+                        res.end(HOST.PROGRAM.getCode())
+                        // return 
+                    }
+                    watch_directory[URL.pathname + ".map"] = function (res) {
+                        res.end(HOST.PROGRAM.getMap())
+                        // return RESULT.Map
                     }
                 }
                 create_code_SCRIPT()
 
             } else {
-                consola.error(`Error: Cannot find module: (${src})`)
+                consola.error(`Error: Cannot find module: (${ELEMENT.src})`)
 
                 // new Error(`NOT EXIST ${src} in ${runed_dir}`)
 
@@ -105,6 +134,9 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
     }
 
+
+
+    // INDEX.HTML CREATOR
     var index_HTML = "ERROR: index.html not found" + runed_dir;
     if (fs.existsSync(index_location)) {
         index_HTML = create_index_HTML();
@@ -117,9 +149,10 @@ module.exports = function (runed_dir, WebSocket_URL) {
         consola.error(`NOT EXIST index.html in ${runed_dir}`)
         // console.error(new Error(`NOT EXIST index.html in ${runed_dir}`))
     }
-    watch_directory['/'] = watch_directory['/index.html'] = function () {
-        return index_HTML;
+    watch_directory['/'] = watch_directory['/index.html'] = function (res) {
+        res.end(index_HTML)
     }
+    //////////////////////
 
 
 
@@ -139,129 +172,198 @@ module.exports = function (runed_dir, WebSocket_URL) {
 
 
 
-    // websock_controler
 
-    var extrac_url = /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi
 
-    var Consumer,
-        source_map;
+
+
+
+
+
+
+    // DIAGNOSTICS_ERROR
     WS_Sock.on('connection', function (ws) {
-        // DATA.Global_DATA.SOCKET_ERRORS.forEach(function (error) {
-        //     ws.send(JSON.stringify(error))
-        // })
-        for (var error_path in DIAGNOSTICS_ERROR) {
 
-            // consola.error(
-            //     new CustomError(
-            //         send_Object.general_error,
-            //         undefined,
-            //         200,
-            //         "\n " + send_Object.data.map(v => {
-            //             return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
-            //         }).join("\n")
-            //     )
-            // )
 
-            DIAGNOSTICS_ERROR[error_path].forEach(function (error) {
-                // console.log(error)
-                consola.error(
-                    new CustomError(
-                        error.general_error,
+        for (var PATH in DIAGNOSTICS_ERROR) {
+            // console.log(DIAGNOSTICS_ERROR[PATH].PROGRAM.getDiagnostics())
+            // console.log(PATH)
+            let getDiagnostics = DIAGNOSTICS_ERROR[PATH].PROGRAM.getDiagnostics();
+            for (var DIAGNOSTIC of getDiagnostics) {
+                // console.log(DIAGNOSTIC)
+                if (DIAGNOSTIC.file) {
+                    const { line, character } = DIAGNOSTIC.file.getLineAndCharacterOfPosition(
+                        DIAGNOSTIC.start
+                    );
+                    // console.log(DIAGNOSTIC.file.originalFileName)
+                    var PATH_relativ = path.relative(DATA.Run_Dir, DIAGNOSTIC.file.originalFileName).replace(/\\/g, "/")
+
+                    var SPLITED = DIAGNOSTIC.file.text.split('\n').slice(line - 1, line + 3).join('\n')
+
+
+                    consola.error(new CustomError(
+                        DIAGNOSTIC.messageText,
                         undefined,
-                        200,
-                        "\n " + error.data.map(v => {
-                            return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
-                        }).join("\n")
-                    )
-                )
-                ws.send(JSON.stringify(error))
-            })
+                        undefined,
+                        `\nat (${PATH_relativ}:${line + 2}:${character + 1})` + "\n " +
+                        HighLight(SPLITED).split('\n').map((v, index) => {
+
+                            let leng = (String(line + 3).length - String(line + index).length)
+                            let left_join = Array.from(Array(leng), x => " ").join("")
+                            let checkLine = (index + line - 1) == line;
+
+
+
+                            return Chalk[checkLine ? "redBright" : "grey"](left_join + (line + 1 + index) + '|' + (checkLine ? "> " : "  ")) + v
+                        }).join('\n')
+                    ))
+
+                    ws.send(JSON.stringify({
+                        general_error: DIAGNOSTIC.messageText,
+                        method: "create_error_code",
+                        data: [{
+                            code: DIAGNOSTIC.file.text,
+                            error_cod: `${DIAGNOSTIC.messageText} (${PATH_relativ}:${line + 1}:${character + 1})`,
+                            line_coll: [line + 1, character + 1],
+                            path: PATH_relativ,
+
+                        }],
+                        // line_coll
+                    }))
+                }
+            }
+            // const lineAndChar = Diagnostic.file.getLineAndCharacterOfPosition(
+            //     Diagnostic.start
+            // );
+
         }
 
 
-        // console.log(DIAGNOSTICS_ERROR)
+
         ws.on('message', function incoming(message) {
             var json_message = JSON.parse(message)
 
+            // console.log(json_message)
             switch (json_message.method) {
                 case "get_error_files":
+                    // console.log(json_message)
+                    // consola 
+                    // Babel_HighLight
+                    // consola.error(
+                    var error_paths = []
+                    json_message.data.forEach((v, index_) => {
+                        // console.log(v)
+                        // console.log(` at (${path.resolve(runed_dir + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`)
+                        var RESOLVED_PATH = path.resolve(DATA.Run_Dir + "/" + v.path)
 
-                    var send_Object = {
-                        ...json_message,
-                        method: "create_error_code",
-                        data: []
-                    }
-
-
-
-                    json_message.data.forEach(async function (element, index) {
-                        var PATH_FILE = path.resolve(runed_dir + element.path),
-                            FILE = DATA.Files[PATH_FILE];
-
-                        // console.log(PATH_FILE, Object.keys(DATA.Files))
-                        if (FILE && FILE.DATA.COMPIL_SCRIPT) {
-                            const { line_coll: [error_line, error_column], error_cod } = element;
-
-                            // decode
-                            let sourceMapText = FILE.DATA.COMPIL_SCRIPT.sourceMapText
-                            Consumer = source_map == sourceMapText ? Consumer : await new SourceMapConsumer(FILE.DATA.COMPIL_SCRIPT.sourceMapText)
-                            // decoded_vql = source_map == sourceMapText ? decoded_vql : decode(JSON.parse(sourceMapText).mappings)
-                            source_map = sourceMapText
-                            // if()
-                            // var decoded_vql = FILE.DATA.SourceMap_VQL || (FILE.DATA.SourceMap_VQL = decode(JSON.parse(FILE.DATA.COMPIL_SCRIPT.sourceMapText).mappings))
-                            const { line, column, source } = Consumer.originalPositionFor({
-                                line: error_line,
-                                column: error_column
-                            });
-
-                            // const [ERROR_COLLUMN, SOURCES_INDEX, ORIGINAL_LINE, ORIGINAL_COLL] = decoded_vql[error_line].reduce((v1, v2) => {
-
-                            //     // console.log(v1[0], v2[0], v1[0] == v2[0] ? v2 : (v1[0] > v2[0] ? v2 : v1))
-
-                            //     return v1[0] == error_column ? v1 : (v2[0] == error_column) ? v2 : (v1[0] > v2[0] ? v2 : v1)
-                            // })
-                            // console.log(line, column, decoded_vql[error_line],  error_line, error_column)
-                            // extrac_url
-                            // console.log(error_line, error_column, line, column)
-                            var new_PATH = path.resolve(path.dirname(PATH_FILE) + "/" + source)
-
-                            // console.log(element, error_cod.replace(extrac_url, `/${path.relative(DATA.Run_Dir, new_PATH)}:${line}:${column}`))
-
-                            if (line != null) {
-                                send_Object.data.push(Object.assign(element, {
-                                    line_coll: [line, column],
-                                    code: DATA.Files[new_PATH].DATA.CODE_SCRIPT,
-                                    error_cod: error_cod.replace(extrac_url, `/${path.relative(DATA.Run_Dir, new_PATH)}:${line}:${column}`)
-                                }))
-                            }
-
-                            if (index == json_message.data.length - 1 && send_Object.data.length) {
-                                // console.log(send_Object )
-                                // general_error:
-
-                                consola.error(
-                                    new CustomError(
-                                        send_Object.general_error,
-                                        undefined,
-                                        200,
-                                        "\n " + send_Object.data.map(v => {
-                                            // console.log(` at (${path.resolve(runed_dir + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`)
-                                            return ` at (${v.path}:${v.line_coll[0]}:${v.line_coll[1]})`
-                                        }).join("\n")
-                                    )
-                                )
-
-                                ws.send(JSON.stringify(send_Object))
-                            }
+                        if (!(RESOLVED_PATH in DIAGNOSTICS_ERROR)) {
+                            return []
                         }
+
+                        const { PROGRAM } = DIAGNOSTICS_ERROR[RESOLVED_PATH]
+                        const [LINE, COLLUMN] = v.line_coll
+                        PROGRAM.getConsumer().then(function (Consumer) {
+                            const { line, column, source } = Consumer.originalPositionFor({
+                                line: LINE,
+                                column: COLLUMN
+                            })
+
+                            // console.log(line, column, source)
+                            if (line) {
+                                error_paths.push({
+                                    line,
+                                    column,
+                                    sourceTXT: Consumer.sourceContentFor(source),
+                                    PATH: (path.relative(DATA.Run_Dir, path.join(path.dirname(RESOLVED_PATH), source))).replace(/\\/g, "/")
+                                })
+                                // error_paths.push(`\nat (${path.resolve(DATA.Run_Dir + "/" + v.path)}:${line}:${column})`)
+                            }
+
+                            if (index_ == json_message.data.length - 1 && error_paths.length) {
+                                const { line, column, sourceTXT, PATH } = error_paths[0]
+                                var SPLIT = sourceTXT.split('\n').slice(line - 2, line + 2)
+                                var SPLITED = SPLIT.join('\n')
+                                // console.log(URL_PATH)
+
+                                // console.log(error_paths)
+
+                                consola.error(new CustomError(
+                                    json_message.general_error,
+                                    undefined,
+                                    undefined,
+                                    error_paths.map(v => {
+                                        return `\nat (${PATH}:${line}:${column})`
+                                    }).join("") + "\n " +
+                                    HighLight(SPLITED).split('\n').map((v, index) => {
+
+
+                                        let leng = (String(line + 2).length - String(line + index - 1).length)
+                                        let left_join = Array.from(Array(leng), x => " ").join("")
+                                        let checkLine = (line + index - 1) == line;
+
+
+
+                                        return Chalk[checkLine ? "redBright" : "grey"](left_join + (line + index - 1) + '|' + (checkLine ? "> " : "  ")) + v
+                                    }).join('\n')
+
+                                ))
+
+
+
+
+
+                                ws.send(JSON.stringify({
+                                    ...json_message,
+                                    method: "create_error_code",
+                                    data: error_paths.map(({ line, column, sourceTXT, PATH }) => {
+
+                                        return {
+                                            line_coll: [line, column],
+                                            code: sourceTXT,
+                                            error_cod: `\nat (${PATH}:${line}:${column})`
+                                        }
+                                    })
+                                }))
+
+
+
+                            }
+                        })
+
+
+                        // console.log(PROGRAM.getConsumer())
+                        // return ` at (${path.resolve(DATA.Run_Dir + "/" + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`
                     })
 
-                    break;
+                // new CustomError(
+                //     json_message.general_error + "\n" + Babel_HighLight(`var s = 74`, { forceColor: true }),
+                //     undefined,
+                //     200,
+                //     "\n " + json_message.data.map(v => {
+                //         // console.log(` at (${path.resolve(runed_dir + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`)
+                //         const [LINE, COLLUMN] = v.line_coll
+                //         var RESOLVED_PATH = path.resolve(DATA.Run_Dir + "/" + v.path)
+                //         const { PROGRAM } = DIAGNOSTICS_ERROR[RESOLVED_PATH]
+                //         var CODE = PROGRAM.getCode()
+                //         var LINES = CODE.split("\n").slice(0, LINE)
+                //         var POP = LINES.pop()
+                //         var POSITION = LINES.join("\n").length + POP.slice(0, COLLUMN)?.length
+                //         console.log("LINES", POSITION)
+                //         console.log(
+                //             PROGRAM.getSourceMapper(),
+                //             v.line_coll,
+                //             PROGRAM.getSourceMapper().tryGetSourcePosition({ fileName: RESOLVED_PATH, pos: 0 }), POSITION
+                //         )
+                //         return ` at (${path.resolve(DATA.Run_Dir + "/" + v.path)}:${v.line_coll[0]}:${v.line_coll[1]})`
+                //     }).join("\n")
+                // )
+                // )
+                // console.log("sdfsdf\nsdfsdfs\rasdasdasda\rsdasd")
+                // CustomError
             }
-        });
-    });
 
-    ////////////////////
+        })
+    })
+
 
 
 }
