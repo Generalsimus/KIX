@@ -8,7 +8,7 @@ const path = require('path')
 const copyFolderSync = require('../source/copyFolderSync')
 const babel = require('@babel/core');
 const babel_preset_minify = require("babel-preset-minify")
-const babel_preset_env = require("@babel/preset-env");
+// const babel_preset_env = require("@babel/preset-env");
 const consola = require("consola");
 // const { IndexKind } = require('typescript');
 

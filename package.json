@@ -1,7 +1,7 @@
 {
     "name": "kix-js",
-    "version": "1.2.1",
-    "description": "JS FRAMEWORK",
+    "version": "1.2.3",
+    "description": "Kix is a platform for building web applications. Kix makes it painless to create interactive UIs. Declarative views make your code more predictable and easier to debug.",
     "main": "index.js",
     "errors_for_me": [
         "typescriptis faills bolos js daumate ",
