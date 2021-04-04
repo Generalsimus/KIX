@@ -50,6 +50,7 @@ module.exports = (runed_dir) => {
         copy_files = {};
 
     var index_location = runed_dir + '/index.html'
+    
     if (fs.existsSync(index_location)) {
         const dom = new JSDOM(fs.readFileSync(index_location, "utf8"));
         var document = dom.window.document,

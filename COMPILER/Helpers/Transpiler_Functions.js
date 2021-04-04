@@ -1,19 +1,25 @@
 const Clone_Json = require("../Modifer/Clone_Json")
 const ts = require("typescript")
 const SyntaxKind = ts.SyntaxKind
+const { JsxText } = SyntaxKind
+let TEGAR = [ts.SyntaxKind["JsxElement"], ts.SyntaxKind["JsxSelfClosingElement"]]
+
 
 function FLAT_JSX_CHILDS(CHILDREN, DATA, VISITOR, CTX) {
     CHILDREN = CHILDREN.flatMap((child, index) => {
 
+         
+        if ((JsxText == child.kind && (
+            child.text.trim().length === 0 && (
+                (index === 0) ||
+                (index === CHILDREN.length - 1) ||
+                (TEGAR.includes(CHILDREN[index + 1]?.kind) || TEGAR.includes(CHILDREN[index - 1]?.kind))
 
-        if (
-            (index === 0 && child.text && child.text.trim().length === 0) ||
-            (index === CHILDREN.length - 1 && child.text && child.text.trim().length === 0) ||
-            (SyntaxKind[child.kind] == "JsxExpression" && !child.expression)
-        ) {
+            )) || (SyntaxKind[child.kind] == "JsxExpression" && !child.expression)
+        )) {
             // console.log(child)
             return []
-        } 
+        }
         // else if (child.text && child.text.trim().length === 0) {
         //     child.text = " "
         // }

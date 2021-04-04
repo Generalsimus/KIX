@@ -228,7 +228,7 @@ module.exports = function (LOCATION, DATA) {
             // var EMITTER = PROGRAM.emit( /*targetSourceFile*/ undefined, /*writeFile*/ undefined, /*cancellationToken*/ undefined, /*emitOnlyDtsFiles*/ undefined, DEFAULT_OPTIONS.transformers);
 
             // console.log("PROGRAM", result, services.getSyntacticDiagnostics(LOCATION), services.getSemanticDiagnostics(LOCATION), "Diagnostic", "PROGRAM.getFilesByNameMap()", "emiter")
-            // console.log("EMIT")
+            // console.log(EMITED.outputFiles[1].text)
 
 
             return `(function(imports){${EMITED.outputFiles[1].text}\n })(window.KIX_PKG||(window.KIX_PKG=[]))\n//# sourceMappingURL=${DATA.REQUEST_url}.map`
