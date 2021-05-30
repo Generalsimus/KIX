@@ -108,7 +108,6 @@ module.exports = function (DEFAULT_HOST, LOCATION, DATA) {
 
     return {
         getSourceFile: function (fileName) {
-            // console.log(fileName)
 
 
             return FILE_IMPORT(fileName, arguments, getSourceFile)
@@ -148,6 +147,7 @@ module.exports = function (DEFAULT_HOST, LOCATION, DATA) {
             // console.log(resolveModuleNames(...arguments))
             var new_module = MODULES.map((MODUL) => {
                 try {
+                    
                     let RESOLVE = resolve.sync(MODUL, {
                         basedir: path.dirname(MODULES_IN),
                         extensions: [".ts", ".tsx", ".js", ".jsx"],

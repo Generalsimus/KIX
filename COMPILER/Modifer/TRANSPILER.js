@@ -178,7 +178,7 @@ module.exports = {
                                 ))
                             })
 
-                            statements_NODE.expression.arguments[2].body.statements.splice(0, 0, (Imported_Names.length ? Clone_Json.CREATE_Variable(Imported_Names) : []))
+                            statements_NODE.expression.arguments[2].body.statements.splice(0, 0, ...(Imported_Names.length ? [Clone_Json.CREATE_Variable(Imported_Names)] : []))
                             return statements_NODE.expression.arguments[2].body.statements
                         } catch (error) {
                             // console.log(NODE)
