@@ -7,8 +7,7 @@ var SAVE_LOG = [],
         blue: "\x1b[34m"
     };
 
-console.save = function () {
-    // return
+console.save = function () { 
     console.clear();
 
     var i = 0;

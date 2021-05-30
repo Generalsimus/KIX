@@ -1,13 +1,12 @@
 {
     "name": "kix-js",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "description": "Kix is a platform for building web applications. Kix makes it painless to create interactive UIs. Declarative views make your code more predictable and easier to debug.",
     "main": "index.js",
     "errors_for_me": [
         "typescriptis faills bolos js daumate ",
         "buildis sourcemapi compiler optionistvis"
     ],
-
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },

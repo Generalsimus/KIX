@@ -60,7 +60,7 @@ module.exports = function (LOCATION, DATA) {
             removeComments: true,
             sourceMap: true,
             "rootDir": DATA.Run_Dir,
-            "baseUrl": DATA.Run_Dir,
+            // "baseUrl": DATA.Run_Dir,
             allowJs: true,
             jsx: "react",
             "allowSyntheticDefaultImports": true,
@@ -70,6 +70,9 @@ module.exports = function (LOCATION, DATA) {
             // "moduleResolution": "node",
             // noResolve:false,
             lib: [".js", ".jsx"].includes(path.extname(LOCATION).toLocaleLowerCase()) ? [] : undefined,
+            "typeRoots": [ 
+                "./"
+            ],
             // [path.resolve(__dirname + "/Helpers/LIBS/es2015.d.ts")],
 
             outFile: path.relative(DATA.Run_Dir, LOCATION),
