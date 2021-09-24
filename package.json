@@ -1,6 +1,6 @@
 {
     "name": "kix",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "description": "Kix is a platform for building web applications. Kix makes it painless to create interactive UIs. Declarative views make your code more predictable and easier to debug.",
     "main": "index.js",
     "errors_for_me": [
