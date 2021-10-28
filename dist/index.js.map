@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../index.js"],"names":[],"mappings":";;;AAEA,wCAAwC;AACxC,oCAAgC;AAGhC,SAAG,CAAC,IAAI,EAAE,CAAA","sourcesContent":["#!/usr/bin/env node\r\n\r\n// const { App } = require(\"./init/App\")\r\nimport { App } from \"./init/App\"\r\n\r\n\r\nApp.init()"]}
