@@ -9,7 +9,7 @@
 
 
 ```bash
-npm i -g kix-js
+npm i -g kix
 ```
 ```bash
 kix new app-name
