@@ -66,7 +66,7 @@ const configModules = (NODE, moduleInfo, compilerOptions) => {
 };
 exports.configModules = configModules;
 exports.defaultModulePaths = {
-    "kix": (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../../main/index.js"))
+    "kix": (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../../main/node_modules/index.js"))
 };
 function resolveModule(modulePath, fileDirectory) {
     try {

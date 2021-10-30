@@ -1,7 +1,7 @@
 {
   "name": "kix-js",
   "version": "1.3.0",
-  "main": "./main/index.js",
+  "main": "./main/node_modules/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
