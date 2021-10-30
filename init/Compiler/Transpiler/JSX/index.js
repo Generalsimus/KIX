@@ -12,7 +12,7 @@ import ts, {
     createIdentifier,
     SignatureKind
 } from "typescript"
-import { ConvertJsxToObject, PropertyAccessExpressionOrElementAccessExpression } from "./utils";
+import { ConvertJsxToObject, PropertyAccessExpressionOrElementAccessExpression, visitFunctionDeclarationForJsxRegistrator } from "./utils";
 import { generateFactory } from "../createFactoryCode";
 const { CREATE_CAll_Function } = generateFactory
 const { createStringLiteral } = factory
@@ -41,6 +41,8 @@ export const JSXTransformersBefore = {
     //     return ConvertJsxToObject(NODE, visitor, CTX, tagName, attributes, children)
     //     // return FLAT_JSX_CHILDS(children, DATA, VISITOR, CTX)
     // },
+    [SyntaxKind.ArrowFunction]: visitFunctionDeclarationForJsxRegistrator,
+    [SyntaxKind.FunctionDeclaration]: visitFunctionDeclarationForJsxRegistrator,
     [SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression
 

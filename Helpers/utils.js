@@ -96,7 +96,7 @@ export const createHost = (__compilerOptions) => {
                 }
             },
             resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
-                console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
+                // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
                 return loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
             },
             resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap]))
@@ -124,4 +124,9 @@ export const getModuleFiles = (Module, ModuleFiles) => {
     for (const LocalModulesPathKey in Module.LocalModules) {
         getModuleFiles(Module.LocalModules[LocalModulesPathKey], ModuleFiles)
     }
+}
+
+let ModuleUnnesesaryIndex = 0;
+export const getModuleWindowName = () => {
+    return `_KIX${++ModuleUnnesesaryIndex}${new Date().getTime()}`
 }

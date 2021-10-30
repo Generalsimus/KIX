@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.createHost = exports.getColumnName = exports.deepAssign = void 0;
+exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.createHost = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const posix_1 = __importDefault(require("path/posix"));
@@ -84,7 +84,7 @@ const createHost = (__compilerOptions) => {
             }
         },
         resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
-            console.log({ resolved: (0, typescript_1.loadWithLocalCache)(typescript_1.Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) });
+            // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
             return (0, typescript_1.loadWithLocalCache)(typescript_1.Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
         },
         resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap]))
@@ -107,4 +107,9 @@ const getModuleFiles = (Module, ModuleFiles) => {
     }
 };
 exports.getModuleFiles = getModuleFiles;
+let ModuleUnnesesaryIndex = 0;
+const getModuleWindowName = () => {
+    return `_KIX${++ModuleUnnesesaryIndex}${new Date().getTime()}`;
+};
+exports.getModuleWindowName = getModuleWindowName;
 //# sourceMappingURL=utils.js.map

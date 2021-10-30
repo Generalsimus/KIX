@@ -3,17 +3,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createObjectPropertyLoop = exports.getTransformersObject = exports.configModules = exports.getOrSetModuleInfo = exports.ModulesThree = void 0;
+exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTransformersObject = exports.resolveModule = exports.defaultModulePaths = exports.configModules = exports.getOrSetModuleInfo = exports.ModulesThree = void 0;
 const typescript_1 = require("typescript");
 const resolve_1 = __importDefault(require("resolve"));
+const path_1 = __importDefault(require("path"));
+const utils_1 = require("../../../Helpers/utils");
 const { createToken, createBinaryExpression, createVariableStatement, createVariableDeclarationList, createVariableDeclaration, createBlock, createIdentifier, createPropertyAccessExpression, createObjectLiteralExpression, createParameterDeclaration, createParenthesizedExpression, createArrowFunction, createCallExpression, createObjectBindingPattern, createBindingElement } = typescript_1.factory;
 // მოდულის შესახებ ინფორმაციის ქეშირება
 exports.ModulesThree = new Map();
 let Module_INDEX = 0;
-const getOrSetModuleInfo = (pathKey) => {
+const getOrSetModuleInfo = (pathKey, compilerOptions) => {
     const module = exports.ModulesThree.get(pathKey);
     const moduleInfo = module || {
-        Module_INDEX: Module_INDEX++
+        Module_INDEX: Module_INDEX++,
+        // __Module_Window_Name: defaultModulePaths[] ? compilerOptions.__Module_Window_Name : compilerOptions.__Module_Window_Name
     };
     if (!module) {
         exports.ModulesThree.set(pathKey, moduleInfo);
@@ -34,7 +37,8 @@ const configModules = (NODE, moduleInfo, compilerOptions) => {
         }
         const module = exports.ModulesThree.get(modulePath);
         const childModuleInfo = module || {
-            Module_INDEX: Module_INDEX++
+            Module_INDEX: Module_INDEX++,
+            __Module_Window_Name: compilerOptions.__Module_Window_Name
         };
         if (!module) {
             exports.ModulesThree.set(modulePath, childModuleInfo);
@@ -43,6 +47,7 @@ const configModules = (NODE, moduleInfo, compilerOptions) => {
         childModuleInfo.KindName = ModuleKindName;
         if ((/[/\\]node_modules[/\\]/).test(modulePath)) {
             childModuleInfo.isNodeModule = true;
+            childModuleInfo.__Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
             NodeModules[modulePath] = childModuleInfo;
             if (!oldNodeModules[modulePath]) {
                 compilerOptions.resetModuleFiles();
@@ -60,6 +65,9 @@ const configModules = (NODE, moduleInfo, compilerOptions) => {
     return ModuleColection;
 };
 exports.configModules = configModules;
+exports.defaultModulePaths = {
+    "kix": (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../../main/index.js"))
+};
 function resolveModule(modulePath, fileDirectory) {
     try {
         return (0, typescript_1.normalizeSlashes)(resolve_1.default.sync(modulePath, {
@@ -67,9 +75,11 @@ function resolveModule(modulePath, fileDirectory) {
             extensions: ['.js', '.ts', '.jsx', '.tsx'],
         }));
     }
-    catch (e) {
+    catch {
+        return exports.defaultModulePaths[modulePath];
     }
 }
+exports.resolveModule = resolveModule;
 const concatBeforOrAfterTransformers = (BeforeOrAfter, transfromers = {}) => {
     for (const transformersObject of BeforeOrAfter) {
         for (const transfromersKey in transformersObject)
@@ -118,4 +128,14 @@ const createObjectPropertyLoop = (namesObject, returnValue = []) => {
     return createObjectBindingPattern(returnValue);
 };
 exports.createObjectPropertyLoop = createObjectPropertyLoop;
+const geModuleLocationMeta = (ModuleData, compilerOptions) => {
+    console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
+    if (!ModuleData) {
+        return;
+    }
+    return ModuleData.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
+        [compilerOptions.__Import_Module_Name, (0, utils_1.getColumnName)(ModuleData.Module_INDEX)] :
+        ["window", ModuleData.__Module_Window_Name, (0, utils_1.getColumnName)(ModuleData.Module_INDEX)];
+};
+exports.geModuleLocationMeta = geModuleLocationMeta;
 //# sourceMappingURL=utils.js.map

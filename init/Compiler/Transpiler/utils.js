@@ -1,6 +1,8 @@
 import { getDirectoryPath, SyntaxKind, visitEachChild, factory, normalizeSlashes } from "typescript"
 import resolve from "resolve"
 import chokidar from "chokidar"
+import path from "path"
+import { getColumnName } from "../../../Helpers/utils"
 
 
 const {
@@ -28,11 +30,12 @@ const {
 // მოდულის შესახებ ინფორმაციის ქეშირება
 export const ModulesThree = new Map()
 let Module_INDEX = 0
-export const getOrSetModuleInfo = (pathKey) => {
+export const getOrSetModuleInfo = (pathKey, compilerOptions) => {
 
     const module = ModulesThree.get(pathKey)
     const moduleInfo = module || {
-        Module_INDEX: Module_INDEX++
+        Module_INDEX: Module_INDEX++,
+        // __Module_Window_Name: defaultModulePaths[] ? compilerOptions.__Module_Window_Name : compilerOptions.__Module_Window_Name
     }
     if (!module) {
         ModulesThree.set(pathKey, moduleInfo)
@@ -66,17 +69,20 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
     const oldNodeModules = moduleInfo.NodeModules || {}
     const NodeModules = {}
     const LocalModules = {}
+
     const ModuleColection = NODE.imports.reduce((ModuleColection, ModuleNode) => {
         const { text, parent, kind } = ModuleNode
 
         const modulePath = resolveModule(text, fileDirectory)
+
         if (!modulePath) {
             return ModuleColection
         }
         const module = ModulesThree.get(modulePath)
 
         const childModuleInfo = module || {
-            Module_INDEX: Module_INDEX++
+            Module_INDEX: Module_INDEX++,
+            __Module_Window_Name: compilerOptions.__Module_Window_Name
         }
         if (!module) {
             ModulesThree.set(modulePath, childModuleInfo)
@@ -89,6 +95,7 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
 
         if ((/[/\\]node_modules[/\\]/).test(modulePath)) {
             childModuleInfo.isNodeModule = true
+            childModuleInfo.__Module_Window_Name = compilerOptions.__Node_Module_Window_Name
             NodeModules[modulePath] = childModuleInfo
             if (!oldNodeModules[modulePath]) {
                 compilerOptions.resetModuleFiles()
@@ -97,7 +104,6 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
         } else {
             LocalModules[modulePath] = childModuleInfo;
         }
-
         ModuleColection[text] = childModuleInfo
         return ModuleColection
     }, {})
@@ -107,17 +113,18 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
     return ModuleColection
 }
 
-
-
-
-function resolveModule(modulePath, fileDirectory) {
+export const defaultModulePaths = {
+    "kix": normalizeSlashes(path.join(__dirname, "../../../main/index.js"))
+}
+export function resolveModule(modulePath, fileDirectory) {
     try {
+
         return normalizeSlashes(resolve.sync(modulePath, {
             basedir: fileDirectory,
             extensions: ['.js', '.ts', '.jsx', '.tsx'],
         }))
-    } catch (e) {
-
+    } catch {
+        return defaultModulePaths[modulePath]
     }
 }
 
@@ -211,4 +218,25 @@ export const createObjectPropertyLoop = (namesObject, returnValue = []) => {
 
     }
     return createObjectBindingPattern(returnValue)
+}
+
+
+
+
+
+
+
+
+
+
+export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
+    console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
+    if (!ModuleData) {
+        return
+    }
+
+
+    return ModuleData.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
+        [compilerOptions.__Import_Module_Name, getColumnName(ModuleData.Module_INDEX)] :
+        ["window", ModuleData.__Module_Window_Name, getColumnName(ModuleData.Module_INDEX)]
 }

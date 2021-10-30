@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PropertyAccessExpressionOrElementAccessExpression = exports.ConvertJsxToObject = void 0;
+exports.visitFunctionDeclarationForJsxRegistrator = exports.PropertyAccessExpressionOrElementAccessExpression = exports.ConvertJsxToObject = void 0;
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("../createFactoryCode");
 const { createStringLiteral, createIdentifier, createArrayLiteralExpression, createUniqueName } = typescript_1.factory;
@@ -135,4 +135,12 @@ const PropertyAccessExpressionOrElementAccessExpression = (NODE, visitor, CTX) =
     return (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
 };
 exports.PropertyAccessExpressionOrElementAccessExpression = PropertyAccessExpressionOrElementAccessExpression;
+const visitFunctionDeclarationForJsxRegistrator = (NODE, visitor, CTX) => {
+    const OldRegistrator = CTX.getJSXPropertyRegistrator;
+    CTX.getJSXPropertyRegistrator = undefined;
+    const newNode = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
+    CTX.getJSXPropertyRegistrator = OldRegistrator;
+    return newNode;
+};
+exports.visitFunctionDeclarationForJsxRegistrator = visitFunctionDeclarationForJsxRegistrator;
 //# sourceMappingURL=utils.js.map

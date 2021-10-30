@@ -21,6 +21,7 @@ import {
     createHost,
     deepAssign,
     getImportModuleName,
+    getModuleWindowName,
     parseJsonFile
 } from "../Helpers/utils.js"
 import {
@@ -57,10 +58,11 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         moduleResolution: ModuleResolutionKind.NodeJs
     },
     priorityCompilerOptions = {
-        module: ModuleKind.AMD, 
+        module: ModuleKind.AMD,
         typeRoots: [
             __RunDirName
         ],
+        __Node_Module_Window_Name: getModuleWindowName(),
         "noImplicitAny": true,
         "paths": {
             "kix": [__dirname]  // this mapping is relative to "baseUrl" 
@@ -76,7 +78,6 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     __compilerOptions = fixupCompilerOptions(deepAssign(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics),
     __Host = createHost(__compilerOptions),
     __TranspilingMeta = {},
-    __KixModulePath = normalizeSlashes(path.join(__dirname, "../main/index.js")),
     __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 
 
@@ -93,7 +94,6 @@ export const App = {
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
     __TranspilingMeta,
-    __KixModulePath,
     __ModuleUrlPath,
     init() {
 

@@ -18,6 +18,8 @@ exports.JSXTransformersBefore = {
     //     return ConvertJsxToObject(NODE, visitor, CTX, tagName, attributes, children)
     //     // return FLAT_JSX_CHILDS(children, DATA, VISITOR, CTX)
     // },
+    [typescript_1.SyntaxKind.ArrowFunction]: utils_1.visitFunctionDeclarationForJsxRegistrator,
+    [typescript_1.SyntaxKind.FunctionDeclaration]: utils_1.visitFunctionDeclarationForJsxRegistrator,
     [typescript_1.SyntaxKind.PropertyAccessExpression]: utils_1.PropertyAccessExpressionOrElementAccessExpression,
     [typescript_1.SyntaxKind.ElementAccessExpression]: utils_1.PropertyAccessExpressionOrElementAccessExpression
 };

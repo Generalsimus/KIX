@@ -57,6 +57,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     typeRoots: [
         __RunDirName
     ],
+    __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
     "noImplicitAny": true,
     "paths": {
         "kix": [__dirname] // this mapping is relative to "baseUrl" 
@@ -68,7 +69,7 @@ __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFil
 // read tsConfig.json file 
 __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
 /////////////////////////
-__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __KixModulePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../main/index.js")), __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 exports.App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,
@@ -80,7 +81,6 @@ exports.App = {
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
     __TranspilingMeta,
-    __KixModulePath,
     __ModuleUrlPath,
     init() {
         if (!this.__compilerOptions.fileName) {

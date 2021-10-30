@@ -167,3 +167,12 @@ export const PropertyAccessExpressionOrElementAccessExpression = (NODE, visitor,
 
     return visitEachChild(NODE, visitor, CTX)
 }
+
+
+export const visitFunctionDeclarationForJsxRegistrator = (NODE, visitor, CTX) => {
+    const OldRegistrator = CTX.getJSXPropertyRegistrator
+    CTX.getJSXPropertyRegistrator = undefined
+    const newNode = visitEachChild(NODE, visitor, CTX)
+    CTX.getJSXPropertyRegistrator = OldRegistrator
+    return newNode
+}

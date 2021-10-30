@@ -1,6 +1,7 @@
 import ts, { SyntaxKind } from "typescript"
 import { generateFactory } from "./createFactoryCode"
 import { getColumnName } from "../../../Helpers/utils"
+import { geModuleLocationMeta } from "./utils"
 
 const factory = ts.factory
 const { ExportKeyword } = SyntaxKind
@@ -57,23 +58,32 @@ function visitImportDeclaration(node, CTX) {
     if (!node.moduleSpecifier || !importClause) {
         return [node];
     }
-    const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+    // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+
     const compilerOptions = CTX.getCompilerOptions()
     const constVariablesNameValue = []
 
     if (ts.isDefaultImport(node)) {
-        constVariablesNameValue.push([
-            importClause.name,
-            CREATE_Property_Access_Expression([compilerOptions.__Import_Module_Name, getColumnName(Module_INDEX), "default"])
-        ])
+        const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+        if (ModuleData) {
+            ModuleData.push("default")
+            constVariablesNameValue.push([
+                importClause.name,
+                CREATE_Property_Access_Expression(ModuleData)
+            ])
+        }
+
 
     }
     const namedBindings = importClause.namedBindings;
     if (namedBindings && namedBindings.elements) {
         for (const element of namedBindings.elements) {
+            const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+
+            ModuleData.push(element.propertyName || element.name)
             constVariablesNameValue.push([
                 element.name,
-                CREATE_Property_Access_Expression([compilerOptions.__Import_Module_Name, getColumnName(Module_INDEX), element.propertyName || element.name])
+                CREATE_Property_Access_Expression(ModuleData)
             ])
 
         }
@@ -107,15 +117,17 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
 
         }
     } else if (node.exportClause) {
-        const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
-        if (typeof Module_INDEX !== "number") {
-            return newNodes
-        }
+        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+
+        const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+        // if (typeof Module_INDEX !== "number") {
+        //     return newNodes
+        // }
         newNodes.push(CREATE_Equals_Token_Nodes([
             CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             (
-                (typeof Module_INDEX === "number") ?
-                    CREATE_Property_Access_Expression([compilerOptions.__Import_Module_Name, getColumnName(Module_INDEX)]) :
+                (ModuleData) ?
+                    CREATE_Property_Access_Expression(ModuleData) :
                     createIdentifier("undefined")
             )
         ]))
@@ -123,8 +135,8 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         // export * as ns from "mod";
         // export * as default from "mod";
     } else {
-        const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
-
+        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+        const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
         CTX.assignPolyfill = createUniqueName(compilerOptions.__Import_Module_Name + "_Assign")
         newNodes.push(createCallExpression(
             (CTX.assignPolyfill),
@@ -132,8 +144,8 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
             [
                 createIdentifier("exports"),
                 (
-                    (typeof Module_INDEX === "number") ?
-                        CREATE_Property_Access_Expression([compilerOptions.__Import_Module_Name, getColumnName(Module_INDEX)]) :
+                    (ModuleData) ?
+                        CREATE_Property_Access_Expression(ModuleData) :
                         createObjectLiteralExpression([], false)
                 )
             ]
