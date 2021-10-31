@@ -42,7 +42,8 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     // emitDeclarationOnly:true,
     // "noUnusedLocals": true,
     // lib: [],
-    lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
+    // lib: ["es2015"],
+    // lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
     // target: ScriptTarget.ES3,
     suppressOutputPathCheck: true,
     removeComments: true,
@@ -55,7 +56,8 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
     typeRoots: [
-        __RunDirName
+        __RunDirName,
+        __dirname
     ],
     __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
     "noImplicitAny": true,
@@ -69,7 +71,8 @@ __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFil
 // read tsConfig.json file 
 __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
 /////////////////////////
-__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+__compilerOptions = (0, utils_js_1.fixLibFileLocationInCompilerOptions)((0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics)), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
 exports.App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,

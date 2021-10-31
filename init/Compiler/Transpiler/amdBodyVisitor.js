@@ -26,11 +26,11 @@ const {
 
 function visitor(node) { return node }
 
-export function topLevelVisitor(node, CTX) {
-    console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
+export function topLevelVisitor(node, currentSourceFile, CTX) {
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
     switch (node.kind) {
         case SyntaxKind.ImportDeclaration:
-            return visitImportDeclaration(node, CTX);
+            return visitImportDeclaration(node, currentSourceFile, CTX);
         // case 263:
         //     return visitImportEqualsDeclaration(node);
         case SyntaxKind.ExportDeclaration:
@@ -51,7 +51,8 @@ export function topLevelVisitor(node, CTX) {
             return [node];
     }
 }
-function visitImportDeclaration(node, CTX) {
+function visitImportDeclaration(node, currentSourceFile, CTX) {
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 55 --> visitImportDeclaration --> CTX", CTX);
     // console.log("🚀 --> file: amdBodyVisitor.js --> line 54 --> visitImportDeclaration --> node", node);
     // var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
     const importClause = node.importClause
@@ -63,35 +64,47 @@ function visitImportDeclaration(node, CTX) {
     const compilerOptions = CTX.getCompilerOptions()
     const constVariablesNameValue = []
 
-    if (ts.isDefaultImport(node)) {
-        const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-        if (ModuleData) {
-            ModuleData.push("default")
-            constVariablesNameValue.push([
-                importClause.name,
-                CREATE_Property_Access_Expression(ModuleData)
-            ])
-        }
+    var importAliasName = ts.getLocalNameForExternalImport(factory, node, currentSourceFile);
+
+    const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+
+    // ModuleData.push(element.propertyName || element.name)
+    constVariablesNameValue.push([
+        // factory.getGeneratedNameForNode(element.name),
+        importAliasName,
+        CREATE_Property_Access_Expression(ModuleData)
+    ])
+    // if (ts.isDefaultImport(node)) {
+    //     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+    //     if (ModuleData) {
+    //         // ModuleData.push("default")
+
+    //         constVariablesNameValue.push([
+    //             importAliasName,
+    //             CREATE_Property_Access_Expression(ModuleData)
+    //         ])
+    //     }
 
 
-    }
-    const namedBindings = importClause.namedBindings;
-    if (namedBindings && namedBindings.elements) {
-        for (const element of namedBindings.elements) {
-            const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+    // }
+    // const namedBindings = importClause.namedBindings;
+    // if (namedBindings && namedBindings.elements) {
+    //     for (const element of namedBindings.elements) {
+    //         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
 
-            ModuleData.push(element.propertyName || element.name)
-            constVariablesNameValue.push([
-                element.name,
-                CREATE_Property_Access_Expression(ModuleData)
-            ])
+    //         // ModuleData.push(element.propertyName || element.name)
+    //         constVariablesNameValue.push([
+    //             // factory.getGeneratedNameForNode(element.name),
+    //             importAliasName,
+    //             CREATE_Property_Access_Expression(ModuleData)
+    //         ])
 
-        }
-    }
+    //     }
+    // }
 
     return constVariablesNameValue.length ? CREATE_Const_Variable(constVariablesNameValue) : []
 
-}
+} 
 
 function visitExportDeclaration(node, CTX, newNodes = []) {
     const compilerOptions = CTX.getCompilerOptions()

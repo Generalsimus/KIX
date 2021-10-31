@@ -8,80 +8,89 @@ import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/
 import resolve from 'resolve'
 import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
 import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
-import { Compile_Node_Modules } from "./CompileModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
 
 
 const { __compilerOptions, __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
 const { resetFilesThree } = __Host
 
-let resetModules = true;
-let oldProgram;
+
 export const CompileFile = (FilePath, HTMLFilePaths) => {
+    let resetModules = true;
+    let oldProgram;
     const outFile = path.relative(__RunDirName, FilePath),
         __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
         REQUEST_PATH = ("./" + outFile).replace(/(^[\.\.\/]+)|(\/+)/g, "/"),
-        MAP_REQUEST_PATH = REQUEST_PATH + ".map"
-
-    const compilerOptions = {
-        ...__compilerOptions,
-        inlineSources: true,
-        outFile,
-        __Module_Window_Name,
-        rootDir: __RunDirName,
-        __Import_Module_Name,
-        resetModuleFiles: () => { resetModules = true },
-        __Url_Dir_Path: path.dirname(REQUEST_PATH)
-    }
-
-    const transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter])
-    oldProgram = createProgram(
-        [FilePath],
-        compilerOptions,
-        __Host,
-        oldProgram
-    );
-
-
-
-
-    oldProgram.emit(
-        undefined /*sourceFile*/,
-        (fileName, content) => {
-
+        MAP_REQUEST_PATH = REQUEST_PATH + ".map",
+        compilerOptions = {
+            ...__compilerOptions,
+            inlineSources: true,
+            outFile,
+            __Module_Window_Name,
+            rootDir: __RunDirName,
+            __Import_Module_Name,
+            resetModuleFiles: () => {
+                resetModules = true
+            },
+            __Url_Dir_Path: path.dirname(REQUEST_PATH)
+        },
+        transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
+        compilableFilePaths = [FilePath],
+        defaultModules = [resolveModule("kix", __RunDirName)],
+        writeFileCallback = (fileName, content) => {
             console.log({ fileName, REQUEST_PATH })
+
             const ext = path.extname(fileName)
             if (ext === ".map") {
                 __requestsThreshold.set(MAP_REQUEST_PATH, content)
-                // console.log(content)
             } else if (ext === ".js") {
                 const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
                 __requestsThreshold.set(REQUEST_PATH, Module_Text)
+                console.log(Module_Text)
             }
+        },
+        changeFileCallback = () => {
+            oldProgram = createProgram(
+                compilableFilePaths,
+                compilerOptions,
+                __Host,
+                oldProgram
+            );
+            oldProgram.emit(
+                undefined /*sourceFile*/,
+                writeFileCallback /*writeFileCallback*/,
+                undefined /*cancellationToken*/,
+                undefined /*emitOnlyDtsFiles*/,
+                transformers /*transformers*/
+            )
+            if (resetModules) {
+                const Modules = new Set(defaultModules)
+                for (const ModuleFilePath of HTMLFilePaths) {
+                    ModuleFilePath && getModuleFiles(ModulesThree.get(ModuleFilePath), Modules)
+                }
+                resetModules = false
+                Compile_Node_Modules(
+                    [...Modules],
+                    compilerOptions
+                )
+
+            }
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram);
+            console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram.getGlobalDiagnostics());
+
+            resetFilesThree(oldProgram.getFilesByNameMap())
         }
-        // undefined
-        /*writeFileCallback*/,
-        undefined /*cancellationToken*/,
-        undefined /*emitOnlyDtsFiles*/,
-        transformers /*transformers*/
-    )
 
-    const Modules = new Set([resolveModule("kix", __RunDirName)])
-    for (const ModuleFilePath of HTMLFilePaths) {
-        getModuleFiles(ModulesThree.get(ModuleFilePath), Modules)
-    }
+    // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host );
+    // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host.getDefaultLibLocation(compilerOptions));
+    changeFileCallback()
 
-    if (resetModules) {
-        resetModules = false
-        Compile_Node_Modules(
-            [...Modules],
-            compilerOptions
-        )
 
-    }
 
-    resetFilesThree(oldProgram.getFilesByNameMap())
+
+
+
 }
 
 
@@ -115,11 +124,16 @@ export const CompileFile = (FilePath, HTMLFilePaths) => {
 
 
 
-export const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
+const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
+    let Node_oldProgram;
     const transformers = getTransformersObject([ModuleTransformersBefore, NodeModuleTransformersBefore], [ModuleTransformersAfter]),
         __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
 
-    oldProgram = createProgram(NodeModuelsPaths,
+
+
+
+
+    Node_oldProgram = createProgram(NodeModuelsPaths,
         {
             ...compilerOptions,
             outFile: __ModuleUrlPath,
@@ -148,9 +162,9 @@ export const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
                 })
             }
         },
-        oldProgram
+        Node_oldProgram
     );
-    oldProgram.emit(
+    Node_oldProgram.emit(
         undefined /*sourceFile*/,
         (fileName, content) => {
 

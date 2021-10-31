@@ -58,7 +58,7 @@ exports.ModuleTransformersBefore = {
                     ]), [compilerOptions.__Import_Module_Name, (0, utils_1.getColumnName)(moduleInfo.Module_INDEX)]))];
             }
             else {
-                NODE.statements = [createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((node) => (0, amdBodyVisitor_1.topLevelVisitor)(node, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX))];
+                NODE.statements = [createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX))];
             }
             NODE.externalModuleIndicator = undefined;
         }

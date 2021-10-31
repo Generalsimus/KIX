@@ -25,20 +25,39 @@ const {
 
 
 
+const KixModulePATH = normalizeSlashes(path.join(__dirname, "../../../main/index.js"))
+export const defaultModulePaths = {
+    "kix": KixModulePATH,
+    [KixModulePATH]: "kix"
+}
+export function resolveModule(modulePath, fileDirectory) {
+    try {
+
+        return normalizeSlashes(resolve.sync(modulePath, {
+            basedir: fileDirectory,
+            extensions: ['.js', '.ts', '.jsx', '.tsx'],
+        }))
+    } catch {
+        return defaultModulePaths[modulePath]
+    }
+}
+
+
+
 
 
 // მოდულის შესახებ ინფორმაციის ქეშირება
 export const ModulesThree = new Map()
 let Module_INDEX = 0
-export const getOrSetModuleInfo = (pathKey, compilerOptions) => {
+export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
 
-    const module = ModulesThree.get(pathKey)
+    const module = ModulesThree.get(modulePath)
     const moduleInfo = module || {
         Module_INDEX: Module_INDEX++,
-        // __Module_Window_Name: defaultModulePaths[] ? compilerOptions.__Module_Window_Name : compilerOptions.__Module_Window_Name
+        __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
     }
     if (!module) {
-        ModulesThree.set(pathKey, moduleInfo)
+        ModulesThree.set(modulePath, moduleInfo)
     }
 
     return moduleInfo
@@ -82,7 +101,7 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
 
         const childModuleInfo = module || {
             Module_INDEX: Module_INDEX++,
-            __Module_Window_Name: compilerOptions.__Module_Window_Name
+            __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
         }
         if (!module) {
             ModulesThree.set(modulePath, childModuleInfo)
@@ -112,23 +131,6 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
     moduleInfo.LocalModules = LocalModules
     return ModuleColection
 }
-
-export const defaultModulePaths = {
-    "kix": normalizeSlashes(path.join(__dirname, "../../../main/node_modules/index.js"))
-}
-export function resolveModule(modulePath, fileDirectory) {
-    try {
-
-        return normalizeSlashes(resolve.sync(modulePath, {
-            basedir: fileDirectory,
-            extensions: ['.js', '.ts', '.jsx', '.tsx'],
-        }))
-    } catch {
-        return defaultModulePaths[modulePath]
-    }
-}
-
-
 
 
 

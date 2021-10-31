@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.createHost = exports.getColumnName = exports.deepAssign = void 0;
+exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const posix_1 = __importDefault(require("path/posix"));
@@ -87,11 +87,24 @@ const createHost = (__compilerOptions) => {
             // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
             return (0, typescript_1.loadWithLocalCache)(typescript_1.Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
         },
-        resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap]))
+        resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
+        // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
     });
     return Host;
 };
 exports.createHost = createHost;
+const fixLibFileLocationInCompilerOptions = (compilerOptions) => {
+    if (compilerOptions.lib) {
+        // compilerOptions.lib=[]
+        // delete compilerOptions.lib
+        console.log((0, typescript_1.normalizeSlashes)(posix_1.default.resolve(__dirname + "/../node_modules/typescript/lib/lib.es2016.d.ts")));
+    }
+    // console.log("🚀 --> file: utils.js --> line 111 --> fixLibFileLocationInCompilerOptions --> compilerOptions", compilerOptions);
+    return compilerOptions;
+};
+exports.fixLibFileLocationInCompilerOptions = fixLibFileLocationInCompilerOptions;
+// "../../../node_modules/typescript/lib"
+// import sss from 
 const parseJsonFile = (fileName) => {
     return fs_1.default.existsSync(fileName) ? (0, typescript_1.parseConfigFileTextToJson)(fileName, (0, fs_1.readFileSync)(fileName, "utf8")).config : {};
 };

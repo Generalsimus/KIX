@@ -10,7 +10,8 @@ import {
     createGetCanonicalFileName,
     createModuleResolutionCache,
     Debug,
-    loadWithLocalCache
+    loadWithLocalCache,
+    normalizeSlashes
 } from "typescript"
 import fs, {
     readFileSync,
@@ -99,14 +100,26 @@ export const createHost = (__compilerOptions) => {
                 // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
                 return loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
             },
-            resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap]))
+            resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
+            // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
         })
 
     return Host
 
 }
+export const fixLibFileLocationInCompilerOptions = (compilerOptions) => {
+    if (compilerOptions.lib) {
+        // compilerOptions.lib=[]
+        // delete compilerOptions.lib
+        console.log(normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/lib.es2016.d.ts")));
 
+    }
+    // console.log("🚀 --> file: utils.js --> line 111 --> fixLibFileLocationInCompilerOptions --> compilerOptions", compilerOptions);
+    return compilerOptions
+}
 
+// "../../../node_modules/typescript/lib"
+// import sss from 
 export const parseJsonFile = (fileName) => {
     return fs.existsSync(fileName) ? parseConfigFileTextToJson(fileName, readFileSync(fileName, "utf8")).config : {}
 }

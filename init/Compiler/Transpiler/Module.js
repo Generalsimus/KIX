@@ -75,7 +75,7 @@ export const ModuleTransformersBefore = {
                 ]), [compilerOptions.__Import_Module_Name, getColumnName(moduleInfo.Module_INDEX)]))]
 
             } else {
-                NODE.statements = [createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((node) => topLevelVisitor(node, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX)))]
+                NODE.statements = [createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => topLevelVisitor(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX))]
             }
             NODE.externalModuleIndicator = undefined
         } catch (error) {

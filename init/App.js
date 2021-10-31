@@ -20,6 +20,7 @@ import fs from "fs"
 import {
     createHost,
     deepAssign,
+    fixLibFileLocationInCompilerOptions,
     getImportModuleName,
     getModuleWindowName,
     parseJsonFile
@@ -46,7 +47,8 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         // emitDeclarationOnly:true,
         // "noUnusedLocals": true,
         // lib: [],
-        lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
+        // lib: ["es2015"],
+        // lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
         // target: ScriptTarget.ES3,
         suppressOutputPathCheck: true,
         removeComments: true,
@@ -60,7 +62,8 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     priorityCompilerOptions = {
         module: ModuleKind.AMD,
         typeRoots: [
-            __RunDirName
+            __RunDirName,
+            __dirname
         ],
         __Node_Module_Window_Name: getModuleWindowName(),
         "noImplicitAny": true,
@@ -75,13 +78,24 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     // read tsConfig.json file 
     __TsConfig = parseJsonFile(ts.findConfigFile(__RunDirName, fs.existsSync)) || {},
     /////////////////////////
-    __compilerOptions = fixupCompilerOptions(deepAssign(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics),
+    __compilerOptions = fixLibFileLocationInCompilerOptions(
+        fixupCompilerOptions(
+            deepAssign(
+                defaultCompilerOptions,
+                __TsConfig.compilerOptions,
+                __packageJson.compilerOptions,
+                priorityCompilerOptions
+            ),
+            __diagnostics
+        )
+    ),
     __Host = createHost(__compilerOptions),
     __TranspilingMeta = {},
     __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 
 
 
+console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
 
 export const App = {
     __RunDirName: __RunDirName,
