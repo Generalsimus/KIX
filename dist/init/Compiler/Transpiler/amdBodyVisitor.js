@@ -29,7 +29,7 @@ const { createUniqueName, createObjectLiteralExpression, createCallExpression, c
 const { CREATE_Export_File_Function, CREATE_Plus_Token_Nodes, CREATE_Const_Variable, CREATE_Property_Access_Expression, CREATE_Equals_Token_Nodes, CREATE_Object_Binding_Pattern, CREATE_CAll_Function, CREATE_Assign_Polyfil, CREATE_Property_Access_Equals_Token, CREATE_Object_WiTH_String_Keys, } = createFactoryCode_1.generateFactory;
 function visitor(node) { return node; }
 function topLevelVisitor(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
+    console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, typescript_1.SyntaxKind[node.kind], currentSourceFile.path);
     switch (node.kind) {
         case typescript_1.SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);

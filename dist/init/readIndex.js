@@ -11,8 +11,9 @@ const consola_1 = __importDefault(require("consola"));
 const chokidar_1 = __importDefault(require("chokidar"));
 const jsdom_1 = require("jsdom");
 const CompileFile_1 = require("./Compiler/CompileFile");
+const utils_1 = require("../Helpers/utils");
 const ReadIndexHTML = (App) => {
-    const { __requestsThreshold, __RunDirName, __ModuleUrlPath } = App;
+    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions } = App;
     const __IndexHTMLPath = path_1.default.resolve("./index.html");
     const __IndexHTMLRequesPaths = ["/", "/index.html"];
     if (!fs_1.default.existsSync(__IndexHTMLPath)) {
@@ -37,8 +38,9 @@ const ReadIndexHTML = (App) => {
                 var UrlMeta = new window.URL(ELEMENT.src, 'http://e'), FilePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(UrlMeta.pathname)));
                 return FilePath;
             });
+            const compilerOptions = (0, utils_1.fixLibFileLocationInCompilerOptions)(__compilerOptions, __Host);
             // Compiler(FilePath)
-            HTMLFilePaths.forEach(FilePath => (0, CompileFile_1.CompileFile)(FilePath, HTMLFilePaths));
+            HTMLFilePaths.forEach(FilePath => (0, CompileFile_1.CompileFile)(FilePath, HTMLFilePaths, compilerOptions));
             const INDEX_HTML_STRING = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
             __IndexHTMLRequesPaths.forEach(INDEX_PATH => __requestsThreshold.set(INDEX_PATH, INDEX_HTML_STRING));
         },

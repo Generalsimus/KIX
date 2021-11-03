@@ -3,7 +3,7 @@ import WebSocket from "ws"
 import http from "http"
 import open from "open"
 import mimeTypes from "mime-types"
-
+import { getWebSocketUrl } from "../main/getWebSocketUrl"
 
 export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { port } }) => {
 

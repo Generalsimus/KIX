@@ -3,6 +3,8 @@ import resolve from "resolve"
 import chokidar from "chokidar"
 import path from "path"
 import { getColumnName } from "../../../Helpers/utils"
+import { App } from "../../App"
+import { visited_SourceFiles } from "./Module"
 
 
 const {
@@ -64,6 +66,24 @@ export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
 }
 
 
+export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requesteCancell }, changeFileCallback }) => {
+    // .originalFileName
+
+    console.log("🚀 --> file: utils.js --> line 77 --> moduleInfo.fileWatcher=chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
+    // deleteFileinThree
+    // console.log("🚀 --> file: utils.js --> line 74 --> watchModuleFileChange --> moduleInfo", moduleInfo);
+    // console.log("🚀 --> file: utils.js --> line 73 --> chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
+
+    moduleInfo.fileWatcher = chokidar.watch(NODE.originalFileName).on('change', (event, path) => {
+        // console.log("chokidar___", event, path);
+        // console.log("🚀 --> file: Module.js --> line 61 --> moduleInfo", moduleInfo);
+
+        App.__Host.deleteFileinThree(NODE.path)
+        visited_SourceFiles.delete(NODE.originalFileName)
+        requesteCancell()
+        changeFileCallback()
+    });
+}
 
 
 
@@ -97,8 +117,8 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
         if (!modulePath) {
             return ModuleColection
         }
-        const module = ModulesThree.get(modulePath)
 
+        const module = ModulesThree.get(modulePath)
         const childModuleInfo = module || {
             Module_INDEX: Module_INDEX++,
             __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
@@ -232,7 +252,7 @@ export const createObjectPropertyLoop = (namesObject, returnValue = []) => {
 
 
 export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
-    console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
+    // console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
     if (!ModuleData) {
         return
     }
@@ -242,3 +262,11 @@ export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
         [compilerOptions.__Import_Module_Name, getColumnName(ModuleData.Module_INDEX)] :
         ["window", ModuleData.__Module_Window_Name, getColumnName(ModuleData.Module_INDEX)]
 }
+
+
+
+
+
+
+
+

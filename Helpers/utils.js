@@ -21,6 +21,7 @@ import { transpilers } from "../init/Compiler/Transpiler/Module"
 import path from "path/posix"
 import { App } from "../init/App"
 import tsModule from 'typescript/lib/tsserverlibrary';
+import { setServers } from "dns"
 
 export const deepAssign = (target, ...sources) => {
     for (const source of sources) {
@@ -46,19 +47,19 @@ export const getColumnName = (i) => {
 
 
 
-
+export let FilesThree = new Map();
 export const createHost = (__compilerOptions) => {
-    let FilesThree = new Map();
+
     const getSourceFileByExtName = (fileName, languageVersion) => {
 
-        console.log("🚀 getSourceFileByExtName ---> fileName", fileName)
+        // console.log("🚀 getSourceFileByExtName ---> fileName", fileName)
         switch (path.extname(fileName).toLocaleLowerCase()) {
             case ".ts":
             case ".tsx":
             case ".js":
             case ".jsx":
             case ".json":
-                return createSourceFile(fileName, readFileSync(fileName, "utf-8"), languageVersion, true)
+                return createSourceFile(fileName, readFileSync(fileName, "utf-8"), languageVersion, true);
             case ".scss":
             case ".css":
                 return createSourceFile(fileName, `
@@ -92,8 +93,14 @@ export const createHost = (__compilerOptions) => {
         Host = Object.assign(_HOST, {
             getSourceFile: (fileName, languageVersion) => {
                 if (existsSync(fileName)) {
-
-                    return FilesThree.get(fileName) || getSourceFileByExtName(fileName, languageVersion)
+                    // let sourceFile = FilesThree.get(fileName)
+                    // if (sourceFile) {
+                    //     return sourceFile
+                    //     // FilesThree.set(fileName,sourceFile)
+                    // }
+                    // sourceFile = getSourceFileByExtName(fileName, languageVersion)
+                    // return FilesThree.set(fileName, sourceFile), sourceFile
+                    return FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion)
                 }
             },
             resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
@@ -101,20 +108,31 @@ export const createHost = (__compilerOptions) => {
                 return loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
             },
             resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
-            // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
+            deleteFileinThree: (filesThreeLocationPath) => (FilesThree.delete(filesThreeLocationPath)),
+            // setFileinThree: (key, file) => (FilesThree.set(key, file)),
+            getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
         })
 
     return Host
 
 }
-export const fixLibFileLocationInCompilerOptions = (compilerOptions) => {
-    if (compilerOptions.lib) {
-        // compilerOptions.lib=[]
-        // delete compilerOptions.lib
-        console.log(normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/lib.es2016.d.ts")));
+export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
+    const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
+    const libDirectory = path.dirname(defaultLibFileName)
+    const newLibs = new Set([defaultLibFileName])
 
+    if (compilerOptions.lib) {
+        for (const lib of compilerOptions.lib) {
+            const libFilePath = path.join(libDirectory, `/lib.${lib.toLowerCase()}.d.ts`)
+            if (fs.existsSync(libFilePath)) {
+                newLibs.add(normalizeSlashes(libFilePath))
+            }
+        }
+    } else {
+        newLibs.add(defaultLibFileName)
     }
-    // console.log("🚀 --> file: utils.js --> line 111 --> fixLibFileLocationInCompilerOptions --> compilerOptions", compilerOptions);
+
+    compilerOptions.lib = [...newLibs]
     return compilerOptions
 }
 
@@ -142,4 +160,26 @@ export const getModuleFiles = (Module, ModuleFiles) => {
 let ModuleUnnesesaryIndex = 0;
 export const getModuleWindowName = () => {
     return `_KIX${++ModuleUnnesesaryIndex}${new Date().getTime()}`
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const createCancellationToken = () => {
+    let requesteCancell = false
+    return {
+        isCancellationRequested: () => { return requesteCancell },
+        throwIfCancellationRequested: () => { },
+        requesteCancell: () => { requesteCancell = true },
+    }
 }

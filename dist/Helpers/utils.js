@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.getColumnName = exports.deepAssign = void 0;
+exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const posix_1 = __importDefault(require("path/posix"));
@@ -47,10 +47,10 @@ const getColumnName = (i) => {
     return p + ls;
 };
 exports.getColumnName = getColumnName;
+exports.FilesThree = new Map();
 const createHost = (__compilerOptions) => {
-    let FilesThree = new Map();
     const getSourceFileByExtName = (fileName, languageVersion) => {
-        console.log("🚀 getSourceFileByExtName ---> fileName", fileName);
+        // console.log("🚀 getSourceFileByExtName ---> fileName", fileName)
         switch (posix_1.default.extname(fileName).toLocaleLowerCase()) {
             case ".ts":
             case ".tsx":
@@ -80,26 +80,44 @@ const createHost = (__compilerOptions) => {
     }, Host = Object.assign(_HOST, {
         getSourceFile: (fileName, languageVersion) => {
             if ((0, fs_1.existsSync)(fileName)) {
-                return FilesThree.get(fileName) || getSourceFileByExtName(fileName, languageVersion);
+                // let sourceFile = FilesThree.get(fileName)
+                // if (sourceFile) {
+                //     return sourceFile
+                //     // FilesThree.set(fileName,sourceFile)
+                // }
+                // sourceFile = getSourceFileByExtName(fileName, languageVersion)
+                // return FilesThree.set(fileName, sourceFile), sourceFile
+                return exports.FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion);
             }
         },
         resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
             // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
             return (0, typescript_1.loadWithLocalCache)(typescript_1.Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
         },
-        resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
-        // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
+        resetFilesThree: (newFilesMap) => (exports.FilesThree = new Map([...exports.FilesThree, ...newFilesMap])),
+        deleteFileinThree: (filesThreeLocationPath) => (exports.FilesThree.delete(filesThreeLocationPath)),
+        // setFileinThree: (key, file) => (FilesThree.set(key, file)),
+        getDefaultLibLocation: () => (0, typescript_1.normalizeSlashes)(posix_1.default.resolve(__dirname + "/../node_modules/typescript/lib/")),
     });
     return Host;
 };
 exports.createHost = createHost;
-const fixLibFileLocationInCompilerOptions = (compilerOptions) => {
+const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
+    const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
+    const libDirectory = posix_1.default.dirname(defaultLibFileName);
+    const newLibs = new Set([defaultLibFileName]);
     if (compilerOptions.lib) {
-        // compilerOptions.lib=[]
-        // delete compilerOptions.lib
-        console.log((0, typescript_1.normalizeSlashes)(posix_1.default.resolve(__dirname + "/../node_modules/typescript/lib/lib.es2016.d.ts")));
+        for (const lib of compilerOptions.lib) {
+            const libFilePath = posix_1.default.join(libDirectory, `/lib.${lib.toLowerCase()}.d.ts`);
+            if (fs_1.default.existsSync(libFilePath)) {
+                newLibs.add((0, typescript_1.normalizeSlashes)(libFilePath));
+            }
+        }
     }
-    // console.log("🚀 --> file: utils.js --> line 111 --> fixLibFileLocationInCompilerOptions --> compilerOptions", compilerOptions);
+    else {
+        newLibs.add(defaultLibFileName);
+    }
+    compilerOptions.lib = [...newLibs];
     return compilerOptions;
 };
 exports.fixLibFileLocationInCompilerOptions = fixLibFileLocationInCompilerOptions;
@@ -125,4 +143,13 @@ const getModuleWindowName = () => {
     return `_KIX${++ModuleUnnesesaryIndex}${new Date().getTime()}`;
 };
 exports.getModuleWindowName = getModuleWindowName;
+const createCancellationToken = () => {
+    let requesteCancell = false;
+    return {
+        isCancellationRequested: () => { return requesteCancell; },
+        throwIfCancellationRequested: () => { },
+        requesteCancell: () => { requesteCancell = true; },
+    };
+};
+exports.createCancellationToken = createCancellationToken;
 //# sourceMappingURL=utils.js.map

@@ -52,7 +52,10 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     allowJs: true,
     allowSyntheticDefaultImports: true,
     resolveJsonModule: true,
-    moduleResolution: typescript_1.ModuleResolutionKind.NodeJs
+    moduleResolution: typescript_1.ModuleResolutionKind.NodeJs,
+    ///////////////////////
+    forceConsistentCasingInFileNames: true,
+    watch: true,
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
     typeRoots: [
@@ -70,9 +73,9 @@ __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFil
 /////////////////////////
 // read tsConfig.json file 
 __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
-/////////////////////////
-__compilerOptions = (0, utils_js_1.fixLibFileLocationInCompilerOptions)((0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics)), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
-console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
+/////////////////////////host.getDefaultLibFileName(options);
+__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+// console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
 exports.App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,

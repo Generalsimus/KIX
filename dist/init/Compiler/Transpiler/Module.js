@@ -18,14 +18,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = void 0;
+exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = exports.visited_SourceFiles = void 0;
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("./createFactoryCode");
-const chokidar_1 = __importDefault(require("chokidar"));
 const utils_1 = require("../../../Helpers/utils");
 const utils_2 = require("./utils");
 const amdBodyVisitor_1 = require("./amdBodyVisitor");
@@ -38,35 +34,51 @@ const { CREATE_Export_File_Function, CREATE_Plus_Token_Nodes, CREATE_Const_Varia
 // let STATEMENTS = []
 // let stateNode = CREATE_Call_Function(STATEMENTS)
 // let UNICNAME = ts.createUniqueName('AAA')
+// let incremm = 0
+exports.visited_SourceFiles = new Map();
 exports.ModuleTransformersBefore = {
     [typescript_1.SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
-        if (NODE.before_visited)
-            return NODE;
+        // console.log("🚀 --> file: Module.js --> line 58 --> CTX", CTX);
+        // if (NODE.before_visited) return NODE
+        const visited_NODE = exports.visited_SourceFiles.get(NODE.originalFileName);
+        // const visited_NODE = FilesThree.get(NODE.path)
+        if (visited_NODE) {
+            return visited_NODE;
+        }
+        // console.log("🚀 --> file: Module.js --> line 65 --> NODE.originalFileName", visited_SourceFiles.keys(), NODE.originalFileName, ++incremm);
+        // console.log("🚀 --> file: Module.js --> line 60 --> NODE.before_visited", NODE.before_visited);
         const compilerOptions = CTX.getCompilerOptions();
         const moduleInfo = (0, utils_2.getOrSetModuleInfo)(NODE.originalFileName, compilerOptions);
-        if (!moduleInfo.isNodeModule) {
-            chokidar_1.default.watch(NODE.originalFileName).on('change', (event, path) => {
-                console.log("chokidar___", event, path);
-            });
-        }
         CTX.ModuleColection = (0, utils_2.configModules)(NODE, moduleInfo, compilerOptions);
+        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher) {
+            (0, utils_2.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
+        }
         try {
             if (typescript_1.default.isJsonSourceFile(NODE)) {
+                NODE = typescript_1.default.updateSourceFileNode(NODE, [createExpressionStatement(CREATE_Property_Access_Equals_Token(CREATE_Object_WiTH_String_Keys([
+                        [createIdentifier("default"), ...NODE.statements]
+                    ]), [compilerOptions.__Import_Module_Name, (0, utils_1.getColumnName)(moduleInfo.Module_INDEX)]))]);
                 NODE.scriptKind = typescript_1.ScriptKind.Unknown;
-                NODE.statements = [createExpressionStatement(CREATE_Property_Access_Equals_Token(CREATE_Object_WiTH_String_Keys([
-                        [createIdentifier("default"), NODE.statements[0].expression]
-                    ]), [compilerOptions.__Import_Module_Name, (0, utils_1.getColumnName)(moduleInfo.Module_INDEX)]))];
             }
             else {
-                NODE.statements = [createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX))];
+                console.log("🚀 --> file: Module.js --> line 63 --> NODE.originalFileName", [NODE.originalFileName]);
+                NODE = typescript_1.default.updateSourceFileNode(NODE, [
+                    createExpressionStatement(CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX))
+                ]);
             }
             NODE.externalModuleIndicator = undefined;
         }
         catch (error) {
             console.log(error);
         }
-        NODE.before_visited = true;
-        return (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
+        NODE = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
+        // NODE.before_visited = true;
+        exports.visited_SourceFiles.set(NODE.originalFileName, NODE);
+        // setFileinThree.set(NODE.originalFileName, NODE)
+        // App.__Host.setFileinThree(NODE.originalFileName.toLowerCase(), NODE)
+        // .set(NODE.originalFileName)
+        // FilesThree.set(NODE.path, NODE)
+        return NODE;
     }
 };
 exports.ModuleTransformersAfter = {

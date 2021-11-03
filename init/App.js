@@ -57,7 +57,10 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         allowJs: true,
         allowSyntheticDefaultImports: true,
         resolveJsonModule: true,
-        moduleResolution: ModuleResolutionKind.NodeJs
+        moduleResolution: ModuleResolutionKind.NodeJs,
+        ///////////////////////
+        forceConsistentCasingInFileNames: true,
+        watch: true,
     },
     priorityCompilerOptions = {
         module: ModuleKind.AMD,
@@ -77,17 +80,15 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     /////////////////////////
     // read tsConfig.json file 
     __TsConfig = parseJsonFile(ts.findConfigFile(__RunDirName, fs.existsSync)) || {},
-    /////////////////////////
-    __compilerOptions = fixLibFileLocationInCompilerOptions(
-        fixupCompilerOptions(
-            deepAssign(
-                defaultCompilerOptions,
-                __TsConfig.compilerOptions,
-                __packageJson.compilerOptions,
-                priorityCompilerOptions
-            ),
-            __diagnostics
-        )
+    /////////////////////////host.getDefaultLibFileName(options);
+    __compilerOptions = fixupCompilerOptions(
+        deepAssign(
+            defaultCompilerOptions,
+            __TsConfig.compilerOptions,
+            __packageJson.compilerOptions,
+            priorityCompilerOptions
+        ),
+        __diagnostics
     ),
     __Host = createHost(__compilerOptions),
     __TranspilingMeta = {},
@@ -95,7 +96,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
 
 
 
-console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
+// console.log("🚀 --> file: App.js --> line 81 --> __compilerOptions", __compilerOptions);
 
 export const App = {
     __RunDirName: __RunDirName,

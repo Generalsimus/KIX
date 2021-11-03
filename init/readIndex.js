@@ -7,12 +7,12 @@ import path from "path"
 import fs from "fs"
 import consola from "consola"
 import chokidar from "chokidar"
-import { JSDOM } from "jsdom"
-import { Compiler } from "./Compiler/index"
+import { JSDOM } from "jsdom" 
 import { CompileFile } from "./Compiler/CompileFile"
+import { fixLibFileLocationInCompilerOptions } from "../Helpers/utils"
 
 export const ReadIndexHTML = (App) => {
-    const { __requestsThreshold, __RunDirName, __ModuleUrlPath } = App
+    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions } = App
     const __IndexHTMLPath = path.resolve("./index.html")
     const __IndexHTMLRequesPaths = ["/", "/index.html"]
 
@@ -50,8 +50,9 @@ export const ReadIndexHTML = (App) => {
                 return FilePath
 
             });
+            const compilerOptions = fixLibFileLocationInCompilerOptions(__compilerOptions, __Host)
             // Compiler(FilePath)
-            HTMLFilePaths.forEach(FilePath => CompileFile(FilePath, HTMLFilePaths));
+            HTMLFilePaths.forEach(FilePath => CompileFile(FilePath, HTMLFilePaths, compilerOptions));
 
             const INDEX_HTML_STRING = "<!DOCTYPE html> \n" + document.documentElement.outerHTML
             __IndexHTMLRequesPaths.forEach(INDEX_PATH => __requestsThreshold.set(INDEX_PATH, INDEX_HTML_STRING))

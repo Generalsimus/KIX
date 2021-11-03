@@ -27,7 +27,7 @@ const {
 function visitor(node) { return node }
 
 export function topLevelVisitor(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
+    console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind], currentSourceFile.path);
     switch (node.kind) {
         case SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);
@@ -104,7 +104,7 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
 
     return constVariablesNameValue.length ? CREATE_Const_Variable(constVariablesNameValue) : []
 
-} 
+}
 
 function visitExportDeclaration(node, CTX, newNodes = []) {
     const compilerOptions = CTX.getCompilerOptions()

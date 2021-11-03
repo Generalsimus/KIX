@@ -3,11 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTransformersObject = exports.configModules = exports.getOrSetModuleInfo = exports.ModulesThree = exports.resolveModule = exports.defaultModulePaths = void 0;
+exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTransformersObject = exports.configModules = exports.watchModuleFileChange = exports.getOrSetModuleInfo = exports.ModulesThree = exports.resolveModule = exports.defaultModulePaths = void 0;
 const typescript_1 = require("typescript");
 const resolve_1 = __importDefault(require("resolve"));
+const chokidar_1 = __importDefault(require("chokidar"));
 const path_1 = __importDefault(require("path"));
 const utils_1 = require("../../../Helpers/utils");
+const App_1 = require("../../App");
+const Module_1 = require("./Module");
 const { createToken, createBinaryExpression, createVariableStatement, createVariableDeclarationList, createVariableDeclaration, createBlock, createIdentifier, createPropertyAccessExpression, createObjectLiteralExpression, createParameterDeclaration, createParenthesizedExpression, createArrowFunction, createCallExpression, createObjectBindingPattern, createBindingElement } = typescript_1.factory;
 const KixModulePATH = (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../../main/index.js"));
 exports.defaultModulePaths = {
@@ -41,6 +44,22 @@ const getOrSetModuleInfo = (modulePath, compilerOptions) => {
     return moduleInfo;
 };
 exports.getOrSetModuleInfo = getOrSetModuleInfo;
+const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requesteCancell }, changeFileCallback }) => {
+    // .originalFileName
+    console.log("🚀 --> file: utils.js --> line 77 --> moduleInfo.fileWatcher=chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
+    // deleteFileinThree
+    // console.log("🚀 --> file: utils.js --> line 74 --> watchModuleFileChange --> moduleInfo", moduleInfo);
+    // console.log("🚀 --> file: utils.js --> line 73 --> chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
+    moduleInfo.fileWatcher = chokidar_1.default.watch(NODE.originalFileName).on('change', (event, path) => {
+        // console.log("chokidar___", event, path);
+        // console.log("🚀 --> file: Module.js --> line 61 --> moduleInfo", moduleInfo);
+        App_1.App.__Host.deleteFileinThree(NODE.path);
+        Module_1.visited_SourceFiles.delete(NODE.originalFileName);
+        requesteCancell();
+        changeFileCallback();
+    });
+};
+exports.watchModuleFileChange = watchModuleFileChange;
 const configModules = (NODE, moduleInfo, compilerOptions) => {
     const fileDirectory = (0, typescript_1.getDirectoryPath)(NODE.originalFileName);
     const oldNodeModules = moduleInfo.NodeModules || {};
@@ -131,7 +150,7 @@ const createObjectPropertyLoop = (namesObject, returnValue = []) => {
 };
 exports.createObjectPropertyLoop = createObjectPropertyLoop;
 const geModuleLocationMeta = (ModuleData, compilerOptions) => {
-    console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
+    // console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
     if (!ModuleData) {
         return;
     }

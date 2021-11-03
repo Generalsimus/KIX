@@ -2,20 +2,27 @@ import { readSourceFiles } from "./readSourceFiles"
 import { App } from "../App"
 import ts, { createProgram, getDirectoryPath, getBaseFileName, normalizeSlashes } from "typescript"
 import chokidar from "chokidar"
-import path from "path/posix"
-import { getImportModuleName, getModuleFiles, getModuleWindowName } from "../../Helpers/utils"
+import path from "path"
+import { createCancellationToken, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../Helpers/utils"
 import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/Module"
 import resolve from 'resolve'
 import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
 import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
+import fs from "fs"
 
 
-const { __compilerOptions, __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
+
+const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
 const { resetFilesThree } = __Host
 
 
-export const CompileFile = (FilePath, HTMLFilePaths) => {
+
+
+
+
+let increm = 0;
+export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
     let oldProgram;
     const outFile = path.relative(__RunDirName, FilePath),
@@ -23,34 +30,13 @@ export const CompileFile = (FilePath, HTMLFilePaths) => {
         __Module_Window_Name = getModuleWindowName(),
         REQUEST_PATH = ("./" + outFile).replace(/(^[\.\.\/]+)|(\/+)/g, "/"),
         MAP_REQUEST_PATH = REQUEST_PATH + ".map",
-        compilerOptions = {
-            ...__compilerOptions,
-            inlineSources: true,
-            outFile,
-            __Module_Window_Name,
-            rootDir: __RunDirName,
-            __Import_Module_Name,
-            resetModuleFiles: () => {
-                resetModules = true
-            },
-            __Url_Dir_Path: path.dirname(REQUEST_PATH)
-        },
-        transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
-        compilableFilePaths = [FilePath],
-        defaultModules = [resolveModule("kix", __RunDirName)],
-        writeFileCallback = (fileName, content) => {
-            console.log({ fileName, REQUEST_PATH })
-
-            const ext = path.extname(fileName)
-            if (ext === ".map") {
-                __requestsThreshold.set(MAP_REQUEST_PATH, content)
-            } else if (ext === ".js") {
-                const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
-                __requestsThreshold.set(REQUEST_PATH, Module_Text)
-                console.log(Module_Text)
-            }
-        },
         changeFileCallback = () => {
+
+            // console.clear()
+            console.log("🚀 --> file: utils.js --> line 69 --> increm", ++increm);
+
+            compilerOptions.cancellationToken = createCancellationToken()
+
             oldProgram = createProgram(
                 compilableFilePaths,
                 compilerOptions,
@@ -77,11 +63,44 @@ export const CompileFile = (FilePath, HTMLFilePaths) => {
 
             }
             // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram);
-            console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram.getGlobalDiagnostics());
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram.getGlobalDiagnostics());
 
             resetFilesThree(oldProgram.getFilesByNameMap())
-        }
+        },
+        compilerOptions = {
+            ...__compilerOptions,
+            inlineSources: true,
+            watch: true,
+            outFile,
+            __Module_Window_Name,
+            rootDir: __RunDirName,
+            __Import_Module_Name,
+            changeFileCallback,
+            resetModuleFiles: () => {
+                resetModules = true
+            },
+            __Url_Dir_Path: path.dirname(REQUEST_PATH)
+        },
+        transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
+        compilableFilePaths = [FilePath],
+        defaultModules = [
+            // resolveModule("kix", __RunDirName),
+            normalizeSlashes(path.join(__dirname, "./../../main/controler.js"))
+        ],
+        writeFileCallback = (fileName, content) => {
+            // console.log({ fileName, REQUEST_PATH })
 
+            const ext = path.extname(fileName)
+            if (ext === ".map") {
+                __requestsThreshold.set(MAP_REQUEST_PATH, content)
+            } else if (ext === ".js") {
+                const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
+                __requestsThreshold.set(REQUEST_PATH, Module_Text)
+                console.log(Module_Text)
+            }
+        };
+    console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
+    // console.log("🚀 --> file: CompileFile.js --> line 97 --> CompileFile --> __dirname", __dirname);
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host );
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host.getDefaultLibLocation(compilerOptions));
     changeFileCallback()
@@ -137,7 +156,8 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
         {
             ...compilerOptions,
             outFile: __ModuleUrlPath,
-            removeComments: true,
+            removeComments: false,
+            lib: undefined,
             sourceMap: false,
             __Module_Window_Name,
             resetModuleFiles: () => { },
@@ -170,6 +190,10 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
 
             if (path.extname(fileName) == ".js") {
                 __requestsThreshold.set(
+                    __ModuleUrlPath,
+                    `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
+                )
+                console.log(
                     __ModuleUrlPath,
                     `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
                 )

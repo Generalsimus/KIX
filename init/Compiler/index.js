@@ -6,17 +6,17 @@ import { CompileFile } from "./CompileFile"
 
 
 
-export const Compiler = (FilePath) => {
+// export const Compiler = (FilePath) => {
 
-    CompileFile(FilePath)
-
-
+//     CompileFile(FilePath)
 
 
 
-    return {
-        watch: () => {
 
-        }
-    }
-}
+
+//     return {
+//         watch: () => {
+
+//         }
+//     }
+// }
