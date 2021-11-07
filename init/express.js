@@ -3,18 +3,17 @@ import WebSocket from "ws"
 import http from "http"
 import open from "open"
 import mimeTypes from "mime-types"
-import { getWebSocketUrl } from "../main/getWebSocketUrl"
+import { webSocketUrl } from "../main/codeController/webSocket/webSocketUrl"
 
 export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { port } }) => {
 
     const app = express();
     const server = http.createServer(app);
-    const WebSocketServer = new WebSocket.Server({ server, path: `/${Date.now()}/AppControler` });
+    const WebSocketServer = new WebSocket.Server({ server, path: webSocketUrl });
 
 
-    // WebSocket
+
     app.use(function (req, res, next) {
-        // ._parsedUrl.pathname
         res.header("Cache-Control", "no-cache");
 
         if (__requestsThreshold.has(req.path)) {
@@ -36,10 +35,17 @@ export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOption
 
         // console.log('\x1b[32m%s\x1b[0m',);
     });
-    // console.log("🚀 ---> file: express.js ---> line 26 ---> listener ---> listener", listener)
 
     return {
         WebSocketServer,
+        socketClientSender: (action = "RESTART_SERVER", data = {}) => {
+            WebSocketServer.clients.forEach(ws => {
+                if (ws.readyState === 1) {
+                    ws.send(JSON.stringify({ action, data }))
+                }
+            })
+
+        },
         listener
     }
 }

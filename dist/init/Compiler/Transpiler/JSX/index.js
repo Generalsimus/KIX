@@ -23,4 +23,3 @@ exports.JSXTransformersBefore = {
     [typescript_1.SyntaxKind.PropertyAccessExpression]: utils_1.PropertyAccessExpressionOrElementAccessExpression,
     [typescript_1.SyntaxKind.ElementAccessExpression]: utils_1.PropertyAccessExpressionOrElementAccessExpression
 };
-//# sourceMappingURL=index.js.map

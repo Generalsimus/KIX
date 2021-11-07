@@ -11,23 +11,10 @@ const {
     createCallExpression,
     createIdentifier
 } = factory
-const {
-    CREATE_Export_File_Function,
-    CREATE_Plus_Token_Nodes,
-    CREATE_Const_Variable,
-    CREATE_Property_Access_Expression,
-    CREATE_Equals_Token_Nodes,
-    CREATE_Object_Binding_Pattern,
-    CREATE_CAll_Function,
-    CREATE_Assign_Polyfil,
-    CREATE_Property_Access_Equals_Token,
-    CREATE_Object_WiTH_String_Keys,
-} = generateFactory
-
-function visitor(node) { return node }
+  
 
 export function topLevelVisitor(node, currentSourceFile, CTX) {
-    console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind], currentSourceFile.path);
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind], currentSourceFile.path);
     switch (node.kind) {
         case SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);
@@ -67,13 +54,15 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
     var importAliasName = ts.getLocalNameForExternalImport(factory, node, currentSourceFile);
 
     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 71 --> vi-sitImportDeclaration --> ModuleData", ModuleData);
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 70 --> visitImportDeclaration --> ModuleData", ModuleData);
 
     // ModuleData.push(element.propertyName || element.name)
     constVariablesNameValue.push([
-        // factory.getGeneratedNameForNode(element.name),
         importAliasName,
-        CREATE_Property_Access_Expression(ModuleData)
+        ModuleData ? generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
     ])
+    // createObjectLiteralExpression([], false)
     // if (ts.isDefaultImport(node)) {
     //     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
     //     if (ModuleData) {
@@ -81,7 +70,7 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
 
     //         constVariablesNameValue.push([
     //             importAliasName,
-    //             CREATE_Property_Access_Expression(ModuleData)
+    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
     //         ])
     //     }
 
@@ -96,13 +85,13 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
     //         constVariablesNameValue.push([
     //             // factory.getGeneratedNameForNode(element.name),
     //             importAliasName,
-    //             CREATE_Property_Access_Expression(ModuleData)
+    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
     //         ])
 
     //     }
     // }
 
-    return constVariablesNameValue.length ? CREATE_Const_Variable(constVariablesNameValue) : []
+    return constVariablesNameValue.length ? generateFactory.CREATE_Const_Variable(constVariablesNameValue) : []
 
 }
 
@@ -116,15 +105,15 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
     //     return undefined;
     // }
 
-    var generatedName = factory.getGeneratedNameForNode(node);
+
     // console.log("🚀 --> file: amdBodyVisitor.js --> line 56 --> visitExportDeclaration --> generatedName", generatedName);
     // specifier.propertyName || specifier.name
     if (node.exportClause && ts.isNamedExports(node.exportClause)) {
         for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
             var specifier = _a[_i];
 
-            newNodes.push(CREATE_Equals_Token_Nodes([
-                CREATE_Property_Access_Expression(["exports", specifier.name]),
+            newNodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+                generateFactory.CREATE_Property_Access_Expression(["exports", specifier.name]),
                 specifier.propertyName || specifier.name
             ]))
 
@@ -136,11 +125,11 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         // if (typeof Module_INDEX !== "number") {
         //     return newNodes
         // }
-        newNodes.push(CREATE_Equals_Token_Nodes([
-            CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
+        newNodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+            generateFactory.CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             (
                 (ModuleData) ?
-                    CREATE_Property_Access_Expression(ModuleData) :
+                generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                     createIdentifier("undefined")
             )
         ]))
@@ -158,7 +147,7 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
                 createIdentifier("exports"),
                 (
                     (ModuleData) ?
-                        CREATE_Property_Access_Expression(ModuleData) :
+                    generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                         createObjectLiteralExpression([], false)
                 )
             ]
@@ -171,8 +160,8 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
 
 
 function visitExportAssignment(node) {
-    return [CREATE_Equals_Token_Nodes([
-        CREATE_Property_Access_Expression(["exports", "default"]),
+    return [generateFactory.CREATE_Equals_Token_Nodes([
+        generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
         node.expression
     ])]
 }
@@ -187,9 +176,10 @@ function appendExportsOfBindingElement(decl, nodes) {
         }
     }
     else if (!ts.isGeneratedIdentifier(decl.name)) {
-        nodes.push(CREATE_Equals_Token_Nodes([
-            CREATE_Property_Access_Expression(["exports", decl.name]),
-            decl.name
+
+        nodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+            generateFactory.CREATE_Property_Access_Expression(["exports", decl.name]),
+            ts.createIdentifier(ts.idText(decl.name))
         ]))
     }
 }

@@ -38,7 +38,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             compilerOptions.cancellationToken = createCancellationToken()
 
             oldProgram = createProgram(
-                compilableFilePaths,
+                compilerOptions.rootNames,
                 compilerOptions,
                 __Host,
                 oldProgram
@@ -74,6 +74,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             outFile,
             __Module_Window_Name,
             rootDir: __RunDirName,
+            rootNames: [FilePath],
             __Import_Module_Name,
             changeFileCallback,
             resetModuleFiles: () => {
@@ -82,10 +83,9 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             __Url_Dir_Path: path.dirname(REQUEST_PATH)
         },
         transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
-        compilableFilePaths = [FilePath],
         defaultModules = [
-            // resolveModule("kix", __RunDirName),
-            normalizeSlashes(path.join(__dirname, "./../../main/controler.js"))
+            resolveModule("kix", __RunDirName),
+            normalizeSlashes(path.join(__dirname, "./../../../main/codeController/index.js"))
         ],
         writeFileCallback = (fileName, content) => {
             // console.log({ fileName, REQUEST_PATH })
@@ -99,7 +99,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
                 console.log(Module_Text)
             }
         };
-    console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
+    // console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
     // console.log("🚀 --> file: CompileFile.js --> line 97 --> CompileFile --> __dirname", __dirname);
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host );
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host.getDefaultLibLocation(compilerOptions));
@@ -149,35 +149,40 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
         __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
 
 
-
+    compilerOptions = {
+        ...compilerOptions,
+        outFile: __ModuleUrlPath,
+        removeComments: false,
+        lib: undefined,
+        sourceMap: false,
+        rootNames: NodeModuelsPaths,
+        __Import_Module_Name: __Module_Window_Name,
+        __Module_Window_Name,
+        resetModuleFiles: () => { },
+    }
 
 
     Node_oldProgram = createProgram(NodeModuelsPaths,
-        {
-            ...compilerOptions,
-            outFile: __ModuleUrlPath,
-            removeComments: false,
-            lib: undefined,
-            sourceMap: false,
-            __Module_Window_Name,
-            resetModuleFiles: () => { },
-        },
+        compilerOptions,
         {
             ...__Host,
             resolveModuleNames: (moduleNames, containingFile, reusedNames, redirectedReference) => {
-                // console.log(containingFile)
+                // 
                 return moduleNames.map((ModuleText) => {
-                    const modulePath = resolve.sync(ModuleText, {
-                        basedir: path.dirname(containingFile),
-                        extensions: ['.js', '.ts'],
-                    })
-                    // console.log(modulePath)
-                    return {
-                        resolvedFileName: modulePath,
-                        originalPath: undefined,
-                        extension: path.extname(modulePath),
-                        isExternalLibraryImport: false,
-                        packageId: undefined
+                    try {
+                        const modulePath = resolve.sync(ModuleText, {
+                            basedir: path.dirname(containingFile),
+                            extensions: ['.js', '.ts'],
+                        })
+                        return {
+                            resolvedFileName: normalizeSlashes(modulePath),
+                            originalPath: undefined,
+                            extension: path.extname(modulePath),
+                            isExternalLibraryImport: false,
+                            packageId: undefined
+                        }
+                    } catch (e) {
+                        return undefined
                     }
                 })
             }
@@ -193,10 +198,10 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
                     __ModuleUrlPath,
                     `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
                 )
-                console.log(
-                    __ModuleUrlPath,
-                    `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
-                )
+                // console.log(
+                //     __ModuleUrlPath,
+                //     `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
+                // )
             }
 
         }

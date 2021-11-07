@@ -23,7 +23,13 @@ exports.visitFunctionDeclarationForJsxRegistrator = exports.PropertyAccessExpres
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("../createFactoryCode");
 const { createStringLiteral, createIdentifier, createArrayLiteralExpression, createUniqueName } = typescript_1.factory;
-const { CREATE_Object_WiTH_String_Keys, CREATE_Spread_Assignment, CREATE_CAll_Function, CREATE_Prop_Registrator_For_Attribute, CREATE_Prop_Registrator_For_Child } = createFactoryCode_1.generateFactory;
+// const {
+// generateFactory.CREATE_Object_WiTH_String_Keys,
+// generateFactory.CREATE_Spread_Assignment,
+// generateFactory.CREATE_CAll_Function,
+// generateFactory.CREATE_Prop_Registrator_For_Attribute,
+// generateFactory.CREATE_Prop_Registrator_For_Child
+// } = generateFactory
 const useJsxPropRegistrator = (visitor, CTX, NODE, getRegistratorBody) => {
     // იქმნება jsx ში მოთავსებული პროპების რეგისტრატორი
     const OldRegistrator = CTX.getJSXPropertyRegistrator;
@@ -53,7 +59,7 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             }
         }
         else {
-            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, CREATE_Prop_Registrator_For_Child));
+            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Child));
         }
         return newChildren;
     }, []);
@@ -85,7 +91,7 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             EventExist = initializer;
         }
         else {
-            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, CREATE_Prop_Registrator_For_Attribute)]);
+            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Attribute)]);
         }
     }
     /////////////////////////
@@ -96,14 +102,14 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             Array.prototype.push.apply(EventsKeys, EventExist.properties);
         }
         else if (EventsKeys.length) {
-            EventsKeys.push(CREATE_Spread_Assignment(EventExist));
+            EventsKeys.push(createFactoryCode_1.generateFactory.CREATE_Spread_Assignment(EventExist));
         }
     }
     if (EventsKeys.length) {
-        newPropertys.push([createIdentifier("e"), CREATE_Object_WiTH_String_Keys(EventsKeys)]);
+        newPropertys.push([createIdentifier("e"), createFactoryCode_1.generateFactory.CREATE_Object_WiTH_String_Keys(EventsKeys)]);
     }
     ///////////////////////
-    return CREATE_Object_WiTH_String_Keys(newPropertys);
+    return createFactoryCode_1.generateFactory.CREATE_Object_WiTH_String_Keys(newPropertys);
 };
 exports.ConvertJsxToObject = ConvertJsxToObject;
 const getInitializer = (initializer) => {
@@ -130,7 +136,7 @@ const getExpressionNames = ({ expression, argumentExpression, name }, expression
 };
 const PropertyAccessExpressionOrElementAccessExpression = (NODE, visitor, CTX) => {
     if (CTX.getJSXPropertyRegistrator) {
-        return visitor(CREATE_CAll_Function(CTX.getJSXPropertyRegistrator(), getExpressionNames(NODE)));
+        return visitor(createFactoryCode_1.generateFactory.CREATE_CAll_Function(CTX.getJSXPropertyRegistrator(), getExpressionNames(NODE)));
     }
     return (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
 };
@@ -143,4 +149,3 @@ const visitFunctionDeclarationForJsxRegistrator = (NODE, visitor, CTX) => {
     return newNode;
 };
 exports.visitFunctionDeclarationForJsxRegistrator = visitFunctionDeclarationForJsxRegistrator;
-//# sourceMappingURL=utils.js.map

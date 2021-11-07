@@ -27,7 +27,7 @@ const {
 
 
 
-const KixModulePATH = normalizeSlashes(path.join(__dirname, "../../../main/index.js"))
+const KixModulePATH = normalizeSlashes(path.join(__dirname, "../../../../main/index.js"))
 export const defaultModulePaths = {
     "kix": KixModulePATH,
     [KixModulePATH]: "kix"
@@ -54,6 +54,7 @@ let Module_INDEX = 0
 export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
 
     const module = ModulesThree.get(modulePath)
+
     const moduleInfo = module || {
         Module_INDEX: Module_INDEX++,
         __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
@@ -62,6 +63,7 @@ export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
         ModulesThree.set(modulePath, moduleInfo)
     }
 
+    // console.log("🚀 --> file: utils.js --> line 122 --> ModuleColection --> ModulesThree", ModulesThree.keys());
     return moduleInfo
 }
 
@@ -69,7 +71,7 @@ export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
 export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requesteCancell }, changeFileCallback }) => {
     // .originalFileName
 
-    console.log("🚀 --> file: utils.js --> line 77 --> moduleInfo.fileWatcher=chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
+    // console.log("🚀 --> file: utils.js --> line 77 --> moduleInfo.fileWatcher=chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
     // deleteFileinThree
     // console.log("🚀 --> file: utils.js --> line 74 --> watchModuleFileChange --> moduleInfo", moduleInfo);
     // console.log("🚀 --> file: utils.js --> line 73 --> chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
@@ -82,6 +84,7 @@ export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { r
         visited_SourceFiles.delete(NODE.originalFileName)
         requesteCancell()
         changeFileCallback()
+        App.server.socketClientSender()
     });
 }
 
@@ -119,6 +122,7 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
         }
 
         const module = ModulesThree.get(modulePath)
+
         const childModuleInfo = module || {
             Module_INDEX: Module_INDEX++,
             __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
@@ -126,6 +130,7 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
         if (!module) {
             ModulesThree.set(modulePath, childModuleInfo)
         }
+        // console.log("🚀 --> file: utils.js --> line 122 --> ModuleColection --> ModulesThree", ModulesThree.keys());
 
 
         const ModuleKindName = SyntaxKind[parent?.expression?.kind]
@@ -146,6 +151,8 @@ export const configModules = (NODE, moduleInfo, compilerOptions) => {
         ModuleColection[text] = childModuleInfo
         return ModuleColection
     }, {})
+
+
     moduleInfo.ModuleColection = ModuleColection
     moduleInfo.NodeModules = NodeModules
     moduleInfo.LocalModules = LocalModules
@@ -257,10 +264,10 @@ export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
         return
     }
 
-
+    const propNode = factory.createNumericLiteral(ModuleData.Module_INDEX) 
     return ModuleData.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
-        [compilerOptions.__Import_Module_Name, getColumnName(ModuleData.Module_INDEX)] :
-        ["window", ModuleData.__Module_Window_Name, getColumnName(ModuleData.Module_INDEX)]
+        [compilerOptions.__Import_Module_Name, propNode] :
+        ["window", factory.createStringLiteral(ModuleData.__Module_Window_Name), propNode]
 }
 
 

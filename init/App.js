@@ -120,7 +120,8 @@ export const App = {
             const {
                 ReadIndexHTML
             } = require("./readIndex")
-            const server = initServer(this)
+
+            this.server = initServer(this)
             const indexHTMLReader = ReadIndexHTML(this)
 
             indexHTMLReader.readJsDomHTML()

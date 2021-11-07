@@ -23,7 +23,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         // console.clear()
         console.log("🚀 --> file: utils.js --> line 69 --> increm", ++increm);
         compilerOptions.cancellationToken = (0, utils_1.createCancellationToken)();
-        oldProgram = (0, typescript_1.createProgram)(compilableFilePaths, compilerOptions, __Host, oldProgram);
+        oldProgram = (0, typescript_1.createProgram)(compilerOptions.rootNames, compilerOptions, __Host, oldProgram);
         oldProgram.emit(undefined /*sourceFile*/, writeFileCallback /*writeFileCallback*/, undefined /*cancellationToken*/, undefined /*emitOnlyDtsFiles*/, transformers /*transformers*/);
         if (resetModules) {
             const Modules = new Set(defaultModules);
@@ -43,15 +43,16 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         outFile,
         __Module_Window_Name,
         rootDir: __RunDirName,
+        rootNames: [FilePath],
         __Import_Module_Name,
         changeFileCallback,
         resetModuleFiles: () => {
             resetModules = true;
         },
         __Url_Dir_Path: path_1.default.dirname(REQUEST_PATH)
-    }, transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, index_1.JSXTransformersBefore], [Module_1.ModuleTransformersAfter]), compilableFilePaths = [FilePath], defaultModules = [
-        // resolveModule("kix", __RunDirName),
-        (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "./../../main/controler.js"))
+    }, transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, index_1.JSXTransformersBefore], [Module_1.ModuleTransformersAfter]), defaultModules = [
+        (0, utils_2.resolveModule)("kix", __RunDirName),
+        (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "./../../../main/codeController/index.js"))
     ], writeFileCallback = (fileName, content) => {
         // console.log({ fileName, REQUEST_PATH })
         const ext = path_1.default.extname(fileName);
@@ -64,7 +65,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             console.log(Module_Text);
         }
     };
-    console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
+    // console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
     // console.log("🚀 --> file: CompileFile.js --> line 97 --> CompileFile --> __dirname", __dirname);
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host );
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host.getDefaultLibLocation(compilerOptions));
@@ -74,41 +75,50 @@ exports.CompileFile = CompileFile;
 const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
     let Node_oldProgram;
     const transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, NodeModules_1.NodeModuleTransformersBefore], [Module_1.ModuleTransformersAfter]), __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
-    Node_oldProgram = (0, typescript_1.createProgram)(NodeModuelsPaths, {
+    compilerOptions = {
         ...compilerOptions,
         outFile: __ModuleUrlPath,
         removeComments: false,
         lib: undefined,
         sourceMap: false,
+        rootNames: NodeModuelsPaths,
+        __Import_Module_Name: __Module_Window_Name,
         __Module_Window_Name,
         resetModuleFiles: () => { },
-    }, {
+    };
+    Node_oldProgram = (0, typescript_1.createProgram)(NodeModuelsPaths, compilerOptions, {
         ...__Host,
         resolveModuleNames: (moduleNames, containingFile, reusedNames, redirectedReference) => {
-            // console.log(containingFile)
+            // 
             return moduleNames.map((ModuleText) => {
-                const modulePath = resolve_1.default.sync(ModuleText, {
-                    basedir: path_1.default.dirname(containingFile),
-                    extensions: ['.js', '.ts'],
-                });
-                // console.log(modulePath)
-                return {
-                    resolvedFileName: modulePath,
-                    originalPath: undefined,
-                    extension: path_1.default.extname(modulePath),
-                    isExternalLibraryImport: false,
-                    packageId: undefined
-                };
+                try {
+                    const modulePath = resolve_1.default.sync(ModuleText, {
+                        basedir: path_1.default.dirname(containingFile),
+                        extensions: ['.js', '.ts'],
+                    });
+                    return {
+                        resolvedFileName: (0, typescript_1.normalizeSlashes)(modulePath),
+                        originalPath: undefined,
+                        extension: path_1.default.extname(modulePath),
+                        isExternalLibraryImport: false,
+                        packageId: undefined
+                    };
+                }
+                catch (e) {
+                    return undefined;
+                }
             });
         }
     }, Node_oldProgram);
     Node_oldProgram.emit(undefined /*sourceFile*/, (fileName, content) => {
         if (path_1.default.extname(fileName) == ".js") {
             __requestsThreshold.set(__ModuleUrlPath, `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`);
-            console.log(__ModuleUrlPath, `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`);
+            // console.log(
+            //     __ModuleUrlPath,
+            //     `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
+            // )
         }
     }
     // undefined
     /*writeFileCallback*/ , undefined /*cancellationToken*/, undefined /*emitOnlyDtsFiles*/, transformers /*transformers*/);
 };
-//# sourceMappingURL=CompileFile.js.map

@@ -22,13 +22,13 @@ const {
     createArrayLiteralExpression,
     createUniqueName
 } = factory
-const {
-    CREATE_Object_WiTH_String_Keys,
-    CREATE_Spread_Assignment,
-    CREATE_CAll_Function,
-    CREATE_Prop_Registrator_For_Attribute,
-    CREATE_Prop_Registrator_For_Child
-} = generateFactory
+// const {
+    // generateFactory.CREATE_Object_WiTH_String_Keys,
+    // generateFactory.CREATE_Spread_Assignment,
+    // generateFactory.CREATE_CAll_Function,
+    // generateFactory.CREATE_Prop_Registrator_For_Attribute,
+    // generateFactory.CREATE_Prop_Registrator_For_Child
+// } = generateFactory
 
 
 
@@ -65,7 +65,7 @@ export const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) 
                 newChildren.push(visitor(createStringLiteral(child.text)))
             }
         } else {
-            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, CREATE_Prop_Registrator_For_Child))
+            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, generateFactory.CREATE_Prop_Registrator_For_Child))
         }
         return newChildren
     }, [])
@@ -100,7 +100,7 @@ export const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) 
         } else if (attrName === "e") {
             EventExist = initializer
         } else {
-            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, CREATE_Prop_Registrator_For_Attribute)])
+            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, generateFactory.CREATE_Prop_Registrator_For_Attribute)])
         }
     }
     /////////////////////////
@@ -113,16 +113,16 @@ export const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) 
         if (eKind === SyntaxKind.ObjectLiteralExpression) {
             Array.prototype.push.apply(EventsKeys, EventExist.properties)
         } else if (EventsKeys.length) {
-            EventsKeys.push(CREATE_Spread_Assignment(EventExist))
+            EventsKeys.push(generateFactory.CREATE_Spread_Assignment(EventExist))
         }
     }
     if (EventsKeys.length) {
 
-        newPropertys.push([createIdentifier("e"), CREATE_Object_WiTH_String_Keys(EventsKeys)])
+        newPropertys.push([createIdentifier("e"), generateFactory.CREATE_Object_WiTH_String_Keys(EventsKeys)])
     }
     ///////////////////////
 
-    return CREATE_Object_WiTH_String_Keys(newPropertys)
+    return generateFactory.CREATE_Object_WiTH_String_Keys(newPropertys)
 }
 
 
@@ -162,7 +162,7 @@ const getExpressionNames = ({ expression, argumentExpression, name }, expression
 
 export const PropertyAccessExpressionOrElementAccessExpression = (NODE, visitor, CTX) => {
     if (CTX.getJSXPropertyRegistrator) {
-        return visitor(CREATE_CAll_Function(CTX.getJSXPropertyRegistrator(), getExpressionNames(NODE)))
+        return visitor(generateFactory.CREATE_CAll_Function(CTX.getJSXPropertyRegistrator(), getExpressionNames(NODE)))
     }
 
     return visitEachChild(NODE, visitor, CTX)

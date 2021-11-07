@@ -92,10 +92,9 @@ exports.App = {
         if (!this.__compilerOptions.fileName) {
             const { initServer } = require("./express.js");
             const { ReadIndexHTML } = require("./readIndex");
-            const server = initServer(this);
+            this.server = initServer(this);
             const indexHTMLReader = ReadIndexHTML(this);
             indexHTMLReader.readJsDomHTML();
         }
     },
 };
-//# sourceMappingURL=App.js.map

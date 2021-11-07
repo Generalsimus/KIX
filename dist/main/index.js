@@ -375,4 +375,3 @@ KD_.createAttribute = function (AttributeName, AttributeGen) {
 };
 KD_.assign(Node.prototype, KD_method);
 exports.default = KD_;
-//# sourceMappingURL=index.js.map

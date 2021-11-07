@@ -1,8 +1,19 @@
-import { type } from "os";
-import ts, { factory, SyntaxKind } from "typescript"
-import { getColumnName } from "../../../Helpers/utils";
-import { App } from "../../App";
-import { createObjectPropertyLoop } from "./utils";
+import {
+    type
+} from "os";
+import ts, {
+    factory,
+    SyntaxKind
+} from "typescript";
+import {
+    getColumnName
+} from "../../../Helpers/utils";
+import {
+    App
+} from "../../App";
+import {
+    createObjectPropertyLoop
+} from "./utils";
 const {
     createToken,
     createBinaryExpression,
@@ -26,202 +37,308 @@ const {
     createStringLiteral,
     createSpreadAssignment,
     createUniqueName,
-    createReturnStatement
-} = factory
-const { PlusToken, EqualsToken } = SyntaxKind
+    createReturnStatement,
+} = factory;
+const {
+    PlusToken,
+    EqualsToken
+} = SyntaxKind;
 export const generateFactory = {
-    CREATE_Plus_Token_Nodes: (Nodes) => {
-        return generateFactory.CREATE_Token_Nodes(Nodes, PlusToken)
+    CREATE_Plus_Token_Nodes(Nodes) {
+        return this.CREATE_Token_Nodes(Nodes, PlusToken);
     },
-    CREATE_Equals_Token_Nodes: (Nodes) => {
-        return generateFactory.CREATE_Token_Nodes(Nodes, EqualsToken)
+    CREATE_Equals_Token_Nodes(Nodes) {
+        return this.CREATE_Token_Nodes(Nodes, EqualsToken);
     },
-    CREATE_Token_Nodes: (Nodes, Token) => {
+    CREATE_Token_Nodes(Nodes, Token) {
         return Nodes.reduce((NodeA, NodeB) => {
-            return createBinaryExpression(NodeA, createToken(Token), NodeB)
-        })
+            return createBinaryExpression(this.CREATE_Identifier(NodeA), createToken(Token), this.CREATE_Identifier(NodeB));
+        });
     },
-    CREATE_Arrow_Function_With_Parenthesized_Expression: (ClildNode, ArgumentsNodes) => {
+    CREATE_Identifier(StringOrNode) {
+        return typeof StringOrNode === "string" ?
+            createIdentifier(StringOrNode) :
+            StringOrNode;
+    },
+    CREATE_Parameter_Declaration(ArgumentsNodes) {
+        return ArgumentsNodes.map((argNode) =>
+            createParameterDeclaration(
+                undefined,
+                undefined,
+                undefined,
+                this.CREATE_Identifier(argNode),
+                undefined,
+                undefined,
+                undefined
+            )
+        );
+    },
+    CREATE_Arrow_Function_With_Parenthesized_Expression(
+        ClildNode,
+        ArgumentsNodes
+    ) {
         return createArrowFunction(
             undefined,
             undefined,
-            ArgumentsNodes.map((argNode) => createParameterDeclaration(
-                undefined,
-                undefined,
-                undefined,
-                argNode,
-                undefined,
-                undefined,
-                undefined
-            )),
+            this.CREATE_Parameter_Declaration(ArgumentsNodes),
             undefined,
             createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             factory.createParenthesizedExpression(ClildNode)
-        )
+        );
     },
-    CREATE_Prop_Registrator_For_Attribute: (newNode, getRegistratorName) => generateFactory.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
-        createUniqueName("__node"),
-        createUniqueName("__atrName"),
-        getRegistratorName
-    ]),
-    CREATE_Prop_Registrator_For_Child: (newNode, getRegistratorName) => generateFactory.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
-        createUniqueName("__node"),
-        getRegistratorName
-    ]),
-    CREATE_Object_Binding_Pattern: (namesObject, returnValue = []) => {
+    CREATE_Prop_Registrator_For_Attribute(newNode, getRegistratorName) {
+        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
+            createUniqueName("__node"),
+            createUniqueName("__atrName"),
+            getRegistratorName,
+        ]);
+    },
+    CREATE_Prop_Registrator_For_Child(newNode, getRegistratorName) {
+        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
+            createUniqueName("__node"),
+            getRegistratorName,
+        ]);
+    },
+    CREATE_Object_Binding_Pattern(namesObject, returnValue = []) {
         for (const nameKey in namesObject) {
-            const value = namesObject[nameKey]
-            returnValue.push(createBindingElement(
-                undefined,
-                value && createIdentifier(nameKey),
-                value && generateFactory.CREATE_Object_Binding_Pattern(value) || createIdentifier(nameKey),
-                undefined
-            ))
-
+            const value = namesObject[nameKey];
+            returnValue.push(
+                createBindingElement(
+                    undefined,
+                    value && createIdentifier(nameKey),
+                    (value && this.CREATE_Object_Binding_Pattern(value)) ||
+                    createIdentifier(nameKey),
+                    undefined
+                )
+            );
         }
-        return createObjectBindingPattern(returnValue)
+        return createObjectBindingPattern(returnValue);
     },
-    CREATE_CAll_Function: (CallNameOrNode, Arguments) => {
+    CREATE_CAll_Function(CallNameOrNode, Arguments) {
         return createCallExpression(
-            typeof CallNameOrNode === "string" ? createIdentifier(CallNameOrNode) : CallNameOrNode,
+            typeof CallNameOrNode === "string" ?
+                createIdentifier(CallNameOrNode) :
+                CallNameOrNode,
             undefined,
             Arguments
-        )
+        );
     },
-    CREATE_Const_Variable: (Nodes) => {
-
+    CREATE_Const_Variable(Nodes, flag = ts.NodeFlags.Const) {
         return createVariableStatement(
             undefined,
             createVariableDeclarationList(
                 Nodes.map(([NameNode, ValueNode]) => {
-
                     return createVariableDeclaration(
                         NameNode,
                         undefined,
                         undefined,
                         ValueNode
-                    )
+                    );
                 }),
-                ts.NodeFlags.Const
+                flag
             )
-        )
+        );
     },
-    CREATE_Object_WiTH_String_Keys: (Nodes) => {
+    CREATE_Object_WiTH_String_Keys(Nodes) {
         return createObjectLiteralExpression(
-            Nodes.map((ArgNodesOrNode) => (ArgNodesOrNode instanceof Array ? createPropertyAssignment.apply(null, ArgNodesOrNode) : ArgNodesOrNode),
+            Nodes.map(
+                (ArgNodesOrNode) =>
+                    ArgNodesOrNode instanceof Array ?
+                        createPropertyAssignment.apply(null, ArgNodesOrNode) :
+                        ArgNodesOrNode,
                 false
-            ))
-    },
-    CREATE_Spread_Assignment: (Node) => {
-        return createSpreadAssignment(createParenthesizedExpression(Node))
-    },
-    CREATE_Assign_Polyfil: (AppNameNode, Nodes) => {
-
-        return generateFactory.CREATE_Const_Variable([[
-            AppNameNode,
-            createArrowFunction(
-                undefined,
-                undefined,
-                [
-                    createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        undefined,
-                        createIdentifier("n"),
-                        undefined,
-                        undefined,
-                        undefined
-                    ),
-                    createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        undefined,
-                        createIdentifier("s"),
-                        undefined,
-                        undefined,
-                        undefined
-                    )
-                ],
-                undefined,
-                createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                createBlock(
-                    [createForInStatement(
-                        createVariableDeclarationList(
-                            [createVariableDeclaration(
-                                createIdentifier("o"),
-                                undefined,
-                                undefined,
-                                undefined
-                            )],
-                            ts.NodeFlags.Const
-                        ),
-                        createIdentifier("s"),
-                        createBlock(
-                            [createExpressionStatement(createBinaryExpression(
-                                createElementAccessExpression(
-                                    createIdentifier("n"),
-                                    createIdentifier("o")
-                                ),
-                                createToken(ts.SyntaxKind.EqualsToken),
-                                createElementAccessExpression(
-                                    createIdentifier("s"),
-                                    createIdentifier("o")
-                                )
-                            ))],
-                            false
-                        )
-                    )],
-                    false
-                )
             )
-        ]])
+        );
     },
-    CREATE_Property_Access_Expression: (propertys) => {
-        return propertys.reduce((propName1, propName2) => {
-            return createPropertyAccessExpression(
-                typeof propName1 === "string" ? createIdentifier(propName1) : propName1,
-                typeof propName2 === "string" ? createIdentifier(propName2) : propName2,
-            )
-        })
+    CREATE_Spread_Assignment(Node) {
+        return createSpreadAssignment(createParenthesizedExpression(Node));
     },
-    CREATE_Property_Access_Equals_Token: (Node, decoratorPropertys = []) => {
-        return generateFactory.CREATE_Equals_Token_Nodes([
-            generateFactory.CREATE_Property_Access_Expression(decoratorPropertys),
-            Node
-        ])
-    },
-    CREATE_Export_File_Function: (body, Import_Module_Name, FILE_INDEX) => {
-
-        body.push(createReturnStatement(createIdentifier("exports")))
-        return generateFactory.CREATE_Property_Access_Equals_Token(
-            createCallExpression(
-                createParenthesizedExpression(createArrowFunction(
+    CREATE_Assign_Polyfil(AppNameNode, Nodes) {
+        return this.CREATE_Const_Variable([
+            [
+                AppNameNode,
+                createArrowFunction(
                     undefined,
                     undefined,
-                    [createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        undefined,
-                        createIdentifier("exports"),
-                        undefined,
-                        undefined,
-                        undefined
-                    )],
+                    this.CREATE_Parameter_Declaration(["n", "s"]),
                     undefined,
                     createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                     createBlock(
-                        body,
-                        true
+                        [
+                            createForInStatement(
+                                createVariableDeclarationList(
+                                    [
+                                        createVariableDeclaration(
+                                            createIdentifier("o"),
+                                            undefined,
+                                            undefined,
+                                            undefined
+                                        ),
+                                    ],
+                                    ts.NodeFlags.Const
+                                ),
+                                createIdentifier("s"),
+                                createBlock(
+                                    [
+                                        createExpressionStatement(
+                                            this.CREATE_Token_Nodes([
+                                                this.CREATE_Element_Access_Expression(["n", "o"]),
+                                                this.CREATE_Element_Access_Expression(["s", "o"])
+                                            ], ts.SyntaxKind.EqualsToken)
+                                        )
+                                    ],
+                                    false
+                                )
+                            ),
+                        ],
+                        false
                     )
-                )),
+                ),
+            ],
+        ]);
+    },
+    CREATE_Property_Access_Expression(propertys) {
+        return propertys.reduce((propName1, propName2) => {
+            return createPropertyAccessExpression(
+                this.CREATE_Identifier(propName1),
+                this.CREATE_Identifier(propName2),
+            );
+        });
+    },
+    CREATE_Element_Access_Expression(propertys) {
+        return propertys.reduce((propName1, propName2) => {
+            return createElementAccessExpression(
+                this.CREATE_Identifier(propName1),
+                this.CREATE_Identifier(propName2),
+            );
+        });
+    },
+    CREATE_Property_Access_Equals_Token(Node, decoratorPropertys = []) {
+        return this.CREATE_Equals_Token_Nodes([
+            this.CREATE_Property_Access_Expression(decoratorPropertys),
+            Node,
+        ]);
+    },
+    CREATE_Export_File_Function(
+        body,
+        __Import_Module_Name,
+        Module_INDEX,
+        ifNeedRunTime
+    ) {
+        return this.CREATE_CAll_Function(__Import_Module_Name + "_Module", [
+            factory.createNumericLiteral(Module_INDEX),
+            factory.createArrowFunction(
                 undefined,
-                [createObjectLiteralExpression(
-                    [],
-                    false
-                )]
-            )
-            , [Import_Module_Name, getColumnName(FILE_INDEX)])
+                undefined,
+                this.CREATE_Parameter_Declaration(["exports"]),
+                undefined,
+                factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+                factory.createBlock(body, true)
+            ),
+            ...(ifNeedRunTime ? [factory.createNumericLiteral("1")] : []),
+        ]);
+    },
 
+    CREATE_Bind_Function(Name, ClildNode, ArgumentsNodes) {
+        return factory.createFunctionDeclaration(
+            undefined,
+            undefined,
+            undefined,
+            factory.createIdentifier(Name),
+            undefined,
+            this.CREATE_Parameter_Declaration(ArgumentsNodes),
+            undefined,
+            factory.createBlock(ClildNode, true)
+        );
+    },
+    CREATE_Module_GET_POLYFIL(__Import_Module_Name) {
+        // return  factory.createIdentifier("k")
+        // console.log(generateFactory.CREATE_Bind_Function, this)
+        return this.CREATE_Bind_Function(
+            __Import_Module_Name + "_Module",
+            [
+                factory.createExpressionStatement(
+                    factory.createCallExpression(
+                        this.CREATE_Property_Access_Expression([
+                            "Object",
+                            "defineProperty",
+                        ]),
+                        undefined,
+                        [
+                            factory.createIdentifier(__Import_Module_Name),
+                            factory.createIdentifier("k"),
+                            factory.createObjectLiteralExpression(
+                                [
+                                    factory.createPropertyAssignment(
+                                        factory.createIdentifier("get"),
+                                        factory.createFunctionExpression(
+                                            undefined,
+                                            undefined,
+                                            undefined,
+                                            undefined,
+                                            [],
+                                            undefined,
+                                            factory.createBlock(
+                                                [
+                                                    factory.createReturnStatement(
+                                                        this.CREATE_Token_Nodes([
+                                                            factory.createIdentifier("e"),
+                                                            this.CREATE_Token_Nodes(
+                                                                [
+                                                                    factory.createCallExpression(
+                                                                        factory.createIdentifier("f"),
+                                                                        undefined,
+                                                                        [
 
-    }
-}
+                                                                            factory.createParenthesizedExpression(
+                                                                                this.CREATE_Token_Nodes([
+                                                                                    factory.createIdentifier("e"),
+                                                                                    factory.createObjectLiteralExpression(
+                                                                                        [],
+                                                                                        false
+                                                                                    )
+                                                                                ], ts.SyntaxKind.EqualsToken),
+                                                                            ),
+                                                                        ]
+                                                                    ),
+                                                                    factory.createIdentifier("e")
+                                                                ],
+                                                                ts.SyntaxKind.CommaToken
+                                                            )
+
+                                                        ], ts.SyntaxKind.BarBarToken)
+
+                                                    ),
+                                                ],
+                                                true
+                                            )
+                                        )
+                                    ),
+                                ],
+                                true
+                            ),
+                        ]
+                    )
+                ),
+                factory.createExpressionStatement(
+                    this.CREATE_Token_Nodes(
+                        [
+                            "i",
+                            this.CREATE_Element_Access_Expression([
+                                __Import_Module_Name,
+                                "k",
+                            ])
+                        ],
+                        ts.SyntaxKind.AmpersandAmpersandToken
+                    )
+                ),
+            ],
+            [
+                "k",
+                "f",
+                "i",
+                "e"
+            ]
+        );
+    },
+};

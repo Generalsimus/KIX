@@ -52,4 +52,3 @@ const ReadIndexHTML = (App) => {
     };
 };
 exports.ReadIndexHTML = ReadIndexHTML;
-//# sourceMappingURL=readIndex.js.map

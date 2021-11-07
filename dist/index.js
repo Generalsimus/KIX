@@ -4,4 +4,3 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // const { App } = require("./init/App")
 const App_1 = require("./init/App");
 App_1.App.init();
-//# sourceMappingURL=index.js.map

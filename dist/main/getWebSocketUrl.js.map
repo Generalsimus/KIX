@@ -1,1 +1,0 @@
-{"version":3,"file":"getWebSocketUrl.js","sourceRoot":"","sources":["../../main/getWebSocketUrl.js"],"names":[],"mappings":";;;AACa,QAAA,eAAe,GAAG,6HAA6H,CAAA","sourcesContent":["\r\nexport const getWebSocketUrl = \"/__DO_NOT_USE_THIS_URL/___KIX___CONTROLER___/5565465342378677564543215667767554/___KIX___CONTROLER___/__DO_NOT_USE_THIS_URL\"\r\n"]}
