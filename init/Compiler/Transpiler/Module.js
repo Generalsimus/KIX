@@ -80,6 +80,7 @@ export const ModuleTransformersBefore = {
         }
 
         try {
+
             if (ts.isJsonSourceFile(NODE)) {
 
                 NODE = ts.updateSourceFileNode(NODE, [createExpressionStatement(generateFactory.CREATE_Property_Access_Equals_Token(CREATE_Object_WiTH_String_Keys([
@@ -88,8 +89,6 @@ export const ModuleTransformersBefore = {
 
                 NODE.scriptKind = ScriptKind.Unknown
             } else {
-                // console.log("🚀 --> file: Module.js --> line 63 --> NODE.originalFileName", [NODE.originalFileName]);
-
                 NODE = ts.updateSourceFileNode(NODE, [
                     createExpressionStatement(
                         generateFactory.CREATE_Export_File_Function(
@@ -100,7 +99,10 @@ export const ModuleTransformersBefore = {
                         )
                     )
                 ])
-                // return NODE
+
+                if (NODE.isCSSFile) {
+                    NODE.fileName = NODE.fileName + ".json"
+                }
             }
             NODE.externalModuleIndicator = undefined
         } catch (error) {

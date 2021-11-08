@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.catchError = void 0;
 const webSocket_1 = require("../webSocket");
-const xhrRequest_1 = require("../xhrRequest");
 const catchError = (event) => {
     const parseUrlRegex = /(?=http)(.*?)(?=(:(\d*):(\d*)))/gm;
     const errorsLocations = [];
@@ -14,7 +13,7 @@ const catchError = (event) => {
             url: match[1],
             path: new window.URL(match[1]).pathname
         });
-        (0, xhrRequest_1.xhrtGetRequet)(match[1], parseSourceMap);
+        // xhrGetRequet(match[1], parseSourceMap)
     }
     (0, webSocket_1.sendWebSocketMessage)({ action: "THROW_ERROR", data: errorsLocations });
 }; // end catchError

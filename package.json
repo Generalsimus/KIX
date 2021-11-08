@@ -59,6 +59,7 @@
     "kid-js-lib": "^1.2.19",
     "mime-types": "^2.1.32",
     "open": "^8.2.1",
+    "sass": "^1.43.4",
     "ts-polyfill": "^3.8.2",
     "typescript": "^4.4.3",
     "ws": "^7.5.3",

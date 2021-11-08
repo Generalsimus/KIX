@@ -1,5 +1,5 @@
 import { sendWebSocketMessage } from "../webSocket";
-import { xhrtGetRequet } from "../xhrRequest";
+import { xhrGetRequet } from "../xhrRequest";
 
 export const catchError = (event) => {
     const parseUrlRegex = /(?=http)(.*?)(?=(:(\d*):(\d*)))/gm
@@ -12,7 +12,7 @@ export const catchError = (event) => {
             url: match[1],
             path: new window.URL(match[1]).pathname
         })
-        xhrtGetRequet(match[1], parseSourceMap)
+        // xhrGetRequet(match[1], parseSourceMap)
     }
     sendWebSocketMessage({ action: "THROW_ERROR", data: errorsLocations });
 } // end catchError

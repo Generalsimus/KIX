@@ -22,6 +22,7 @@ import path from "path/posix"
 import { App } from "../init/App"
 import tsModule from 'typescript/lib/tsserverlibrary';
 import { setServers } from "dns"
+import createCssSourceFile from "./createCssSourceFile"
 
 export const deepAssign = (target, ...sources) => {
     for (const source of sources) {
@@ -62,11 +63,8 @@ export const createHost = (__compilerOptions) => {
                 return createSourceFile(fileName, readFileSync(fileName, "utf-8"), languageVersion, true);
             case ".scss":
             case ".css":
-                return createSourceFile(fileName, `
-                 var sfsdfs = 2
-                export { sfsdfs };
-                export default "44444";
-                `, languageVersion, true)
+
+                return createCssSourceFile(fileName, readFileSync(fileName, "utf-8"), languageVersion)
             // default
         }
     }
@@ -80,7 +78,7 @@ export const createHost = (__compilerOptions) => {
 
             if (isCssRegex.test(moduleName)) {
                 return {
-                    extension: tsModule.Extension.Js,
+                    extension: tsModule.Extension.Dts,
                     isExternalLibraryImport: false,
                     resolvedFileName: path.join(
                         path.dirname(containingFile),

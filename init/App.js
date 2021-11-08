@@ -104,7 +104,7 @@ export const App = {
     // __Target: ScriptTarget.hasOwnProperty(OptionTarget) ? OptionTarget : "Latest",
     __diagnostics: __diagnostics,
     __args: __args,
-    __Dev_Mode: !!__args["_"]?.includes("build"),
+    __Dev_Mode: !__args["_"]?.includes("build"),
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),

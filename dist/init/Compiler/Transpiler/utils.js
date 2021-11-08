@@ -30,7 +30,7 @@ function resolveModule(modulePath, fileDirectory) {
 exports.resolveModule = resolveModule;
 // მოდულის შესახებ ინფორმაციის ქეშირება
 exports.ModulesThree = new Map();
-let Module_INDEX = 0;
+let Module_INDEX = 1;
 const getOrSetModuleInfo = (modulePath, compilerOptions) => {
     const module = exports.ModulesThree.get(modulePath);
     const moduleInfo = module || {

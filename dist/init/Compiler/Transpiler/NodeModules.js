@@ -12,9 +12,7 @@ exports.NodeModuleTransformersBefore = {
 //     return NODE
 // },
 // [SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
-// console.log("🚀 --> file: NodeModules.js --> line 15 --> NODE", NODE);
-//     // if (NODE.After_visited) return NODE
-//     // NODE.After_visited = true;
+//     NODE.fileName = NODE.fileName + ".json"
 //     return NODE
 // }
 };

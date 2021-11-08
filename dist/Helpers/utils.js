@@ -27,6 +27,7 @@ const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const posix_1 = __importDefault(require("path/posix"));
 const tsserverlibrary_1 = __importDefault(require("typescript/lib/tsserverlibrary"));
+const createCssSourceFile_1 = __importDefault(require("./createCssSourceFile"));
 const deepAssign = (target, ...sources) => {
     for (const source of sources) {
         for (let k in source) {
@@ -60,18 +61,14 @@ const createHost = (__compilerOptions) => {
                 return (0, typescript_1.createSourceFile)(fileName, (0, fs_1.readFileSync)(fileName, "utf-8"), languageVersion, true);
             case ".scss":
             case ".css":
-                return (0, typescript_1.createSourceFile)(fileName, `
-                 var sfsdfs = 2
-                export { sfsdfs };
-                export default "44444";
-                `, languageVersion, true);
+                return (0, createCssSourceFile_1.default)(fileName, (0, fs_1.readFileSync)(fileName, "utf-8"), languageVersion);
             // default
         }
     };
     const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/, _HOST = (0, typescript_1.createCompilerHost)(__compilerOptions, true), currentDirectory = _HOST.getCurrentDirectory(), getCanonicalFileName = (0, typescript_1.createGetCanonicalFileName)(_HOST.useCaseSensitiveFileNames()), moduleResolutionCache = (0, typescript_1.createModuleResolutionCache)(currentDirectory, getCanonicalFileName), Module_loader = function (moduleName, containingFile, redirectedReference) {
         if (isCssRegex.test(moduleName)) {
             return {
-                extension: tsserverlibrary_1.default.Extension.Js,
+                extension: tsserverlibrary_1.default.Extension.Dts,
                 isExternalLibraryImport: false,
                 resolvedFileName: posix_1.default.join(posix_1.default.dirname(containingFile), moduleName),
             };

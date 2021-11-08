@@ -71,11 +71,12 @@ exports.ModuleTransformersBefore = {
                 NODE.scriptKind = typescript_1.ScriptKind.Unknown;
             }
             else {
-                // console.log("🚀 --> file: Module.js --> line 63 --> NODE.originalFileName", [NODE.originalFileName]);
                 NODE = typescript_1.default.updateSourceFileNode(NODE, [
                     createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX, compilerOptions.rootNames.includes(NODE.originalFileName)))
                 ]);
-                // return NODE
+                if (NODE.isCSSFile) {
+                    NODE.fileName = NODE.fileName + ".json";
+                }
             }
             NODE.externalModuleIndicator = undefined;
         }

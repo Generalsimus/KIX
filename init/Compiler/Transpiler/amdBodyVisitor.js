@@ -1,20 +1,30 @@
-import ts, { SyntaxKind } from "typescript"
-import { generateFactory } from "./createFactoryCode"
-import { getColumnName } from "../../../Helpers/utils"
-import { geModuleLocationMeta } from "./utils"
+import ts, {
+    SyntaxKind
+} from "typescript"
+import {
+    generateFactory
+} from "./createFactoryCode"
+import {
+    getColumnName
+} from "../../../Helpers/utils"
+import {
+    geModuleLocationMeta
+} from "./utils"
 
 const factory = ts.factory
-const { ExportKeyword } = SyntaxKind
+const {
+    ExportKeyword
+} = SyntaxKind
 const {
     createUniqueName,
     createObjectLiteralExpression,
     createCallExpression,
     createIdentifier
 } = factory
-  
+
 
 export function topLevelVisitor(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind], currentSourceFile.path);
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
     switch (node.kind) {
         case SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);
@@ -38,76 +48,43 @@ export function topLevelVisitor(node, currentSourceFile, CTX) {
             return [node];
     }
 }
+
 function visitImportDeclaration(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 55 --> visitImportDeclaration --> CTX", CTX);
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 54 --> visitImportDeclaration --> node", node);
-    // var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
+
     const importClause = node.importClause
-    if (!node.moduleSpecifier || !importClause) {
+
+
+    if (!node.moduleSpecifier && !importClause) {
         return [node];
     }
-    // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+
 
     const compilerOptions = CTX.getCompilerOptions()
-    const constVariablesNameValue = []
+
 
     var importAliasName = ts.getLocalNameForExternalImport(factory, node, currentSourceFile);
 
     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 71 --> vi-sitImportDeclaration --> ModuleData", ModuleData);
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 70 --> visitImportDeclaration --> ModuleData", ModuleData);
 
-    // ModuleData.push(element.propertyName || element.name)
-    constVariablesNameValue.push([
-        importAliasName,
-        ModuleData ? generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
+    const moduleLocationNODE = ModuleData ?generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
+    if (node.moduleSpecifier && !importClause) {
+        return [moduleLocationNODE];
+    }
+
+    return generateFactory.CREATE_Const_Variable([
+        [
+            importAliasName,
+            moduleLocationNODE
+        ]
     ])
-    // createObjectLiteralExpression([], false)
-    // if (ts.isDefaultImport(node)) {
-    //     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-    //     if (ModuleData) {
-    //         // ModuleData.push("default")
-
-    //         constVariablesNameValue.push([
-    //             importAliasName,
-    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
-    //         ])
-    //     }
-
-
-    // }
-    // const namedBindings = importClause.namedBindings;
-    // if (namedBindings && namedBindings.elements) {
-    //     for (const element of namedBindings.elements) {
-    //         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-
-    //         // ModuleData.push(element.propertyName || element.name)
-    //         constVariablesNameValue.push([
-    //             // factory.getGeneratedNameForNode(element.name),
-    //             importAliasName,
-    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
-    //         ])
-
-    //     }
-    // }
-
-    return constVariablesNameValue.length ? generateFactory.CREATE_Const_Variable(constVariablesNameValue) : []
 
 }
 
 function visitExportDeclaration(node, CTX, newNodes = []) {
     const compilerOptions = CTX.getCompilerOptions()
-    // delete node.parent
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 50 --> visitExportDeclaration --> node.moduleSpecifier", node);
-    // if (!node.moduleSpecifier) {
-    //     // Elide export declarations with no module specifier as they are handled
-    //     // elsewhere.
-    //     return undefined;
-    // }
 
 
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 56 --> visitExportDeclaration --> generatedName", generatedName);
-    // specifier.propertyName || specifier.name
+
     if (node.exportClause && ts.isNamedExports(node.exportClause)) {
         for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
             var specifier = _a[_i];
@@ -119,7 +96,6 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
 
         }
     } else if (node.exportClause) {
-        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
 
         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
         // if (typeof Module_INDEX !== "number") {
@@ -129,7 +105,7 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
             generateFactory.CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             (
                 (ModuleData) ?
-                generateFactory.CREATE_Element_Access_Expression(ModuleData) :
+                    generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                     createIdentifier("undefined")
             )
         ]))
@@ -147,7 +123,7 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
                 createIdentifier("exports"),
                 (
                     (ModuleData) ?
-                    generateFactory.CREATE_Element_Access_Expression(ModuleData) :
+                        generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                         createObjectLiteralExpression([], false)
                 )
             ]
@@ -174,8 +150,7 @@ function appendExportsOfBindingElement(decl, nodes) {
                 appendExportsOfBindingElement(element, nodes);
             }
         }
-    }
-    else if (!ts.isGeneratedIdentifier(decl.name)) {
+    } else if (!ts.isGeneratedIdentifier(decl.name)) {
 
         nodes.push(generateFactory.CREATE_Equals_Token_Nodes([
             generateFactory.CREATE_Property_Access_Expression(["exports", decl.name]),
@@ -183,10 +158,13 @@ function appendExportsOfBindingElement(decl, nodes) {
         ]))
     }
 }
+
 function checkModiferAndHaveExport(node, newNodes = [node]) {
     if (
         node.modifiers &&
-        node.modifiers.some(({ kind }) => ts.SyntaxKind.ExportKeyword === kind)
+        node.modifiers.some(({
+            kind
+        }) => ts.SyntaxKind.ExportKeyword === kind)
     ) {
         appendExportsOfBindingElement(node, newNodes)
     }
@@ -197,6 +175,7 @@ function visitClassDeclaration(node) {
 
     return checkModiferAndHaveExport(node)
 }
+
 function visitFunctionDeclaration(node) {
 
     return checkModiferAndHaveExport(node)
@@ -208,7 +187,9 @@ function visitFunctionDeclaration(node) {
 function visitVariableStatement(node, newNodes = [node]) {
     if (
         node.modifiers &&
-        node.modifiers.some(({ kind }) => ts.SyntaxKind.ExportKeyword === kind)
+        node.modifiers.some(({
+            kind
+        }) => ts.SyntaxKind.ExportKeyword === kind)
     ) {
         for (var _i = 0, _a = node.declarationList.declarations; _i < _a.length; _i++) {
             var variable = _a[_i];

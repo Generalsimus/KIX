@@ -27,7 +27,7 @@ const factory = typescript_1.default.factory;
 const { ExportKeyword } = typescript_1.SyntaxKind;
 const { createUniqueName, createObjectLiteralExpression, createCallExpression, createIdentifier } = factory;
 function topLevelVisitor(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind], currentSourceFile.path);
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
     switch (node.kind) {
         case typescript_1.SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);
@@ -53,61 +53,26 @@ function topLevelVisitor(node, currentSourceFile, CTX) {
 }
 exports.topLevelVisitor = topLevelVisitor;
 function visitImportDeclaration(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 55 --> visitImportDeclaration --> CTX", CTX);
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 54 --> visitImportDeclaration --> node", node);
-    // var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
     const importClause = node.importClause;
-    if (!node.moduleSpecifier || !importClause) {
+    if (!node.moduleSpecifier && !importClause) {
         return [node];
     }
-    // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
     const compilerOptions = CTX.getCompilerOptions();
-    const constVariablesNameValue = [];
     var importAliasName = typescript_1.default.getLocalNameForExternalImport(factory, node, currentSourceFile);
     const ModuleData = (0, utils_1.geModuleLocationMeta)(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions);
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 71 --> vi-sitImportDeclaration --> ModuleData", ModuleData);
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 70 --> visitImportDeclaration --> ModuleData", ModuleData);
-    // ModuleData.push(element.propertyName || element.name)
-    constVariablesNameValue.push([
-        importAliasName,
-        ModuleData ? createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
+    const moduleLocationNODE = ModuleData ? createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined");
+    if (node.moduleSpecifier && !importClause) {
+        return [moduleLocationNODE];
+    }
+    return createFactoryCode_1.generateFactory.CREATE_Const_Variable([
+        [
+            importAliasName,
+            moduleLocationNODE
+        ]
     ]);
-    // createObjectLiteralExpression([], false)
-    // if (ts.isDefaultImport(node)) {
-    //     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-    //     if (ModuleData) {
-    //         // ModuleData.push("default")
-    //         constVariablesNameValue.push([
-    //             importAliasName,
-    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
-    //         ])
-    //     }
-    // }
-    // const namedBindings = importClause.namedBindings;
-    // if (namedBindings && namedBindings.elements) {
-    //     for (const element of namedBindings.elements) {
-    //         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-    //         // ModuleData.push(element.propertyName || element.name)
-    //         constVariablesNameValue.push([
-    //             // factory.getGeneratedNameForNode(element.name),
-    //             importAliasName,
-    //             generateFactory.CREATE_Property_Access_Expression(ModuleData)
-    //         ])
-    //     }
-    // }
-    return constVariablesNameValue.length ? createFactoryCode_1.generateFactory.CREATE_Const_Variable(constVariablesNameValue) : [];
 }
 function visitExportDeclaration(node, CTX, newNodes = []) {
     const compilerOptions = CTX.getCompilerOptions();
-    // delete node.parent
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 50 --> visitExportDeclaration --> node.moduleSpecifier", node);
-    // if (!node.moduleSpecifier) {
-    //     // Elide export declarations with no module specifier as they are handled
-    //     // elsewhere.
-    //     return undefined;
-    // }
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 56 --> visitExportDeclaration --> generatedName", generatedName);
-    // specifier.propertyName || specifier.name
     if (node.exportClause && typescript_1.default.isNamedExports(node.exportClause)) {
         for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
             var specifier = _a[_i];
@@ -118,7 +83,6 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         }
     }
     else if (node.exportClause) {
-        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
         const ModuleData = (0, utils_1.geModuleLocationMeta)(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions);
         // if (typeof Module_INDEX !== "number") {
         //     return newNodes

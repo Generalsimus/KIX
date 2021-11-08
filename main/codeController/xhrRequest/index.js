@@ -1,5 +1,5 @@
 
-export const xhrtGetRequet = (url, callback) => {
+export const xhrGetRequet = (url, callback) => {
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
         if (xhr.status === 200) {
@@ -8,7 +8,7 @@ export const xhrtGetRequet = (url, callback) => {
             console.log('Request failed.  Returned status of ' + xhr.status);
         }
     });
-    xhr.open("GET", "http://www.example.org/example.txt");
+    xhr.open("GET", url);
     xhr.send();
     return xhr;
 }
