@@ -181,3 +181,9 @@ export const createCancellationToken = () => {
         requesteCancell: () => { requesteCancell = true },
     }
 }
+
+
+
+export const filePathToUrl = (filePath) => {
+    return  ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "/")
+}

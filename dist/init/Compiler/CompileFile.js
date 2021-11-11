@@ -19,7 +19,7 @@ let increm = 0;
 const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
     let oldProgram;
-    const outFile = path_1.default.relative(__RunDirName, FilePath), __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), REQUEST_PATH = ("./" + outFile).replace(/(^[\.\.\/]+)|(\/+)/g, "/"), MAP_REQUEST_PATH = REQUEST_PATH + ".map", changeFileCallback = () => {
+    const outFile = path_1.default.relative(__RunDirName, FilePath), __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), REQUEST_PATH = (0, utils_1.filePathToUrl)(outFile), MAP_REQUEST_PATH = REQUEST_PATH + ".map", changeFileCallback = () => {
         // console.clear()
         console.log("🚀 --> file: utils.js --> line 69 --> increm", ++increm);
         compilerOptions.cancellationToken = (0, utils_1.createCancellationToken)();
@@ -78,7 +78,7 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
     compilerOptions = {
         ...compilerOptions,
         outFile: __ModuleUrlPath,
-        removeComments: false,
+        // removeComments: false,
         lib: undefined,
         sourceMap: false,
         rootNames: NodeModuelsPaths,

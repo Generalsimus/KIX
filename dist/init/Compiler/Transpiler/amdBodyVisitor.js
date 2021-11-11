@@ -62,7 +62,7 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
     const ModuleData = (0, utils_1.geModuleLocationMeta)(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions);
     const moduleLocationNODE = ModuleData ? createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined");
     if (node.moduleSpecifier && !importClause) {
-        return [moduleLocationNODE];
+        return [factory.createExpressionStatement(moduleLocationNODE)];
     }
     return createFactoryCode_1.generateFactory.CREATE_Const_Variable([
         [
@@ -76,10 +76,10 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
     if (node.exportClause && typescript_1.default.isNamedExports(node.exportClause)) {
         for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
             var specifier = _a[_i];
-            newNodes.push(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
+            newNodes.push(factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
                 createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", specifier.name]),
                 specifier.propertyName || specifier.name
-            ]));
+            ])));
         }
     }
     else if (node.exportClause) {
@@ -87,12 +87,12 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         // if (typeof Module_INDEX !== "number") {
         //     return newNodes
         // }
-        newNodes.push(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
+        newNodes.push(factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
             createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             ((ModuleData) ?
                 createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                 createIdentifier("undefined"))
-        ]));
+        ])));
         // export * as ns from "mod";
         // export * as default from "mod";
     }
@@ -111,10 +111,10 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
     return newNodes;
 }
 function visitExportAssignment(node) {
-    return [createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
+    return [factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
             createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
             node.expression
-        ])];
+        ]))];
 }
 function appendExportsOfBindingElement(decl, nodes) {
     if (typescript_1.default.isBindingPattern(decl.name)) {
@@ -126,10 +126,10 @@ function appendExportsOfBindingElement(decl, nodes) {
         }
     }
     else if (!typescript_1.default.isGeneratedIdentifier(decl.name)) {
-        nodes.push(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
+        nodes.push(factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
             createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", decl.name]),
             typescript_1.default.createIdentifier(typescript_1.default.idText(decl.name))
-        ]));
+        ])));
     }
 }
 function checkModiferAndHaveExport(node, newNodes = [node]) {

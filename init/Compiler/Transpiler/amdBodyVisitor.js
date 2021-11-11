@@ -68,7 +68,7 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
 
     const moduleLocationNODE = ModuleData ?generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
     if (node.moduleSpecifier && !importClause) {
-        return [moduleLocationNODE];
+        return [factory.createExpressionStatement(moduleLocationNODE)];
     }
 
     return generateFactory.CREATE_Const_Variable([
@@ -89,10 +89,10 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
             var specifier = _a[_i];
 
-            newNodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+            newNodes.push(factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
                 generateFactory.CREATE_Property_Access_Expression(["exports", specifier.name]),
                 specifier.propertyName || specifier.name
-            ]))
+            ])))
 
         }
     } else if (node.exportClause) {
@@ -101,14 +101,14 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         // if (typeof Module_INDEX !== "number") {
         //     return newNodes
         // }
-        newNodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+        newNodes.push(factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
             generateFactory.CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             (
                 (ModuleData) ?
                     generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                     createIdentifier("undefined")
             )
-        ]))
+        ])))
 
         // export * as ns from "mod";
         // export * as default from "mod";
@@ -136,10 +136,10 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
 
 
 function visitExportAssignment(node) {
-    return [generateFactory.CREATE_Equals_Token_Nodes([
+    return [factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
         generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
         node.expression
-    ])]
+    ]))]
 }
 
 function appendExportsOfBindingElement(decl, nodes) {
@@ -152,10 +152,10 @@ function appendExportsOfBindingElement(decl, nodes) {
         }
     } else if (!ts.isGeneratedIdentifier(decl.name)) {
 
-        nodes.push(generateFactory.CREATE_Equals_Token_Nodes([
+        nodes.push(factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
             generateFactory.CREATE_Property_Access_Expression(["exports", decl.name]),
             ts.createIdentifier(ts.idText(decl.name))
-        ]))
+        ])))
     }
 }
 

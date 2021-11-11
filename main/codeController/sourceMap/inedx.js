@@ -1,4 +1,4 @@
 import { decode } from "./decode"
 
 
-export decode
+export default decode

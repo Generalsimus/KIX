@@ -10,22 +10,22 @@ const App_1 = require("../init/App");
 const url_1 = __importDefault(require("url"));
 const fs_1 = __importDefault(require("fs"));
 const typescript_1 = require("typescript");
+const utils_1 = require("./utils");
 function createCssSourceFile(fileName, fileContent, languageVersion) {
     const { css, map } = (0, exports.parseCssFile)(fileName, fileContent);
-    console.log("🚀 --> file: createCssSourceFile.js --> line 9 --> createCssSourceFile --> css, map", (0, exports.parseCssFile)(fileName, fileContent));
-    let sourceFile = (0, typescript_1.createSourceFile)(fileName, 'import kix from "kix"\n export default kix(kix.style, `' + css.toString() + '`)' + `
-        console.log(kix)
-        
-        `, languageVersion, true);
+    let sourceContent;
     if (App_1.App.__Dev_Mode) {
-        sourceFile = (0, typescript_1.createSourceFile)(fileName, `import kix from "kix";
-            const style = KD_(document.head,{style:""});
-            ` + 'export default kix(style, `' + css.toString() + '`);\n' + `
-            KD_(style,"\\n/*# sourceMappingURL=${map.toString()} */`, languageVersion, true);
+        let sourceMappingURL = (0, utils_1.filePathToUrl)(path_1.default.relative(App_1.App.__RunDirName, fileName)) + ".map";
+        sourceContent = `import kix from "kix"; 
+        const s = kix(document.head,{style:""});
+        export default kix(s,${"`" + String(css) + "`"}); 
+        kix(s,"\\n/*# sourceMappingURL=${sourceMappingURL} */");`;
+        App_1.App.__requestsThreshold.set(sourceMappingURL, map);
     }
     else {
-        sourceFile = (0, typescript_1.createSourceFile)(fileName, 'import kix from "kix"\n export default kix(kix.style, `' + css.toString() + '`)', languageVersion, true);
+        sourceContent = 'import kix from "kix"\n export default kix(kix.style, `' + String(css) + '\`)';
     }
+    const sourceFile = (0, typescript_1.createSourceFile)(fileName, sourceContent, languageVersion, true);
     sourceFile.isCSSFile = true;
     return sourceFile;
 }
@@ -35,6 +35,7 @@ const parseCssFile = (fileName, fileContent) => {
         file: fileName,
         data: resolveQuotesInFileContent(fileContent),
         outputStyle: 'compressed',
+        outFile: fileName,
         importer: function (url, prev, done) {
             var PATH = path_1.default.resolve(path_1.default.dirname(fileName) + "/" + url);
             if (fs_1.default.existsSync(PATH)) {
@@ -48,10 +49,9 @@ const parseCssFile = (fileName, fileContent) => {
                 return new sass_1.default.types.String(`url("${url}")`);
             }
         },
-        sourceMapContents: true,
-        sourceMap: true,
-        // sourceMapContents: App.__Dev_Mode,
-        // sourceMap: App.__Dev_Mode,
+        sourceMapContents: App_1.App.__Dev_Mode,
+        sourceMap: App_1.App.__Dev_Mode,
+        omitSourceMapUrl: true
     });
 };
 exports.parseCssFile = parseCssFile;

@@ -3,7 +3,7 @@ import { App } from "../App"
 import ts, { createProgram, getDirectoryPath, getBaseFileName, normalizeSlashes } from "typescript"
 import chokidar from "chokidar"
 import path from "path"
-import { createCancellationToken, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../Helpers/utils"
+import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../Helpers/utils"
 import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/Module"
 import resolve from 'resolve'
 import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
@@ -28,7 +28,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     const outFile = path.relative(__RunDirName, FilePath),
         __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
-        REQUEST_PATH = ("./" + outFile).replace(/(^[\.\.\/]+)|(\/+)/g, "/"),
+        REQUEST_PATH =  filePathToUrl(outFile),
         MAP_REQUEST_PATH = REQUEST_PATH + ".map",
         changeFileCallback = () => {
 
@@ -152,7 +152,7 @@ const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
     compilerOptions = {
         ...compilerOptions,
         outFile: __ModuleUrlPath,
-        removeComments: false,
+        // removeComments: false,
         lib: undefined,
         sourceMap: false,
         rootNames: NodeModuelsPaths,

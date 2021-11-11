@@ -4,48 +4,50 @@ import { App } from "../init/App"
 import URL from "url"
 import fs from "fs"
 import { createSourceFile, ScriptTarget } from "typescript";
+import { filePathToUrl } from "./utils";
+
+
 export default function createCssSourceFile(fileName, fileContent, languageVersion) {
     const { css, map } = parseCssFile(fileName, fileContent)
-    console.log("🚀 --> file: createCssSourceFile.js --> line 9 --> createCssSourceFile --> css, map", parseCssFile(fileName, fileContent));
-    let sourceFile = createSourceFile(
+    let sourceContent;
+    if (App.__Dev_Mode) {
+        let sourceMappingURL = filePathToUrl(path.relative(App.__RunDirName, fileName)) + ".map"
+        sourceContent = `import kix from "kix"; 
+        const s = kix(document.head,{style:""});
+        export default kix(s,${"`" + String(css) + "`"}); 
+        kix(s,"\\n/*# sourceMappingURL=${sourceMappingURL} */");`
+
+
+
+        App.__requestsThreshold.set(sourceMappingURL, map)
+    } else {
+        sourceContent = 'import kix from "kix"\n export default kix(kix.style, `' + String(css) + '\`)';
+    }
+
+    const sourceFile = createSourceFile(
         fileName,
-        'import kix from "kix"\n export default kix(kix.style, `' + css.toString() + '`)' + `
-        console.log(kix)
-        
-        `,
+        sourceContent,
         languageVersion,
         true
     )
-    if (App.__Dev_Mode) {
-        sourceFile = createSourceFile(
-            fileName,
-            `import kix from "kix";
-            const style = KD_(document.head,{style:""});
-            ` + 'export default kix(style, `' + css.toString() + '`);\n' + `
-            KD_(style,"\\n/*# sourceMappingURL=${map.toString()} */`,
-            languageVersion,
-            true
-        )
-    } else {
-        sourceFile = createSourceFile(
-            fileName,
-            'import kix from "kix"\n export default kix(kix.style, `' + css.toString() + '`)',
-            languageVersion,
-            true
-        )
-    }
+ 
     sourceFile.isCSSFile = true
     return sourceFile
 }
+
+
 export const parseCssFile = (fileName, fileContent) => {
+
+    
     return sass.renderSync({
         file: fileName,
         data: resolveQuotesInFileContent(fileContent),
         outputStyle: 'compressed',
+        outFile: fileName,
         importer: function (url, prev, done) {
             var PATH = path.resolve(path.dirname(fileName) + "/" + url)
             if (fs.existsSync(PATH)) {
-              
+
                 return { file: PATH, contents: fs.readFileSync(PATH, "utf8") };
             }
             return { file: url, contents: undefined };
@@ -57,10 +59,11 @@ export const parseCssFile = (fileName, fileContent) => {
                 return new sass.types.String(`url("${url}")`)
             }
         },
-        sourceMapContents:true,
-        sourceMap: true,
-        // sourceMapContents: App.__Dev_Mode,
-        // sourceMap: App.__Dev_Mode,
+        sourceMapContents: App.__Dev_Mode,
+        sourceMap: App.__Dev_Mode,
+        omitSourceMapUrl: true
+
+
     })
 
 }

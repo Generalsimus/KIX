@@ -46,7 +46,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     // lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
     // target: ScriptTarget.ES3,
     suppressOutputPathCheck: true,
-    removeComments: true,
+    // removeComments: true,
     sourceMap: true,
     rootDir: __RunDirName,
     allowJs: true,

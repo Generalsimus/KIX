@@ -7,7 +7,7 @@ import path from "path"
 import fs from "fs"
 import consola from "consola"
 import chokidar from "chokidar"
-import { JSDOM } from "jsdom" 
+import { JSDOM } from "jsdom"
 import { CompileFile } from "./Compiler/CompileFile"
 import { fixLibFileLocationInCompilerOptions } from "../Helpers/utils"
 
@@ -36,10 +36,10 @@ export const ReadIndexHTML = (App) => {
             const HtmlDom = new JSDOM(fs.readFileSync(__IndexHTMLPath, "utf8")),
                 window = HtmlDom.window,
                 document = window.document;
-            document.head[document.head.firstElementChild ? "insertBefore" : "appendChild"](
+            document.body[document.body.firstElementChild ? "insertBefore" : "appendChild"](
                 Object.assign(document.createElement('script'),
                     { src: __ModuleUrlPath }),
-                document.head.firstElementChild
+                document.body.firstElementChild
             )
 
 

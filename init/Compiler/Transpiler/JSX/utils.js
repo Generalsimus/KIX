@@ -8,8 +8,7 @@ import ts, {
     normalizeSlashes,
     SyntaxKind,
     getLocalNameForExternalImport,
-    collectExternalModuleInfo,
-    createIdentifier,
+    collectExternalModuleInfo, 
     SignatureKind,
     createNull
 } from "typescript"

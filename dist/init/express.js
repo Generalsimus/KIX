@@ -16,6 +16,7 @@ const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { po
     const WebSocketServer = new ws_1.default.Server({ server, path: webSocketUrl_1.webSocketUrl });
     app.use(function (req, res, next) {
         res.header("Cache-Control", "no-cache");
+        // console.log("🚀 --> file: express.js --> line 20 --> req.path", req.path);
         if (__requestsThreshold.has(req.path)) {
             res.header("content-type", mime_types_1.default.lookup(req.path) || "text/html");
             res.end(__requestsThreshold.get(req.path));
