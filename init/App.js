@@ -33,7 +33,7 @@ import resolve from "resolve"
 
 
 
-// create default config
+// create default configd
 // console.log(ScriptTarget)
 const __RunDirName = normalizeSlashes(path.resolve("./")),
     __args = yargs(hideBin(process.argv)).argv,

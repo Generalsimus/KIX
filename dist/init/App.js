@@ -30,7 +30,7 @@ const typescript_1 = __importStar(require("typescript"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const utils_js_1 = require("../Helpers/utils.js");
-// create default config
+// create default configd
 // console.log(ScriptTarget)
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",

@@ -23,17 +23,23 @@ const createErrorCode = () => {
         });
     }
     else {
-        let iframeBody = (0, index_1.default)(document.body, {
+        let iframe = (0, index_1.default)(document.body, {
             iframe: [],
             style: `border: none;position: fixed;background: #262626;width: 100%;height: 100%;top: 0;left: 0;z-index:22222222222222222222222;`
-        }).contentDocument.body;
+        });
+        let iframeBody = iframe.contentDocument.body;
         iframeBody.style = "margin: 0px;padding: 0px;";
         ErrorBodyTag = (0, index_1.default)(iframeBody, {
             div: {
                 div: svgCloseIcon,
-                style: `position: absolute;right: 0;top: 0;color: white;margin: 2vw;`
+                style: `position: absolute;right: 0;top: 0;color: white;margin: 20px;cursor:pointer;`,
+                e: {
+                    click: () => {
+                        iframe.remove();
+                    }
+                }
             },
-            style: "padding: 5vw;"
+            style: "padding: 5vw"
         });
     }
 };
@@ -41,13 +47,25 @@ exports.createErrorCode = createErrorCode;
 const svgCloseIcon = {
     svg: [{
             g: [{
-                    path: "",
-                    "fill-rule": "evenodd",
-                    "clip-rule": "evenodd",
-                    d: "M46.1317 45.8683C41.6407 50.3593 41.6407 57.6407 46.1317 62.1317L88 104L46.1662 145.834C41.6752 150.325 41.6752 157.606 46.1662 162.097C50.6572 166.588 57.9386 166.588 62.4297 162.097L104.263 120.263L145.834 161.834C150.325 166.325 157.606 166.325 162.097 161.834C166.588 157.343 166.588 150.061 162.097 145.57L120.527 104L162.132 62.3952C166.623 57.9042 166.623 50.6228 162.132 46.1317C157.641 41.6407 150.359 41.6407 145.868 46.1317L104.263 87.7365L62.3952 45.8683C57.9042 41.3772 50.6228 41.3772 46.1317 45.8683Z",
+                    rect: "",
+                    x: "354",
+                    y: "66.1335",
+                    width: "61",
+                    height: "404",
+                    rx: "30.5",
+                    transform: "rotate(45 354 66.1335)",
+                    fill: "#E33030"
+                }, {
+                    rect: "",
+                    x: "68",
+                    y: "109.134",
+                    width: "61",
+                    height: "404",
+                    rx: "30.5",
+                    transform: "rotate(-45 68 109.134)",
                     fill: "#E33030"
                 }],
-            filter: "url(#filter0_d_18_6)"
+            filter: "url(#filter0_d_1_6)"
         }, {
             defs: [{
                     filter: [{
@@ -61,10 +79,11 @@ const svgCloseIcon = {
                             values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0",
                             result: "hardAlpha"
                         }, {
-                            feOffset: ""
+                            feOffset: "",
+                            dy: "2"
                         }, {
                             feGaussianBlur: "",
-                            stdDeviation: "21"
+                            stdDeviation: "40"
                         }, {
                             feComposite: "",
                             in2: "hardAlpha",
@@ -72,31 +91,31 @@ const svgCloseIcon = {
                         }, {
                             feColorMatrix: "",
                             type: "matrix",
-                            values: "0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0.72 0"
+                            values: "0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"
                         }, {
                             feBlend: "",
                             mode: "normal",
                             in2: "BackgroundImageFix",
-                            result: "effect1_dropShadow_18_6"
+                            result: "effect1_dropShadow_1_6"
                         }, {
                             feBlend: "",
                             mode: "normal",
                             in: "SourceGraphic",
-                            in2: "effect1_dropShadow_18_6",
+                            in2: "effect1_dropShadow_1_6",
                             result: "shape"
                         }],
-                    id: "filter0_d_18_6",
-                    x: "0.763455",
-                    y: "0.5",
-                    width: "206.737",
-                    height: "206.966",
+                    id: "filter0_d_1_6",
+                    x: "0.633514",
+                    y: "0.633514",
+                    width: "463.866",
+                    height: "463.671",
                     filterUnits: "userSpaceOnUse",
                     "color-interpolation-filters": "sRGB"
                 }]
         }],
-    width: "35",
-    height: "35",
-    viewBox: "0 0 208 208",
+    width: "25",
+    height: "25",
+    viewBox: "0 0 465 465",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
 };
