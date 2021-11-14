@@ -1,15 +1,10 @@
-import { SocketControlerFunctions } from "./SocketControlerFunctions"
+import { SocketControlerFunctions } from "./SocketMessageControler"
 import { webSocketHost } from "../index"
 
 
 
 
-export const catchSocketMessages = (event) => {
-    try {
-        const { action, data } = JSON.parse(event.data)
-        SocketControlerFunctions[action](data)
-    } catch (e) { }
-}
+
 
 export const sendWebSocketMessage = (action, data) => {
     const sendMessage = () => {

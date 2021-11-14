@@ -1,16 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendWebSocketMessage = exports.catchSocketMessages = void 0;
-const SocketControlerFunctions_1 = require("./SocketControlerFunctions");
+exports.sendWebSocketMessage = void 0;
 const index_1 = require("../index");
-const catchSocketMessages = (event) => {
-    try {
-        const { action, data } = JSON.parse(event.data);
-        SocketControlerFunctions_1.SocketControlerFunctions[action](data);
-    }
-    catch (e) { }
-};
-exports.catchSocketMessages = catchSocketMessages;
 const sendWebSocketMessage = (action, data) => {
     const sendMessage = () => {
         index_1.webSocketHost.send(JSON.stringify({ action, data }));

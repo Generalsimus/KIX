@@ -4,6 +4,7 @@ import http from "http"
 import open from "open"
 import mimeTypes from "mime-types"
 import { webSocketUrl } from "../main/codeController/webSocket/webSocketUrl"
+import { listenSocketMessages } from "./SocketMessageControler"
 
 export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { port } }) => {
 
@@ -36,17 +37,18 @@ export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOption
 
         // console.log('\x1b[32m%s\x1b[0m',);
     });
+    const socketClientSender = (action = "RESTART_SERVER", data = {}) => {
+        WebSocketServer.clients.forEach(ws => {
+            if (ws.readyState === 1) {
+                ws.send(JSON.stringify({ action, data }))
+            }
+        })
 
+    }
+    listenSocketMessages(WebSocketServer, socketClientSender);
     return {
         WebSocketServer,
-        socketClientSender: (action = "RESTART_SERVER", data = {}) => {
-            WebSocketServer.clients.forEach(ws => {
-                if (ws.readyState === 1) {
-                    ws.send(JSON.stringify({ action, data }))
-                }
-            })
-
-        },
+        socketClientSender: socketClientSender,
         listener
     }
 }
