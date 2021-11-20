@@ -1,15 +1,19 @@
+import { highlighter } from "../../../Helpers/highlighter"
+import { logError } from "../../../Helpers/loger"
 import { App } from "../../../init/App"
+import { cutCodeForHigliting } from "../utils"
 import { decode } from "./decode"
 const { __requestsThreshold } = App
 export const ERROR_CODE = (errorData, socketClientSender) => {
     const mapFile = __requestsThreshold.get(errorData.path + ".map")
+    let ifBreak = false
     if (mapFile) {
         const sourceMapObject = JSON.parse(mapFile)
         const decodedMappingsVlq = decode(sourceMapObject.mappings)
         for (const lineGeneratedCodeIndexs in decodedMappingsVlq) {
             const lineGeneratedCode = parseInt(lineGeneratedCodeIndexs);
             const vlq = decodedMappingsVlq[lineGeneratedCode];
-            let ifBreak = false
+
             for (const [
                 columnInGeneratedCode,
                 correspondingSourceFile,
@@ -17,14 +21,18 @@ export const ERROR_CODE = (errorData, socketClientSender) => {
                 columnNumberInOriginalCode
             ] of vlq) {
                 if ((lineGeneratedCode + 1) === errorData.line) {
-
-                    socketClientSender("ALERT_ERROR", {
+                    const errorInfo = {
                         errorData,
                         ...errorData,
                         fileCode: sourceMapObject.sourcesContent[correspondingSourceFile],
                         column: columnNumberInOriginalCode + 1,
                         line: LineNumberInOriginalCode + 1,
+                    }
+                    logError({
+                        messageText: errorInfo.errorMessage,
+                        errorText: cutCodeForHigliting(errorInfo)
                     })
+                    socketClientSender("ALERT_ERROR", errorInfo)
 
                     ifBreak = true
                     break;
@@ -36,4 +44,12 @@ export const ERROR_CODE = (errorData, socketClientSender) => {
         }
     }
 
+    const jsFile = __requestsThreshold.get(errorData.path)
+    if (!ifBreak && jsFile) {
+        socketClientSender("ALERT_ERROR", {
+            errorData,
+            ...errorData,
+            fileCode: jsFile,
+        })
+    }
 }

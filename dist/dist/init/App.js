@@ -1,20 +1,26 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
+    if (k2 === undefined)
+        k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function () { return m[k]; } });
+}) : (function (o, m, k, k2) {
+    if (k2 === undefined)
+        k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : function (o, v) {
     o["default"] = v;
 });
 var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
+    if (mod && mod.__esModule)
+        return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null)
+        for (var k in mod)
+            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+                __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -34,7 +40,6 @@ const utils_js_1 = require("../Helpers/utils.js");
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
     "outDir": "./",
-    checkJs: true,
     // "noImplicitUseStrict": true,
     // alwaysStrict: false,
     // port: 0,
@@ -46,7 +51,8 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     // lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
     // target: ScriptTarget.ES3,
     // removeComments: true, 
-    //////////////////////////////
+    // / ///////////////////////////
+    exclude: [],
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
     sourceMap: true,
@@ -57,8 +63,6 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     suppressOutputPathCheck: true,
     forceConsistentCasingInFileNames: true,
     watch: true,
-    jsx: "preserve",
-    // jsx: "react",
     // rootDir: __RunDirName,
     // baseUrl: path.join(__dirname, "../../"),
     // typeRoots: [

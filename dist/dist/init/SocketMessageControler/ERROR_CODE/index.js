@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ERROR_CODE = void 0;
-const loger_1 = require("../../../Helpers/loger");
 const App_1 = require("../../../init/App");
-const utils_1 = require("../utils");
 const decode_1 = require("./decode");
 const { __requestsThreshold } = App_1.App;
 const ERROR_CODE = (errorData, socketClientSender) => {
@@ -17,18 +15,13 @@ const ERROR_CODE = (errorData, socketClientSender) => {
             const vlq = decodedMappingsVlq[lineGeneratedCode];
             for (const [columnInGeneratedCode, correspondingSourceFile, LineNumberInOriginalCode, columnNumberInOriginalCode] of vlq) {
                 if ((lineGeneratedCode + 1) === errorData.line) {
-                    const errorInfo = {
+                    socketClientSender("ALERT_ERROR", {
                         errorData,
                         ...errorData,
                         fileCode: sourceMapObject.sourcesContent[correspondingSourceFile],
                         column: columnNumberInOriginalCode + 1,
                         line: LineNumberInOriginalCode + 1,
-                    };
-                    (0, loger_1.logError)({
-                        messageText: errorInfo.errorMessage,
-                        errorText: (0, utils_1.cutCodeForHigliting)(errorInfo)
                     });
-                    socketClientSender("ALERT_ERROR", errorInfo);
                     ifBreak = true;
                     break;
                 }

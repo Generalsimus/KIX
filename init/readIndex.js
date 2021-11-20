@@ -10,6 +10,8 @@ import chokidar from "chokidar"
 import { JSDOM } from "jsdom"
 import { CompileFile } from "./Compiler/CompileFile"
 import { fixLibFileLocationInCompilerOptions } from "../Helpers/utils"
+import { __compiledFilesThreshold } from "./Compiler/CompileFile"
+
 
 export const ReadIndexHTML = (App) => {
     const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions } = App
@@ -21,15 +23,12 @@ export const ReadIndexHTML = (App) => {
     }
     return {
         watchIndexHTML() {
-            chokidar.watch(__IndexHTMLPath).on('add', path => {
+            const watchChange = () => {
+                __compiledFilesThreshold.clear();
                 __requestsThreshold.clear();
-                this.readJsDomHTML()
-            }).on('change', path => {
-                __requestsThreshold.clear();
-                this.readJsDomHTML()
-            }).on('unlink', () => {
-                __requestsThreshold.clear();
-            });
+            }
+            // chokidar.watch(__IndexHTMLPath).on('add', watchChange).on('change', watchChange).on('unlink', () => watchChange);.
+            chokidar.watch(__IndexHTMLPath).on('all', watchChange)
         },
 
         readJsDomHTML() {

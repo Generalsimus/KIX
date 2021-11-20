@@ -13,6 +13,7 @@ export const createErrorCode = ({
     line,
     errorMessage,
     column,
+    path,
     url
 }) => {
     const errorLine = line;
@@ -58,7 +59,7 @@ export const createErrorCode = ({
             h2: errorMessage,
             style: "color: #e33030;"
         }, {
-            div: `at (${url}:${line}:${column})`,
+            div: `at (${path}:${line}:${column})`,
             style: "color: #59769b;word-break: break-word;margin: 1vw 0;"
         }, {
             div: {

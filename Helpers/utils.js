@@ -18,22 +18,22 @@ import fs, {
     existsSync
 } from "fs"
 import { transpilers } from "../init/Compiler/Transpiler/Module"
-import path from "path/posix"
+import path from "path"
 import { App } from "../init/App"
 import tsModule from 'typescript/lib/tsserverlibrary';
 import { setServers } from "dns"
 import createCssSourceFile from "./createCssSourceFile"
 
 export const deepAssign = (target, ...sources) => {
-    for (const source of sources) {
-        for (let k in source) {
-            let vs = source[k],
-                vt = target[k]
-            if (Object(vs) == vs && Object(vt) === vt) {
-                target[k] = deepAssign(vt, vs)
-                continue
+    for (let source of sources) {
+        for (let key in source) {
+            if (source.hasOwnProperty(key)) {
+                if (source[key] && typeof source[key] === "object") {
+                    target[key] = deepAssign(target[key] || {}, source[key]);
+                } else {
+                    target[key] = source[key];
+                }
             }
-            target[k] = source[k]
         }
     }
     return target
@@ -98,30 +98,31 @@ export const createHost = (__compilerOptions) => {
                     // }
                     // sourceFile = getSourceFileByExtName(fileName, languageVersion)
                     // return FilesThree.set(fileName, sourceFile), sourceFile
+
                     return FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion)
                 }
             },
             resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
-                // console.log({ resolved: loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader) })
+
                 return loadWithLocalCache(Debug.checkEachDefined(moduleNames), containingFile, redirectedReference, Module_loader);
             },
             resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
             deleteFileinThree: (filesThreeLocationPath) => (FilesThree.delete(filesThreeLocationPath)),
-            // setFileinThree: (key, file) => (FilesThree.set(key, file)),
-            getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "/../node_modules/typescript/lib/")),
         })
 
     return Host
 
 }
+
 export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
     const libDirectory = path.dirname(defaultLibFileName)
-    const newLibs = new Set([defaultLibFileName])
+    const newLibs = new Set([defaultLibFileName, normalizeSlashes(path.join(__dirname, "../../kix.lib.d.ts"))])
 
     if (compilerOptions.lib) {
         for (const lib of compilerOptions.lib) {
-            const libFilePath = path.join(libDirectory, `/lib.${lib.toLowerCase()}.d.ts`)
+            const libFilePath = path.join(libDirectory, `./lib.${lib.toLowerCase()}.d.ts`)
+            // console.log("🚀 --> file: utils.js --> line 127 --> fixLibFileLocationInCompilerOptions --> libFilePath", libFilePath)
             if (fs.existsSync(libFilePath)) {
                 newLibs.add(normalizeSlashes(libFilePath))
             }
@@ -131,6 +132,8 @@ export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     }
 
     compilerOptions.lib = [...newLibs]
+    // compilerOptions.lib = undefined
+    // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions
 }
 
@@ -185,5 +188,7 @@ export const createCancellationToken = () => {
 
 
 export const filePathToUrl = (filePath) => {
-    return  ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "/")
+
+    return ("./" + filePath).replace(/(^[\.\.\/]+)|([\\]+)/g, "/")
+    // return ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "\\")
 }

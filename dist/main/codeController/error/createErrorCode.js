@@ -9,7 +9,7 @@ const prism_1 = __importDefault(require("./prismjs/prism"));
 const prismjsCSS_1 = require("./prismjs/prismjsCSS");
 const svgCloseIcon_1 = require("./svgCloseIcon");
 let ErrorBodyTag;
-const createErrorCode = ({ fileCode, line, errorMessage, column, url }) => {
+const createErrorCode = ({ fileCode, line, errorMessage, column, path, url }) => {
     const errorLine = line;
     const fileSplitCode = fileCode.split(/\r?\n/);
     const slicedCode = fileSplitCode.slice(Math.max(errorLine - 5, 0), 10 + Math.max(errorLine - 5, 0));
@@ -50,7 +50,7 @@ const createErrorCode = ({ fileCode, line, errorMessage, column, url }) => {
                 h2: errorMessage,
                 style: "color: #e33030;"
             }, {
-                div: `at (${url}:${line}:${column})`,
+                div: `at (${path}:${line}:${column})`,
                 style: "color: #59769b;word-break: break-word;margin: 1vw 0;"
             }, {
                 div: {

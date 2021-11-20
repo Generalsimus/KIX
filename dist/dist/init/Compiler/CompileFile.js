@@ -13,7 +13,6 @@ const resolve_1 = __importDefault(require("resolve"));
 const utils_2 = require("./Transpiler/utils");
 const NodeModules_1 = require("./Transpiler/NodeModules");
 const index_1 = require("./Transpiler/JSX/index");
-const loger_1 = require("../../Helpers/loger");
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App_1.App;
 const { resetFilesThree } = __Host;
 let increm = 0;
@@ -22,14 +21,12 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
     let oldProgram;
     const outFile = path_1.default.relative(__RunDirName, FilePath), __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), REQUEST_PATH = (0, utils_1.filePathToUrl)(outFile), MAP_REQUEST_PATH = REQUEST_PATH + ".map", changeFileCallback = () => {
-        (0, loger_1.clareLog)({
-            "\nGenerating browser application bundles...": "yellow"
-        });
+        // console.clear()
+        // console.log("🚀 --> file: utils.js --> line 69 --> increm", ++increm);
         compilerOptions.cancellationToken = (0, utils_1.createCancellationToken)();
         oldProgram = (0, typescript_1.createProgram)(compilerOptions.rootNames, compilerOptions, __Host, oldProgram);
-        exports.__compiledFilesThreshold.set(FilePath, oldProgram);
-        // console.log("🚀 --> file: CompileFile.js --> line 49 --> CompileFile --> getProgramDiagnostics(oldProgram)", getProgramDiagnostics(oldProgram))
         oldProgram.emit(undefined /*sourceFile*/, writeFileCallback /*writeFileCallback*/, undefined /*cancellationToken*/, undefined /*emitOnlyDtsFiles*/, transformers /*transformers*/);
+        exports.__compiledFilesThreshold.set(FilePath, oldProgram);
         // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
         if (resetModules) {
             const Modules = new Set(defaultModules);
@@ -71,7 +68,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         else if (ext === ".js") {
             const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`;
             __requestsThreshold.set(REQUEST_PATH, Module_Text);
-            // console.log(Module_Text.length)
+            console.log(Module_Text);
         }
     };
     // console.log("🚀 --> file: CompileFile.js --> line 79 --> CompileFile --> compilerOptions", compilerOptions)

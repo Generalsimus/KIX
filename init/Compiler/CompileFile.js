@@ -10,7 +10,8 @@ import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler
 import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
 import fs from "fs"
-
+import { getProgramDiagnostics } from "../SocketMessageControler/utils"
+import { clareLog, log } from "../../Helpers/loger"
 
 
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
@@ -22,18 +23,20 @@ const { resetFilesThree } = __Host
 
 
 let increm = 0;
+export const __compiledFilesThreshold = new Map();
 export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
     let oldProgram;
     const outFile = path.relative(__RunDirName, FilePath),
         __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
-        REQUEST_PATH =  filePathToUrl(outFile),
+        REQUEST_PATH = filePathToUrl(outFile),
         MAP_REQUEST_PATH = REQUEST_PATH + ".map",
         changeFileCallback = () => {
+            clareLog({
+                "\nGenerating browser application bundles...": "yellow"
+            })
 
-            // console.clear()
-            console.log("🚀 --> file: utils.js --> line 69 --> increm", ++increm);
 
             compilerOptions.cancellationToken = createCancellationToken()
 
@@ -43,6 +46,9 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
                 __Host,
                 oldProgram
             );
+            __compiledFilesThreshold.set(FilePath, oldProgram)
+
+            // console.log("🚀 --> file: CompileFile.js --> line 49 --> CompileFile --> getProgramDiagnostics(oldProgram)", getProgramDiagnostics(oldProgram))
             oldProgram.emit(
                 undefined /*sourceFile*/,
                 writeFileCallback /*writeFileCallback*/,
@@ -50,9 +56,12 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
                 undefined /*emitOnlyDtsFiles*/,
                 transformers /*transformers*/
             )
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
             if (resetModules) {
                 const Modules = new Set(defaultModules)
+
                 for (const ModuleFilePath of HTMLFilePaths) {
+
                     ModuleFilePath && getModuleFiles(ModulesThree.get(ModuleFilePath), Modules)
                 }
                 resetModules = false
@@ -63,7 +72,10 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 
             }
             // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram);
-            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram.getGlobalDiagnostics());
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getGlobalDiagnostics", oldProgram.getGlobalDiagnostics());
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
+            // services.getSyntacticDiagnostics(LOCATION).concat(oldProgram.getSemanticDiagnostics(LOCATION))
+            // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getSemanticDiagnostics());
 
             resetFilesThree(oldProgram.getFilesByNameMap())
         },
@@ -96,9 +108,10 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             } else if (ext === ".js") {
                 const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
                 __requestsThreshold.set(REQUEST_PATH, Module_Text)
-                console.log(Module_Text)
+                // console.log(Module_Text.length)
             }
         };
+    // console.log("🚀 --> file: CompileFile.js --> line 79 --> CompileFile --> compilerOptions", compilerOptions)
     // console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
     // console.log("🚀 --> file: CompileFile.js --> line 97 --> CompileFile --> __dirname", __dirname);
     // console.log("🚀 --> file: CompileFile.js --> line 15 --> __Host", __Host );

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// const { App } = require("./init/App")
+// const { App } = require("./dist/init/App")
 import { App } from "./init/App"
 
 
