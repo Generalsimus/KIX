@@ -57,7 +57,7 @@ const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requeste
         Module_1.visited_SourceFiles.delete(NODE.originalFileName);
         requesteCancell();
         changeFileCallback();
-        App_1.App.server.socketClientSender();
+        App_1.App.server.socketClientSender("RESTART_SERVER", {});
     });
 };
 exports.watchModuleFileChange = watchModuleFileChange;

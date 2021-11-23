@@ -14,9 +14,9 @@ import { __compiledFilesThreshold } from "./Compiler/CompileFile"
 
 
 export const ReadIndexHTML = (App) => {
-    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions } = App
+    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions, __IndexHTMLRequesPaths } = App
     const __IndexHTMLPath = path.resolve("./index.html")
-    const __IndexHTMLRequesPaths = ["/", "/index.html"]
+
 
     if (!fs.existsSync(__IndexHTMLPath)) {
         throw consola.error("Couldn't find index.html'")

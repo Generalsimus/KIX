@@ -84,7 +84,7 @@ export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { r
         visited_SourceFiles.delete(NODE.originalFileName)
         requesteCancell()
         changeFileCallback()
-        App.server.socketClientSender()
+        App.server.socketClientSender("RESTART_SERVER", {})
     });
 }
 
@@ -264,7 +264,7 @@ export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
         return
     }
 
-    const propNode = factory.createNumericLiteral(ModuleData.Module_INDEX) 
+    const propNode = factory.createNumericLiteral(ModuleData.Module_INDEX)
     return ModuleData.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
         [compilerOptions.__Import_Module_Name, propNode] :
         ["window", factory.createStringLiteral(ModuleData.__Module_Window_Name), propNode]

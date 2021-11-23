@@ -30,6 +30,8 @@ const typescript_1 = __importStar(require("typescript"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const utils_js_1 = require("../Helpers/utils.js");
+const build_js_1 = require("./build.js");
+const createTemplate_js_1 = require("./createTemplate/createTemplate.js");
 // create default config 
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
@@ -66,8 +68,10 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     // __dirname,
     // path.join(__dirname, "../../")
     // ],
-    // types: [__dirname, path.join(__dirname, "../../")],
-    __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
+    // types: [__dirname, path.join(__dirname, "../../")], 
+    // resetServerDate: () => {
+    //     App.server.socketClientSender("RESTART_SERVER", {})
+    // },
     "noImplicitAny": true,
     // "paths": {
     //     "kix": [__dirname] // this mapping is relative to "baseUrl" 
@@ -79,7 +83,9 @@ __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFil
 // read tsConfig.json file 
 __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
 /////////////////////////host.getDefaultLibFileName(options);
-__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions, {
+    __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
+}), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 // console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", __compilerOptions)
 exports.App = {
     __RunDirName: __RunDirName,
@@ -92,13 +98,27 @@ exports.App = {
     __requestsThreshold: new Map(),
     __TranspilingMeta,
     __ModuleUrlPath,
+    __IndexHTMLRequesPaths: ["/", "/index.html"],
+    priorityCompilerOptions,
+    defaultCompilerOptions,
     init() {
-        if (!this.__compilerOptions.fileName) {
-            const { initServer } = require("./express.js");
+        const runBuild = __args._.includes("build");
+        const runStart = __args._.includes("start");
+        const runNew = __args._.includes("new");
+        if (runBuild || runStart) {
+            if (runStart) {
+                const { initServer } = require("./express.js");
+                this.server = initServer(this);
+            }
+            if (runBuild) {
+                (0, build_js_1.buildApp)();
+            }
             const { ReadIndexHTML } = require("./readIndex");
-            this.server = initServer(this);
             const indexHTMLReader = ReadIndexHTML(this);
             indexHTMLReader.readJsDomHTML();
+        }
+        if (runNew) {
+            (0, createTemplate_js_1.createTemplate)();
         }
     },
 };

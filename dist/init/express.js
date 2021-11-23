@@ -54,7 +54,7 @@ const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { po
         // console.save(`\nYou can now view in the browser: `, "white", http_url, 'blue', `\nTo create a production build, use: `, "white", 'npm build', 'blue')
         // console.log('\x1b[32m%s\x1b[0m',);
     });
-    const socketClientSender = (action = "RESTART_SERVER", data = {}) => {
+    const socketClientSender = (action, data) => {
         WebSocketServer.clients.forEach(ws => {
             if (ws.readyState === 1) {
                 ws.send(JSON.stringify({ action, data }));

@@ -39,11 +39,6 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             resetModules = false;
             Compile_Node_Modules([...Modules], compilerOptions);
         }
-        // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> oldProgram", oldProgram);
-        // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getGlobalDiagnostics", oldProgram.getGlobalDiagnostics());
-        // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
-        // services.getSyntacticDiagnostics(LOCATION).concat(oldProgram.getSemanticDiagnostics(LOCATION))
-        // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getSemanticDiagnostics());
         resetFilesThree(oldProgram.getFilesByNameMap());
     }, compilerOptions = {
         ...__compilerOptions,
@@ -71,6 +66,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         else if (ext === ".js") {
             const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`;
             __requestsThreshold.set(REQUEST_PATH, Module_Text);
+            // console.log(Module_Text)
             // console.log(Module_Text.length)
         }
     };
@@ -83,6 +79,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 };
 exports.CompileFile = CompileFile;
 const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
+    console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths);
     let Node_oldProgram;
     const transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, NodeModules_1.NodeModuleTransformersBefore], [Module_1.ModuleTransformersAfter]), __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
     compilerOptions = {

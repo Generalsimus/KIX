@@ -14,9 +14,8 @@ const CompileFile_1 = require("./Compiler/CompileFile");
 const utils_1 = require("../Helpers/utils");
 const CompileFile_2 = require("./Compiler/CompileFile");
 const ReadIndexHTML = (App) => {
-    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions } = App;
+    const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions, __IndexHTMLRequesPaths } = App;
     const __IndexHTMLPath = path_1.default.resolve("./index.html");
-    const __IndexHTMLRequesPaths = ["/", "/index.html"];
     if (!fs_1.default.existsSync(__IndexHTMLPath)) {
         throw consola_1.default.error("Couldn't find index.html'");
     }

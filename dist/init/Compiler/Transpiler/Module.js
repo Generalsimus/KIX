@@ -25,6 +25,7 @@ const createFactoryCode_1 = require("./createFactoryCode");
 const utils_1 = require("../../../Helpers/utils");
 const utils_2 = require("./utils");
 const amdBodyVisitor_1 = require("./amdBodyVisitor");
+const App_1 = require("../../App");
 // console.log("🚀 ---> file: Module.js ---> line 16 ---> TransformFlags", TransformFlags)
 const { ContainsDynamicImport } = typescript_1.TransformFlags;
 const { createStringLiteral, createCallExpression, createUniqueName, createExpressionStatement, createParenthesizedExpression, createReturnStatement, createIdentifier, } = typescript_1.factory;
@@ -36,7 +37,9 @@ const { createStringLiteral, createCallExpression, createUniqueName, createExpre
 // let incremm = 0
 exports.visited_SourceFiles = new Map();
 exports.ModuleTransformersBefore = {
-    [typescript_1.SyntaxKind.ExportKeyword]: () => { },
+    [typescript_1.SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
+        // console.log("🚀 --> file: Module.js --> line 49 --> NODE", NODE)/
+    },
     [typescript_1.SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
         // console.log("🚀 --> file: Module.js --> line 61 --> NODE", Object.keys(NODE));
         // return NODE
@@ -60,12 +63,12 @@ exports.ModuleTransformersBefore = {
         // console.log("🚀 --> file: Module.js --> line 75 --> CTX", CTX.getEmitResolver());
         const moduleInfo = (0, utils_2.getOrSetModuleInfo)(NODE.originalFileName, compilerOptions);
         CTX.ModuleColection = (0, utils_2.configModules)(NODE, moduleInfo, compilerOptions);
-        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher) {
+        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher && App_1.App.__Dev_Mode) {
             (0, utils_2.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
         }
         try {
             if (typescript_1.default.isJsonSourceFile(NODE)) {
-                NODE = typescript_1.default.updateSourceFileNode(NODE, [createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Property_Access_Equals_Token(CREATE_Object_WiTH_String_Keys([
+                NODE = typescript_1.default.updateSourceFileNode(NODE, [createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Property_Access_Equals_Token(createFactoryCode_1.generateFactory.CREATE_Object_WiTH_String_Keys([
                         [createIdentifier("default"), ...NODE.statements]
                     ]), [compilerOptions.__Import_Module_Name, (0, utils_1.getColumnName)(moduleInfo.Module_INDEX)]))]);
                 NODE.scriptKind = typescript_1.ScriptKind.Unknown;

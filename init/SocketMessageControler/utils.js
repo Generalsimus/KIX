@@ -87,7 +87,8 @@ export const cutCodeForHigliting = (errorInfo) => {
         highlighter(SPLITED).split('\n').map((v, index) => {
 
             let leng = (String(Math.max(line - 2, line + 2)).length - String(line + index).length)
-            let left_join = Array.from(Array(leng), x => " ").join("")
+            // console.log("🚀 --> file: utils.js --> line 91 --> highlighter --> leng", leng)
+            let left_join = Array.from(Array(Math.max(0, leng)), x => " ").join("")
 
 
 

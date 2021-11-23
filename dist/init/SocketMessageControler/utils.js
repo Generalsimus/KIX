@@ -79,7 +79,8 @@ const cutCodeForHigliting = (errorInfo) => {
     return `\nat (${filePath}:${line}:${column})` + "\n " +
         (0, highlighter_1.highlighter)(SPLITED).split('\n').map((v, index) => {
             let leng = (String(Math.max(line - 2, line + 2)).length - String(line + index).length);
-            let left_join = Array.from(Array(leng), x => " ").join("");
+            // console.log("🚀 --> file: utils.js --> line 91 --> highlighter --> leng", leng)
+            let left_join = Array.from(Array(Math.max(0, leng)), x => " ").join("");
             return chalk_1.default[index ? "grey" : "redBright"](left_join + ((line) + index) + '|' + (index ? "  " : "> ")) + v;
         }).join('\n');
 };

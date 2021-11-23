@@ -33,6 +33,8 @@ import {
     transpilerAfter
 } from "./Compiler/Transpiler/Module.js"
 import resolve from "resolve"
+import { buildApp } from "./build.js"
+import { createTemplate } from "./createTemplate/createTemplate.js"
 
 
 
@@ -75,8 +77,10 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         // __dirname,
         // path.join(__dirname, "../../")
         // ],
-        // types: [__dirname, path.join(__dirname, "../../")],
-        __Node_Module_Window_Name: getModuleWindowName(),
+        // types: [__dirname, path.join(__dirname, "../../")], 
+        // resetServerDate: () => {
+        //     App.server.socketClientSender("RESTART_SERVER", {})
+        // },
         "noImplicitAny": true,
         // "paths": {
         //     "kix": [__dirname] // this mapping is relative to "baseUrl" 
@@ -94,7 +98,10 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
             defaultCompilerOptions,
             __TsConfig.compilerOptions,
             __packageJson.compilerOptions,
-            priorityCompilerOptions
+            priorityCompilerOptions,
+            {
+                __Node_Module_Window_Name: getModuleWindowName(),
+            }
         ),
         __diagnostics
     ),
@@ -117,25 +124,38 @@ export const App = {
     __requestsThreshold: new Map(),
     __TranspilingMeta,
     __ModuleUrlPath,
+    __IndexHTMLRequesPaths: ["/", "/index.html"],
+    priorityCompilerOptions,
+    defaultCompilerOptions,
     init() {
+        const runBuild = __args._.includes("build")
+        const runStart = __args._.includes("start")
+        const runNew = __args._.includes("new")
 
-        if (!this.__compilerOptions.fileName) {
+        if (runBuild || runStart) {
+            if (runStart) {
+                const {
+                    initServer
+                } = require("./express.js")
 
-            const {
-                initServer
-            } = require("./express.js")
+                this.server = initServer(this)
+            }
+            if (runBuild) {
+                buildApp()
+            }
             const {
                 ReadIndexHTML
             } = require("./readIndex")
-
-            this.server = initServer(this)
             const indexHTMLReader = ReadIndexHTML(this)
 
             indexHTMLReader.readJsDomHTML()
+        }
 
+        if (runNew) {
+            createTemplate()
         }
 
     },
 
 
-}
+} 

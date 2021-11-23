@@ -59,7 +59,7 @@ export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOption
 
         // console.log('\x1b[32m%s\x1b[0m',);
     });
-    const socketClientSender = (action = "RESTART_SERVER", data = {}) => {
+    const socketClientSender = (action, data) => {
         WebSocketServer.clients.forEach(ws => {
             if (ws.readyState === 1) {
                 ws.send(JSON.stringify({ action, data }))

@@ -19,7 +19,7 @@ import resolve from 'resolve'
 import path from "path/posix"
 import chokidar from "chokidar"
 import { FilesThree, getColumnName } from "../../../Helpers/utils"
-import { configModules, getOrSetModuleInfo, ModulesThree, watchModuleFileChange } from "./utils"
+import { configModules, geModuleLocationMeta, getOrSetModuleInfo, ModulesThree, watchModuleFileChange } from "./utils"
 import { topLevelVisitor } from "./amdBodyVisitor"
 import { App } from "../../App"
 
@@ -45,7 +45,10 @@ const {
 // let incremm = 0
 export const visited_SourceFiles = new Map()
 export const ModuleTransformersBefore = {
-    [SyntaxKind.ExportKeyword]: () => { },
+    [SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
+        // console.log("🚀 --> file: Module.js --> line 49 --> NODE", NODE)/
+
+    },
     [SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
         // console.log("🚀 --> file: Module.js --> line 61 --> NODE", Object.keys(NODE));
 
@@ -75,7 +78,7 @@ export const ModuleTransformersBefore = {
 
         CTX.ModuleColection = configModules(NODE, moduleInfo, compilerOptions)
 
-        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher) {
+        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher && App.__Dev_Mode) {
             watchModuleFileChange(NODE, moduleInfo, compilerOptions)
         }
 
@@ -83,7 +86,7 @@ export const ModuleTransformersBefore = {
 
             if (ts.isJsonSourceFile(NODE)) {
 
-                NODE = ts.updateSourceFileNode(NODE, [createExpressionStatement(generateFactory.CREATE_Property_Access_Equals_Token(CREATE_Object_WiTH_String_Keys([
+                NODE = ts.updateSourceFileNode(NODE, [createExpressionStatement(generateFactory.CREATE_Property_Access_Equals_Token(generateFactory.CREATE_Object_WiTH_String_Keys([
                     [createIdentifier("default"), ...NODE.statements]
                 ]), [compilerOptions.__Import_Module_Name, getColumnName(moduleInfo.Module_INDEX)]))])
 
