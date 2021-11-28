@@ -10,7 +10,7 @@ export const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true
     for (const [compiledFilePath, program] of __compiledFilesThreshold) {
         const diagnostics = getProgramDiagnostics(program);
-        // const diagnostics = [];
+
 
         for (var diagnose of diagnostics) {
             if (diagnose.file) {
@@ -22,11 +22,12 @@ export const sendFileDiagnostics = (connectedWs, socketClientSender) => {
 
                 const errorInfo = {
                     path: filePathToUrl(path.relative(App.__RunDirName, diagnose.file.originalFileName)),
-                    errorMessage: diagnose.messageText,
+                    errorMessage: diagnose.messageText?.messageText || diagnose.messageText,
                     fileCode: diagnose.file.text,
                     column: character + 1,
                     line: line + 1,
                 }
+
                 logError({
                     messageText: errorInfo.errorMessage,
                     errorText: cutCodeForHigliting(errorInfo)

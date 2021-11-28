@@ -1,20 +1,26 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
+    if (k2 === undefined)
+        k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function () { return m[k]; } });
+}) : (function (o, m, k, k2) {
+    if (k2 === undefined)
+        k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : function (o, v) {
     o["default"] = v;
 });
 var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
+    if (mod && mod.__esModule)
+        return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null)
+        for (var k in mod)
+            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+                __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -103,8 +109,7 @@ const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const libDirectory = path_1.default.dirname(defaultLibFileName);
     const newLibs = new Set([defaultLibFileName, (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../kix.lib.d.ts"))]);
     if (compilerOptions.lib) {
-        for (const libKey in compilerOptions.lib) {
-            const lib = compilerOptions.lib[libKey];
+        for (const lib of compilerOptions.lib) {
             const libFilePath = path_1.default.join(libDirectory, `./lib.${lib.toLowerCase()}.d.ts`);
             // console.log("🚀 --> file: utils.js --> line 127 --> fixLibFileLocationInCompilerOptions --> libFilePath", libFilePath)
             if (fs_1.default.existsSync(libFilePath)) {
@@ -116,7 +121,6 @@ const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
         newLibs.add(defaultLibFileName);
     }
     compilerOptions.lib = [...newLibs];
-    console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib);
     // compilerOptions.lib = undefined
     // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions;

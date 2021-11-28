@@ -120,7 +120,8 @@ export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const newLibs = new Set([defaultLibFileName, normalizeSlashes(path.join(__dirname, "../../kix.lib.d.ts"))])
 
     if (compilerOptions.lib) {
-        for (const lib of compilerOptions.lib) {
+        for (const libKey in compilerOptions.lib) {
+            const lib = compilerOptions.lib[libKey]
             const libFilePath = path.join(libDirectory, `./lib.${lib.toLowerCase()}.d.ts`)
             // console.log("🚀 --> file: utils.js --> line 127 --> fixLibFileLocationInCompilerOptions --> libFilePath", libFilePath)
             if (fs.existsSync(libFilePath)) {
@@ -132,6 +133,7 @@ export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     }
 
     compilerOptions.lib = [...newLibs]
+    console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     // compilerOptions.lib = undefined
     // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions
@@ -149,12 +151,16 @@ export const getImportModuleName = () => `________KIX__IMPORT__MODULE__${new Dat
 
 
 
-export const getModuleFiles = (Module, ModuleFiles) => {
+export const getModuleFiles = (Module, ModuleFiles, parsedPaths = new Set()) => {
+
     for (const MODULE_PATH in Module.NodeModules) {
         ModuleFiles.add(MODULE_PATH)
     }
     for (const LocalModulesPathKey in Module.LocalModules) {
-        getModuleFiles(Module.LocalModules[LocalModulesPathKey], ModuleFiles)
+        if (!parsedPaths.has(LocalModulesPathKey)) {
+            parsedPaths.add(LocalModulesPathKey)
+            getModuleFiles(Module.LocalModules[LocalModulesPathKey], ModuleFiles, parsedPaths)
+        }
     }
 }
 
