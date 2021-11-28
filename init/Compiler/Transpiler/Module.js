@@ -62,7 +62,7 @@ export const ModuleTransformersBefore = {
             return visited_NODE
         }
 
-        // console.log("🚀 --> file: Module.js --> line 65 --> NODE.originalFileName", visited_SourceFiles.keys(), NODE.originalFileName, ++incremm);
+        // console.log("🚀 --> file: Module.js --> line 65 --> NODE.originalFileName", NODE.originalFileName);
         // console.log("🚀 --> file: Module.js --> line 60 --> NODE.before_visited", NODE.before_visited);
 
         const compilerOptions = CTX.getCompilerOptions()

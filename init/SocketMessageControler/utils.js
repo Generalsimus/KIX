@@ -8,6 +8,7 @@ import Chalk from "chalk"
 
 export const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true
+    console.log("🚀 --> file: utils.js --> line 12 --> sendFileDiagnostics --> __compiledFilesThreshold", __compiledFilesThreshold)
     for (const [compiledFilePath, program] of __compiledFilesThreshold) {
         const diagnostics = getProgramDiagnostics(program);
 

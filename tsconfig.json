@@ -76,6 +76,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "demoTemplates"
+    "demoTemplates",
+    "lib"
   ]
 }

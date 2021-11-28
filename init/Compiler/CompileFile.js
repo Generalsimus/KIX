@@ -22,7 +22,7 @@ const { resetFilesThree } = __Host
 
 
 
-let increm = 0;
+// let increm = 0;
 export const __compiledFilesThreshold = new Map();
 export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
@@ -34,7 +34,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         MAP_REQUEST_PATH = REQUEST_PATH + ".map",
         changeFileCallback = () => {
             clareLog({
-                "\nGenerating browser application bundles...": "yellow"
+                "Generating browser application bundles...": "yellow"
             })
 
 
@@ -153,7 +153,9 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 
 
 const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
-    console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+// console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
     let Node_oldProgram;
     const transformers = getTransformersObject([ModuleTransformersBefore, NodeModuleTransformersBefore], [ModuleTransformersAfter]),
         __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;

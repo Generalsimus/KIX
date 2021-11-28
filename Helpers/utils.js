@@ -1,11 +1,7 @@
 import {
-    ScriptKind,
-    createPrinter,
     parseConfigFileTextToJson,
     createSourceFile,
     createCompilerHost,
-    SyntaxKind,
-    visitEachChild,
     resolveModuleName,
     createGetCanonicalFileName,
     createModuleResolutionCache,
@@ -17,11 +13,8 @@ import fs, {
     readFileSync,
     existsSync
 } from "fs"
-import { transpilers } from "../init/Compiler/Transpiler/Module"
 import path from "path"
-import { App } from "../init/App"
 import tsModule from 'typescript/lib/tsserverlibrary';
-import { setServers } from "dns"
 import createCssSourceFile from "./createCssSourceFile"
 
 export const deepAssign = (target, ...sources) => {
@@ -108,6 +101,8 @@ export const createHost = (__compilerOptions) => {
             },
             resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
             deleteFileinThree: (filesThreeLocationPath) => (FilesThree.delete(filesThreeLocationPath)),
+            getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../lib/s")),
+
         })
 
     return Host
@@ -116,7 +111,8 @@ export const createHost = (__compilerOptions) => {
 
 export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
-    const libDirectory = path.dirname(defaultLibFileName)
+    // const libDirectory = path.dirname(defaultLibFileName) 
+    const libDirectory = normalizeSlashes(path.resolve(__dirname + "./../lib"))
     const newLibs = new Set([defaultLibFileName, normalizeSlashes(path.join(__dirname, "../../kix.lib.d.ts"))])
 
     if (compilerOptions.lib) {
@@ -133,7 +129,7 @@ export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     }
 
     compilerOptions.lib = [...newLibs]
-    console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
+    // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     // compilerOptions.lib = undefined
     // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions

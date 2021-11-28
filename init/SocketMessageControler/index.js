@@ -8,7 +8,6 @@ export const SocketControlerFunctions = {
 export const listenSocketMessages = (ws, socketClientSender) => {
 
 
-
     ws.on('connection', function (connectedWs) {
         sendFileDiagnostics(connectedWs, socketClientSender)
         connectedWs.on('message', (message) => {

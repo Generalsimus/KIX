@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="" rel="noopener">
+  <a href="https://kixjs.ml/" rel="noopener">
  <img width=200px src="./logo.png" alt="Project logo"></a>
 </p>
 

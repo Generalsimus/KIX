@@ -94,13 +94,15 @@ const createHost = (__compilerOptions) => {
         },
         resetFilesThree: (newFilesMap) => (exports.FilesThree = new Map([...exports.FilesThree, ...newFilesMap])),
         deleteFileinThree: (filesThreeLocationPath) => (exports.FilesThree.delete(filesThreeLocationPath)),
+        getDefaultLibLocation: () => (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../lib/s")),
     });
     return Host;
 };
 exports.createHost = createHost;
 const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
-    const libDirectory = path_1.default.dirname(defaultLibFileName);
+    // const libDirectory = path.dirname(defaultLibFileName) 
+    const libDirectory = (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../lib"));
     const newLibs = new Set([defaultLibFileName, (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../kix.lib.d.ts"))]);
     if (compilerOptions.lib) {
         for (const libKey in compilerOptions.lib) {
@@ -116,7 +118,7 @@ const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
         newLibs.add(defaultLibFileName);
     }
     compilerOptions.lib = [...newLibs];
-    console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib);
+    // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     // compilerOptions.lib = undefined
     // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions;

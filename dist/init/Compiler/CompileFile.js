@@ -16,14 +16,14 @@ const index_1 = require("./Transpiler/JSX/index");
 const loger_1 = require("../../Helpers/loger");
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App_1.App;
 const { resetFilesThree } = __Host;
-let increm = 0;
+// let increm = 0;
 exports.__compiledFilesThreshold = new Map();
 const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let resetModules = true;
     let oldProgram;
     const outFile = path_1.default.relative(__RunDirName, FilePath), __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), REQUEST_PATH = (0, utils_1.filePathToUrl)(outFile), MAP_REQUEST_PATH = REQUEST_PATH + ".map", changeFileCallback = () => {
         (0, loger_1.clareLog)({
-            "\nGenerating browser application bundles...": "yellow"
+            "Generating browser application bundles...": "yellow"
         });
         compilerOptions.cancellationToken = (0, utils_1.createCancellationToken)();
         oldProgram = (0, typescript_1.createProgram)(compilerOptions.rootNames, compilerOptions, __Host, oldProgram);
@@ -79,7 +79,9 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 };
 exports.CompileFile = CompileFile;
 const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
-    console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths);
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
     let Node_oldProgram;
     const transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, NodeModules_1.NodeModuleTransformersBefore], [Module_1.ModuleTransformersAfter]), __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
     compilerOptions = {
