@@ -9,7 +9,7 @@ import { clareLog } from "../Helpers/loger";
 
 export const buildApp = () => {
     const { __compiledFilesThreshold } = require("./Compiler/CompileFile");
-    const buildFolderPath = path.join(App.__RunDirName, "build")
+    const buildFolderPath = path.join(App.__RunDirName, App.__compilerOptions.outDir);
     process.on('exit', () => {
         fs.rmSync(buildFolderPath, { recursive: true, force: true });
 
