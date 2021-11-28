@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://kixjs.ml/" rel="noopener">
- <img width=200px src="./logo.png" alt="Project logo"></a>
+ <img width=200px src="/logo.png" alt="Project logo"></a>
 </p>
 
 <h3 align="center"><strong>KIX</strong></h3>
@@ -96,16 +96,13 @@ Add additional notes about how to deploy this on a live system.
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [VueJs](https://vuejs.org/) - Web Framework
 - [NodeJs](https://nodejs.org/en/) - Server Environment
 
 ## ✍️ Authors <a name = "authors"></a>
 
 - [@Generalsimus](https://github.com/Generalsimus) - Idea & Initial work
 
-See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Generalsimus/KIX/graphs/contributors) who participated in this project.
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 
