@@ -3,7 +3,7 @@
  <img width=200px src="./logo.png" alt="Project logo"></a>
 </p>
 
-<h3 align="center">KIX</h3>
+<h3 align="center"><strong>KIX</strong></h3>
 
 <div align="center">
 
