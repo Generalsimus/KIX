@@ -15,7 +15,9 @@ const getDemoPackageObject = (appName) => {
         "private": true,
         "main": "index.js",
         "scripts": {
-            "test": "echo \"Error: no test specified\" && exit 1"
+            "test": "echo \"Error: no test specified\" && exit 1",
+            "dev": "kix start",
+            "start": "kix start"
         },
         "repository": {
             "type": "git",

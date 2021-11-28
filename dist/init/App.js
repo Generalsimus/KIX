@@ -35,23 +35,16 @@ const createTemplate_js_1 = require("./createTemplate/createTemplate.js");
 // create default config 
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
-    "outDir": "./",
+    "outDir": "./build",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "lib": [
+        "es2015"
+    ],
     checkJs: true,
-    // "noImplicitUseStrict": true,
-    // alwaysStrict: false,
-    // port: 0,
-    // outFile: path.resolve("./"), 
-    // emitDeclarationOnly:true,
-    // "noUnusedLocals": true,
-    // lib: [],
-    // lib: ["es2015"],
-    // lib: ["C:\\Users\\totor\\OneDrive\\Desktop\\node_react_examples\\KIDJS\\TS_KIX\\node_modules\\typescript\\lib\\lib.es2015.d.ts"],
-    // target: ScriptTarget.ES3,
-    // removeComments: true, 
-    //////////////////////////////
+    sourceMap: true,
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
-    sourceMap: true,
     allowJs: true,
     allowSyntheticDefaultImports: true,
     resolveJsonModule: true,

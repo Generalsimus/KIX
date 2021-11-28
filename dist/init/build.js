@@ -13,7 +13,7 @@ const safeFileWrite_1 = require("../Helpers/safeFileWrite");
 const loger_1 = require("../Helpers/loger");
 const buildApp = () => {
     const { __compiledFilesThreshold } = require("./Compiler/CompileFile");
-    const buildFolderPath = path_1.default.join(App_1.App.__RunDirName, "build");
+    const buildFolderPath = path_1.default.join(App_1.App.__RunDirName, App_1.App.__compilerOptions.outDir);
     process_1.default.on('exit', () => {
         fs_1.default.rmSync(buildFolderPath, { recursive: true, force: true });
         (0, copyFolderSync_1.copyFolderSync)(App_1.App.__RunDirName, buildFolderPath, [
