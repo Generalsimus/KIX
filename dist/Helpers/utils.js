@@ -94,7 +94,7 @@ const createHost = (__compilerOptions) => {
         },
         resetFilesThree: (newFilesMap) => (exports.FilesThree = new Map([...exports.FilesThree, ...newFilesMap])),
         deleteFileinThree: (filesThreeLocationPath) => (exports.FilesThree.delete(filesThreeLocationPath)),
-        getDefaultLibLocation: () => (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../lib/s")),
+        getDefaultLibLocation: () => (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../../lib")),
     });
     return Host;
 };
