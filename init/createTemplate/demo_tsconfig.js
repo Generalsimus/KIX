@@ -25,10 +25,11 @@ export const getDemoTsConfigObject = () => {
             outDir,
             rootDir,
             baseUrl,
-            jsx,
+            // jsx,
+            "jsx": "preserve",
             watch,
             forceConsistentCasingInFileNames,
-            suppressOutputPathCheck,
+            // suppressOutputPathCheck,
             resolveJsonModule,
             allowSyntheticDefaultImports,
             allowJs,
@@ -37,8 +38,8 @@ export const getDemoTsConfigObject = () => {
             "noImplicitAny": true,
         },
         "include": [
-            "./node_modules/kix/lib/lib.dom.d.ts",
-            "./node_modules/kix/lib/lib.dom.iterable.d.ts"
+            "./node_modules/kix/lib/kix.dom.d.ts",
+            "./node_modules/kix/lib/kix.dom.iterable.d.ts"
         ],
     }
 }
