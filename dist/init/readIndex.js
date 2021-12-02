@@ -24,11 +24,12 @@ const ReadIndexHTML = (App) => {
             const watchChange = () => {
                 CompileFile_2.__compiledFilesThreshold.clear();
                 __requestsThreshold.clear();
+                this.readJsDomHTML();
             };
-            // chokidar.watch(__IndexHTMLPath).on('add', watchChange).on('change', watchChange).on('unlink', () => watchChange);.
             chokidar_1.default.watch(__IndexHTMLPath).on('all', watchChange);
         },
         readJsDomHTML() {
+            // console.log("🚀 --> file: readIndex.js --> line 57 --> readJsDomHTML --> HTMLFilePaths", "HTMLFilePaths")
             const HtmlDom = new jsdom_1.JSDOM(fs_1.default.readFileSync(__IndexHTMLPath, "utf8")), window = HtmlDom.window, document = window.document;
             document.body[document.body.firstElementChild ? "insertBefore" : "appendChild"](Object.assign(document.createElement('script'), { src: __ModuleUrlPath }), document.body.firstElementChild);
             const HTMLFilePaths = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (ELEMENT, index) => {

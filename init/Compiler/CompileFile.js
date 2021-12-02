@@ -91,7 +91,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         },
         transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
         defaultModules = [
-            resolveModule("kix", __RunDirName),
+            App.__kixModuleLocation || App.__kixLocalLocation,
             normalizeSlashes(path.join(__dirname, "./../../../main/codeController/index.js"))
         ],
         writeFileCallback = (fileName, content) => {
@@ -101,12 +101,17 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             if (ext === ".map") {
                 __requestsThreshold.set(MAP_REQUEST_PATH, content)
             } else if (ext === ".js") {
+                // console.log("🚀 --> file: CompileFile.js --> line 105 --> CompileFile --> compilerOptions.__Import_Module_Name", compilerOptions.__Import_Module_Name)
+                // console.log("🚀 --> file: CompileFile.js --> line 105 --> CompileFile --> __Import_Module_Name", __Import_Module_Name)
                 const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
+
                 __requestsThreshold.set(REQUEST_PATH, Module_Text)
                 // console.log(Module_Text)
                 // console.log(Module_Text.length)
             }
         };
+
+    // console.log("🚀 --> file: CompileFile.js --> line 105 --> CompileFile --> compilerOptions.__Import_Module_Name", compilerOptions.__Import_Module_Name)
     // console.log("🚀 --> file: CompileFile.js --> line 79 --> CompileFile --> compilerOptions", compilerOptions)
     // console.log("🚀 --> file: CompileFile.js --> line 83 --> CompileFile --> defaultModules", defaultModules);
     // console.log("🚀 --> file: CompileFile.js --> line 97 --> CompileFile --> __dirname", __dirname);
@@ -152,18 +157,19 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 
 
 
-const Compile_Node_Modules = (NodeModuelsPaths, compilerOptions) => {
-// console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
+const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
+    // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
     // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
     // console.log("🚀 --> file: CompileFile.js --> line 156 --> NodeModuelsPaths", NodeModuelsPaths)
     let Node_oldProgram;
     const transformers = getTransformersObject([ModuleTransformersBefore, NodeModuleTransformersBefore], [ModuleTransformersAfter]),
-        __Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
+        __Module_Window_Name = defaultcompilerOptions.__Node_Module_Window_Name;
+    // console.log("🚀 --> file: CompileFile.js --> line 167 --> __Module_Window_Name", __Module_Window_Name)/
 
 
 
-    compilerOptions = {
-        ...compilerOptions,
+    const compilerOptions = {
+        ...defaultcompilerOptions,
         outFile: __ModuleUrlPath,
         // removeComments: false,
         lib: undefined,

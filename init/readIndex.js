@@ -26,12 +26,15 @@ export const ReadIndexHTML = (App) => {
             const watchChange = () => {
                 __compiledFilesThreshold.clear();
                 __requestsThreshold.clear();
+                this.readJsDomHTML();
             }
-            // chokidar.watch(__IndexHTMLPath).on('add', watchChange).on('change', watchChange).on('unlink', () => watchChange);.
+
             chokidar.watch(__IndexHTMLPath).on('all', watchChange)
         },
 
         readJsDomHTML() {
+
+            // console.log("🚀 --> file: readIndex.js --> line 57 --> readJsDomHTML --> HTMLFilePaths", "HTMLFilePaths")
             const HtmlDom = new JSDOM(fs.readFileSync(__IndexHTMLPath, "utf8")),
                 window = HtmlDom.window,
                 document = window.document;

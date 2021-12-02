@@ -13,7 +13,7 @@ const highlighter_1 = require("../../Helpers/highlighter");
 const chalk_1 = __importDefault(require("chalk"));
 const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true;
-    console.log("🚀 --> file: utils.js --> line 12 --> sendFileDiagnostics --> __compiledFilesThreshold", CompileFile_1.__compiledFilesThreshold);
+    // console.log("🚀 --> file: utils.js --> line 12 --> sendFileDiagnostics --> __compiledFilesThreshold", __compiledFilesThreshold)
     for (const [compiledFilePath, program] of CompileFile_1.__compiledFilesThreshold) {
         const diagnostics = (0, exports.getProgramDiagnostics)(program);
         for (var diagnose of diagnostics) {

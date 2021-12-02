@@ -26,7 +26,8 @@ import {
     fixLibFileLocationInCompilerOptions,
     getImportModuleName,
     getModuleWindowName,
-    parseJsonFile
+    parseJsonFile,
+    resolveKixModule
 } from "../Helpers/utils.js"
 import {
     transpilerBefore,
@@ -35,7 +36,7 @@ import {
 import resolve from "resolve"
 import { buildApp } from "./build.js"
 import { createTemplate } from "./createTemplate/createTemplate.js"
-
+import { spawn } from "child_process"
 
 
 // create default config 
@@ -49,7 +50,6 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         "lib": [
             "es2015"
         ],
-        checkJs: true,
         sourceMap: true,
     },
     priorityCompilerOptions = {
@@ -62,6 +62,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         forceConsistentCasingInFileNames: true,
         watch: true,
         jsx: "preserve",
+        __Node_Module_Window_Name: getModuleWindowName(),
         // jsx: "react",
         // rootDir: __RunDirName,
         // baseUrl: path.join(__dirname, "../../"),
@@ -92,9 +93,6 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
             __TsConfig.compilerOptions,
             __packageJson.compilerOptions,
             priorityCompilerOptions,
-            {
-                __Node_Module_Window_Name: getModuleWindowName(),
-            }
         ),
         __diagnostics
     ),
@@ -103,7 +101,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 
 
-// console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", __compilerOptions)
+// console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", path.join(__dirname, "../../main/index.js"),)
 
 
 export const App = {
@@ -111,10 +109,12 @@ export const App = {
     __compilerOptions: __compilerOptions,
     __diagnostics: __diagnostics,
     __args: __args,
-    __Dev_Mode: !__args["_"]?.includes("build"),
+    __Dev_Mode: !!__args._?.includes("start"),
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
+    __kixModuleLocation: resolveKixModule(__RunDirName),
+    __kixLocalLocation: normalizeSlashes(path.join(__dirname, "../../main/index.js")),
     __TranspilingMeta,
     __ModuleUrlPath,
     __IndexHTMLRequesPaths: ["/", "/index.html"],
@@ -122,26 +122,44 @@ export const App = {
     defaultCompilerOptions,
     init() {
         const runBuild = __args._.includes("build")
-        const runStart = __args._.includes("start")
+        const runStart = this.__Dev_Mode
         const runNew = __args._.includes("new")
-
-        if (runBuild || runStart) {
-            if (runStart) {
-                const {
-                    initServer
-                } = require("./express.js")
-
-                this.server = initServer(this)
-            }
-            if (runBuild) {
-                buildApp()
-            }
+        const runIndexHtmlReader = () => {
             const {
                 ReadIndexHTML
             } = require("./readIndex")
             const indexHTMLReader = ReadIndexHTML(this)
+            if (runStart) {
+                indexHTMLReader.watchIndexHTML()
+            } else {
+                indexHTMLReader.readJsDomHTML()
+            }
+        }
+        const runExpressServer = () => {
+            const {
+                initServer
+            } = require("./express.js")
 
-            indexHTMLReader.readJsDomHTML()
+            this.server = initServer(this)
+        }
+        if (runBuild || runStart) {
+            if (runStart) {
+                if (this.__kixModuleLocation && !this.__kixModuleLocation.includes(this.__RunDirName)) {
+                    spawn('npm', ["run", "dev"], {
+                        shell: true,
+                        stdio: 'inherit'
+                    }).on("close", () => {
+                        runExpressServer()
+                        runIndexHtmlReader()
+                    })
+                    return;
+                }
+                runExpressServer()
+            }
+            if (runBuild) {
+                buildApp()
+            }
+            runIndexHtmlReader()
         }
 
         if (runNew) {

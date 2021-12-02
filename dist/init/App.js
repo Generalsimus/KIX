@@ -32,6 +32,7 @@ const fs_1 = __importDefault(require("fs"));
 const utils_js_1 = require("../Helpers/utils.js");
 const build_js_1 = require("./build.js");
 const createTemplate_js_1 = require("./createTemplate/createTemplate.js");
+const child_process_1 = require("child_process");
 // create default config 
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
@@ -41,7 +42,6 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     "lib": [
         "es2015"
     ],
-    checkJs: true,
     sourceMap: true,
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
@@ -53,6 +53,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     forceConsistentCasingInFileNames: true,
     watch: true,
     jsx: "preserve",
+    __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
     // jsx: "react",
     // rootDir: __RunDirName,
     // baseUrl: path.join(__dirname, "../../"),
@@ -76,19 +77,19 @@ __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFil
 // read tsConfig.json file 
 __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
 /////////////////////////host.getDefaultLibFileName(options);
-__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions, {
-    __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
-}), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
-// console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", __compilerOptions)
+__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
+// console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", path.join(__dirname, "../../main/index.js"),)
 exports.App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,
     __diagnostics: __diagnostics,
     __args: __args,
-    __Dev_Mode: !__args["_"]?.includes("build"),
+    __Dev_Mode: !!__args._?.includes("start"),
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
+    __kixModuleLocation: (0, utils_js_1.resolveKixModule)(__RunDirName),
+    __kixLocalLocation: (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../main/index.js")),
     __TranspilingMeta,
     __ModuleUrlPath,
     __IndexHTMLRequesPaths: ["/", "/index.html"],
@@ -96,19 +97,40 @@ exports.App = {
     defaultCompilerOptions,
     init() {
         const runBuild = __args._.includes("build");
-        const runStart = __args._.includes("start");
+        const runStart = this.__Dev_Mode;
         const runNew = __args._.includes("new");
+        const runIndexHtmlReader = () => {
+            const { ReadIndexHTML } = require("./readIndex");
+            const indexHTMLReader = ReadIndexHTML(this);
+            if (runStart) {
+                indexHTMLReader.watchIndexHTML();
+            }
+            else {
+                indexHTMLReader.readJsDomHTML();
+            }
+        };
+        const runExpressServer = () => {
+            const { initServer } = require("./express.js");
+            this.server = initServer(this);
+        };
         if (runBuild || runStart) {
             if (runStart) {
-                const { initServer } = require("./express.js");
-                this.server = initServer(this);
+                if (this.__kixModuleLocation && !this.__kixModuleLocation.includes(this.__RunDirName)) {
+                    (0, child_process_1.spawn)('npm', ["run", "dev"], {
+                        shell: true,
+                        stdio: 'inherit'
+                    }).on("close", () => {
+                        runExpressServer();
+                        runIndexHtmlReader();
+                    });
+                    return;
+                }
+                runExpressServer();
             }
             if (runBuild) {
                 (0, build_js_1.buildApp)();
             }
-            const { ReadIndexHTML } = require("./readIndex");
-            const indexHTMLReader = ReadIndexHTML(this);
-            indexHTMLReader.readJsDomHTML();
+            runIndexHtmlReader();
         }
         if (runNew) {
             (0, createTemplate_js_1.createTemplate)();

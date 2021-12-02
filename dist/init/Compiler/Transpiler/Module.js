@@ -87,6 +87,7 @@ exports.ModuleTransformersBefore = {
             console.log(error);
         }
         if (!CTX.Module_GET_POLYFIL) {
+            // console.log("🚀 --> file: Module.js --> line 117 --> compilerOptions.__Import_Module_Name", compilerOptions.__Import_Module_Name)
             NODE.statements.splice(0, 0, (CTX.Module_GET_POLYFIL = createFactoryCode_1.generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name)));
         }
         NODE = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);

@@ -16,6 +16,7 @@ import fs, {
 import path from "path"
 import tsModule from 'typescript/lib/tsserverlibrary';
 import createCssSourceFile from "./createCssSourceFile"
+import resolve from "resolve"
 
 export const deepAssign = (target, ...sources) => {
     for (let source of sources) {
@@ -101,7 +102,7 @@ export const createHost = (__compilerOptions) => {
             },
             resetFilesThree: (newFilesMap) => (FilesThree = new Map([...FilesThree, ...newFilesMap])),
             deleteFileinThree: (filesThreeLocationPath) => (FilesThree.delete(filesThreeLocationPath)),
-            getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../../lib")),
+            // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../../lib")),
 
         })
 
@@ -111,8 +112,8 @@ export const createHost = (__compilerOptions) => {
 
 export const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
-    // const libDirectory = path.dirname(defaultLibFileName) 
-    const libDirectory = normalizeSlashes(path.resolve(__dirname + "./../lib"))
+    const libDirectory = path.dirname(defaultLibFileName)
+    // const libDirectory = normalizeSlashes(path.resolve(__dirname + "./../lib"))
     const newLibs = new Set([defaultLibFileName, normalizeSlashes(path.join(__dirname, "../../kix.lib.d.ts"))])
 
     if (compilerOptions.lib) {
@@ -193,4 +194,16 @@ export const filePathToUrl = (filePath) => {
 
     return ("./" + filePath).replace(/(^[\.\.\/]+)|([\\]+)/g, "/")
     // return ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "\\")
+}
+
+
+export const resolveKixModule = (fileDirectory) => {
+    try {
+        return normalizeSlashes(resolve.sync("kix", {
+            basedir: fileDirectory,
+            extensions: ['.js', '.ts', '.jsx', '.tsx'],
+        }))
+    } catch {
+        return
+    }
 }

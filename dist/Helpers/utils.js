@@ -22,12 +22,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
+exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
 const tsserverlibrary_1 = __importDefault(require("typescript/lib/tsserverlibrary"));
 const createCssSourceFile_1 = __importDefault(require("./createCssSourceFile"));
+const resolve_1 = __importDefault(require("resolve"));
 const deepAssign = (target, ...sources) => {
     for (let source of sources) {
         for (let key in source) {
@@ -94,15 +95,15 @@ const createHost = (__compilerOptions) => {
         },
         resetFilesThree: (newFilesMap) => (exports.FilesThree = new Map([...exports.FilesThree, ...newFilesMap])),
         deleteFileinThree: (filesThreeLocationPath) => (exports.FilesThree.delete(filesThreeLocationPath)),
-        getDefaultLibLocation: () => (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../../lib")),
+        // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../../lib")),
     });
     return Host;
 };
 exports.createHost = createHost;
 const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
-    // const libDirectory = path.dirname(defaultLibFileName) 
-    const libDirectory = (0, typescript_1.normalizeSlashes)(path_1.default.resolve(__dirname + "./../lib"));
+    const libDirectory = path_1.default.dirname(defaultLibFileName);
+    // const libDirectory = normalizeSlashes(path.resolve(__dirname + "./../lib"))
     const newLibs = new Set([defaultLibFileName, (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../kix.lib.d.ts"))]);
     if (compilerOptions.lib) {
         for (const libKey in compilerOptions.lib) {
@@ -163,3 +164,15 @@ const filePathToUrl = (filePath) => {
     // return ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "\\")
 };
 exports.filePathToUrl = filePathToUrl;
+const resolveKixModule = (fileDirectory) => {
+    try {
+        return (0, typescript_1.normalizeSlashes)(resolve_1.default.sync("kix", {
+            basedir: fileDirectory,
+            extensions: ['.js', '.ts', '.jsx', '.tsx'],
+        }));
+    }
+    catch {
+        return;
+    }
+};
+exports.resolveKixModule = resolveKixModule;

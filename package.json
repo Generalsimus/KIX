@@ -1,6 +1,6 @@
 {
   "name": "kix",
-  "version": "3.0.4-beta.9",
+  "version": "3.0.4-beta.21",
   "main": "./main/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -58,8 +58,6 @@
     "express": "^4.17.1",
     "highlight-es": "^1.0.3",
     "jsdom": "^16.7.0",
-    "kid-js-lib": "^1.2.19",
-    "kix": "^3.0.3",
     "mime-types": "^2.1.32",
     "open": "^8.2.1",
     "prompts": "^2.4.2",

@@ -16,6 +16,7 @@ export const getDemoTsConfigObject = () => {
         sourceMap,
         lib,
         module,
+        checkJs,
         moduleResolution
     } = App.__compilerOptions
     return {
@@ -33,6 +34,7 @@ export const getDemoTsConfigObject = () => {
             resolveJsonModule,
             allowSyntheticDefaultImports,
             allowJs,
+            checkJs: !!checkJs,
             sourceMap,
             lib,
             "noImplicitAny": true,

@@ -7,14 +7,12 @@ exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTra
 const typescript_1 = require("typescript");
 const resolve_1 = __importDefault(require("resolve"));
 const chokidar_1 = __importDefault(require("chokidar"));
-const path_1 = __importDefault(require("path"));
 const App_1 = require("../../App");
 const Module_1 = require("./Module");
 const { createToken, createBinaryExpression, createVariableStatement, createVariableDeclarationList, createVariableDeclaration, createBlock, createIdentifier, createPropertyAccessExpression, createObjectLiteralExpression, createParameterDeclaration, createParenthesizedExpression, createArrowFunction, createCallExpression, createObjectBindingPattern, createBindingElement } = typescript_1.factory;
-const KixModulePATH = (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../../../main/index.js"));
 exports.defaultModulePaths = {
-    "kix": KixModulePATH,
-    [KixModulePATH]: "kix"
+    "kix": App_1.App.__kixLocalLocation,
+    [App_1.App.__kixLocalLocation]: "kix"
 };
 function resolveModule(modulePath, fileDirectory) {
     try {

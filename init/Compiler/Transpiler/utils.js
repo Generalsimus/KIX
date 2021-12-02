@@ -27,10 +27,9 @@ const {
 
 
 
-const KixModulePATH = normalizeSlashes(path.join(__dirname, "../../../../main/index.js"))
 export const defaultModulePaths = {
-    "kix": KixModulePATH,
-    [KixModulePATH]: "kix"
+    "kix": App.__kixLocalLocation,
+    [App.__kixLocalLocation]: "kix"
 }
 export function resolveModule(modulePath, fileDirectory) {
     try {
