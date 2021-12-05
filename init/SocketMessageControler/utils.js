@@ -5,6 +5,7 @@ import { App } from "../App"
 import { log, logError } from "../../Helpers/loger";
 import { highlighter } from "../../Helpers/highlighter";
 import Chalk from "chalk"
+import { normalizeSlashes } from "typescript"
 
 export const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true
@@ -85,7 +86,7 @@ export const cutCodeForHigliting = (errorInfo) => {
     const { line, column, path: filePath, fileCode } = errorInfo
     var SPLITED = fileCode.split('\n').slice(line - 1, line + 4).join('\n')
 
-    return `\nat (${filePath}:${line}:${column})` + "\n " +
+    return `\nat (${normalizeSlashes(path.join(App.__RunDirName, filePath))}:${line}:${column})` + "\n " +
         highlighter(SPLITED).split('\n').map((v, index) => {
 
             let leng = (String(Math.max(line - 2, line + 2)).length - String(line + index).length)

@@ -14,8 +14,6 @@ import ts, {
 } from "typescript"
 import { ConvertJsxToObject, PropertyAccessExpressionOrElementAccessExpression, visitFunctionDeclarationForJsxRegistrator } from "./utils";
 import { generateFactory } from "../createFactoryCode";
-const { CREATE_CAll_Function } = generateFactory
-const { createStringLiteral } = factory
 
 
 
@@ -29,7 +27,7 @@ export const JSXTransformersBefore = {
             },
             children
         } = NODE;
-        
+
         return ConvertJsxToObject(visitor, CTX, tagName, attributes, children)
     },
     [SyntaxKind.JsxSelfClosingElement]: (NODE, visitor, CTX) => {

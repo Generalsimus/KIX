@@ -11,7 +11,9 @@ export const NodeMethods = {
     return createSvgNode(null, objectNode);
   },
   switch(switchObjectNode, nodeName, createElement, createKixElement) {
-    let newSwitchObjectNode = { ...switchObjectNode };
+    let newSwitchObjectNode = {
+      ...switchObjectNode
+    };
     delete newSwitchObjectNode[nodeName];
     return createKixElement(newSwitchObjectNode, createElement("a")).e({
       click: function (e) {
@@ -112,21 +114,15 @@ export const AttributeMethods = {
     return this.getAttribute(a);
   },
   setAttr(attribute, value) {
-    value instanceof Function
-      ? this.setAttr(attribute, value(this, attribute))
-      :
-      AttributeMethods[attribute]
-        ?
-        this[attribute](value, attribute, this)
-        :
-        this.setAttribute(attribute, value);
+
+    value instanceof Function ?
+      this.setAttr(attribute, value(this, attribute, objectPropertyRegistrator)) :
+      (AttributeMethods[attribute] ? this[attribute](value, attribute, this) : this.setAttribute(attribute, value));
     return this;
   },
   Select(query) {
-    return query instanceof Array
-      ?
-      this.querySelectorAll(query.join(", "))
-      :
+    return query instanceof Array ?
+      this.querySelectorAll(query.join(", ")) :
       this.querySelector(query);
   },
   Child(index) {
@@ -134,17 +130,14 @@ export const AttributeMethods = {
     return index == undefined ? c : c[index];
   },
   Inner(innerHTML) {
-    return innerHTML
-      ?
-      (this.innerHTML = "" && kix(this, innerHTML))
-      :
+    return innerHTML ?
+      (this.innerHTML = "" && kix(this, innerHTML)) :
       this.innerHTML;
   },
-  setStyle(styleAttr) {
+  Style(styleAttr) {
     styleAttr instanceof Object
       ?
-      Object.assign(this.style, styleAttr)
-      :
+      Object.assign(this.style, styleAttr) :
       styleAttr && this.setAttribute("style", String(styleAttr));
     return this.style;
   },
@@ -157,7 +150,8 @@ export const AttributeMethods = {
     return this;
   },
   Parent(parentIndex) {
-    let htmlNode = this, indexLocation = 0;
+    let htmlNode = this,
+      indexLocation = 0;
     parentIndex = parentIndex || 0;
     while (typeof parentIndex == "number" && indexLocation <= parentIndex) {
       htmlNode = htmlNode.parentNode;
@@ -187,47 +181,133 @@ export const AttributeMethods = {
     return this;
   },
   Replace(replaceNode) {
-    replaceNode = kix(null, kix(replaceNode, this.parentNode));
-    this.parentNode.replaceChild(replaceNode, this);
+    const parent = this.Parent()
+    replaceNode = kix(null, flatFunction(replaceNode, this.Parent(), objectPropertyRegistrator));
+    parent.replaceChild(replaceNode, this);
     return replaceNode;
   },
-  insert(method, node) {
+  Insert(method, node) {
+    let parent = this.Parent(),
+      HtmlNode = kix(null, flatFunction(node, parent, objectPropertyRegistrator));
     switch (method) {
       case "after":
-        let n = this.nextSibling, p = this.Parent();
+        let n = this.nextSibling;
         if (n) {
-          method = kix(null, node);
-          p.insertBefore(method, n);
-          return method;
-        }
-        else {
-          return p.Append(node);
+          parent.insertBefore(HtmlNode, n);
+          return HtmlNode;
+        } else {
+          return parent.Append(node);
         }
       case "before":
-        p = this.Parent();
-        method = kix(null, node);
-        p.insertBefore(method, this);
-        return method;
+        parent.insertBefore(HtmlNode, this);
+        return HtmlNode;
     }
   },
   Restart() {
-    let node = kix(null, this.KNode);
+    let node = kix(null,
+      flatFunction(this.KNode, this.Parent(), objectPropertyRegistrator)
+    );
     this.Replace(node);
     return node;
   },
 };
 Object.assign(Node.prototype, AttributeMethods);
+const fillArray = (node) => (node.hasOwnProperty(0) ? node : [""])
+const toArrayAndFill = (node) => node instanceof Array ? fillArray(node) : [node]
+function replaceChildNodes(newValues, nod2, childIndex, nodeList, value, node) {
+
+  while ((value = newValues[childIndex]), (node = nod2[childIndex]), ((childIndex < newValues.length) || (childIndex < nod2.length))) {
+
+
+    if (value instanceof Array) {
+      nodeList[childIndex] = replaceChildNodes(fillArray(value), [node], 0, [])
+
+    } else if (node instanceof Array) {
+
+      nodeList[childIndex] = replaceChildNodes([value], node, 0, [])[0]
+
+    } else {
+      if (node) {
+
+        if (childIndex < newValues.length) {
+
+          value = flatFunction(value, node.parentNode)
+          if (node.KD_OBJECT === value) {
+            nodeList[childIndex] = last_node = node
+          } else {
+            nodeList[childIndex] = last_node = node.Replace(value)
+          }
+        } else {
+
+          node.Remove()
+        }
+
+      } else if (childIndex < newValues.length) {
+        nodeList[childIndex] = last_node = last_node.Insert("after", value);
+      }
+    }
+    childIndex++
+
+  };
+
+  return nodeList
+}
+
+const objectPropertyRegistrator = (registrator) => {
+  const RegisterNodes = {};
+  let exitNodesOrAttributeNode;
+  let attributeName;
+
+  return (parent, isAttribute) => {
+    let getValue = () => registrator((object, ...props) => {
+      for (const prop of props) {
+        const ifHaveObject = RegisterNodes[prop] || [];
+
+        if (ifHaveObject.indexOf(object) === -1) {
+          let currentValue = object[prop]
+          const descriptor = Object.getOwnPropertyDescriptor(object, prop);
+          Object.defineProperty(object, prop, {
+            enumerable: true,
+            configurable: true,
+            get: () => typeof currentValue === "function" ? currentValue.bind(object) : currentValue,
+            set(newValue) {
+              currentValue = newValue;
+
+              (descriptor.set && descriptor.set(currentValue))
+              if (attributeName) {
+                exitNodesOrAttributeNode.setAttr(attributeName, getValue())
+              } else {
+                let valuesss = toArrayAndFill(getValue())
+                exitNodesOrAttributeNode = replaceChildNodes(valuesss, exitNodesOrAttributeNode, 0, [])
+              }
+            }
+          })
+          ifHaveObject.push(object)
+        }
+        RegisterNodes[prop] = ifHaveObject
+        object = object[prop]
+      }
+      return object
+    })
+
+
+    exitNodesOrAttributeNode = (attributeName = (typeof isAttribute === "string" && isAttribute)) ? parent : kix(parent, toArrayAndFill(getValue()))
+    return attributeName ? getValue() : exitNodesOrAttributeNode
+
+
+
+  }
+
+}
 export function createNodeApp(createElement) {
   const createKixElement = (objectNode, createdNode) => {
     for (var objectNodeProperty in objectNode) {
       if (createdNode) {
         createdNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
-      }
-      else {
+      } else {
         if (NodeMethods[objectNodeProperty]) {
           return NodeMethods[objectNodeProperty](objectNode, objectNodeProperty, createElement, createKixElement);
-        }
-        else {
+        } else {
           createdNode = createElement(objectNodeProperty);
           createdNode.KNode = objectNode;
         }
@@ -236,11 +316,13 @@ export function createNodeApp(createElement) {
     }
     return createdNode;
   };
+
   function Kix(parent, node) {
     switch (type(node)) {
       case "Array":
         return node.map((childNode) => Kix(parent, childNode));
       case "Function":
+        return Kix(parent, node(parent, objectPropertyRegistrator))
       case "Object":
         node = createKixElement(node);
         break;
@@ -259,11 +341,12 @@ export function createNodeApp(createElement) {
       case "BigInt":
       case "Symbol":
       case "Error":
-        const textNode = document.createTextNode((node = String(node)));
+        const textNode = document.createTextNode(String(node));
         textNode.KNode = node;
         node = textNode;
         break;
     }
+
     return parent && parent.appendChild(node), node;
   }
   return Kix;

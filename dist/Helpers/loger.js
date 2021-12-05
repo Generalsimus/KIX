@@ -18,7 +18,7 @@ const saveLog = (logObject) => {
     for (const Logstring in logObject) {
         savedLogs.push(`${colors[logObject[Logstring]] + Logstring}\x1b[0m`);
     }
-    console.clear();
+    // console.clear();
     console.log.apply(null, savedLogs);
 };
 exports.saveLog = saveLog;
@@ -27,7 +27,7 @@ const log = (logObject) => {
     for (const Logstring in logObject) {
         logs.push(`${colors[logObject[Logstring]] + Logstring}\x1b[0m`);
     }
-    console.clear();
+    // console.clear();
     console.log.apply(null, logs);
 };
 exports.log = log;
@@ -36,7 +36,7 @@ const clareLog = (logObject) => {
     for (const Logstring in logObject) {
         logs.push(`${colors[logObject[Logstring]] + Logstring}\x1b[0m`);
     }
-    console.clear();
+    // console.clear();
     console.log.apply(null, logs);
 };
 exports.clareLog = clareLog;

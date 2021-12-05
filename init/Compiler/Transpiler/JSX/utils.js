@@ -8,7 +8,7 @@ import ts, {
     normalizeSlashes,
     SyntaxKind,
     getLocalNameForExternalImport,
-    collectExternalModuleInfo, 
+    collectExternalModuleInfo,
     SignatureKind,
     createNull
 } from "typescript"
@@ -22,11 +22,11 @@ const {
     createUniqueName
 } = factory
 // const {
-    // generateFactory.CREATE_Object_WiTH_String_Keys,
-    // generateFactory.CREATE_Spread_Assignment,
-    // generateFactory.CREATE_CAll_Function,
-    // generateFactory.CREATE_Prop_Registrator_For_Attribute,
-    // generateFactory.CREATE_Prop_Registrator_For_Child
+// generateFactory.CREATE_Object_WiTH_String_Keys,
+// generateFactory.CREATE_Spread_Assignment,
+// generateFactory.CREATE_CAll_Function,
+// generateFactory.CREATE_Prop_Registrator_For_Attribute,
+// generateFactory.CREATE_Prop_Registrator_For_Child
 // } = generateFactory
 
 
@@ -64,7 +64,7 @@ export const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) 
                 newChildren.push(visitor(createStringLiteral(child.text)))
             }
         } else {
-            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, generateFactory.CREATE_Prop_Registrator_For_Child))
+            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, generateFactory.CREATE_Prop_Registrator_For_Child.bind(generateFactory)))
         }
         return newChildren
     }, [])
@@ -99,7 +99,7 @@ export const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) 
         } else if (attrName === "e") {
             EventExist = initializer
         } else {
-            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, generateFactory.CREATE_Prop_Registrator_For_Attribute)])
+            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, generateFactory.CREATE_Prop_Registrator_For_Attribute.bind(generateFactory))])
         }
     }
     /////////////////////////

@@ -87,16 +87,22 @@ export const generateFactory = {
         );
     },
     CREATE_Prop_Registrator_For_Attribute(newNode, getRegistratorName) {
-        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
+
+        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(getRegistratorName, [
+            this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [getRegistratorName])
+        ]), [
             createUniqueName("__node"),
             createUniqueName("__atrName"),
             getRegistratorName,
         ]);
     },
     CREATE_Prop_Registrator_For_Child(newNode, getRegistratorName) {
-        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [
+
+        return this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(getRegistratorName, [
+            this.CREATE_Arrow_Function_With_Parenthesized_Expression(newNode, [getRegistratorName])
+        ]), [
             createUniqueName("__node"),
-            getRegistratorName,
+            getRegistratorName
         ]);
     },
     CREATE_Object_Binding_Pattern(namesObject, returnValue = []) {

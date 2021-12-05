@@ -59,7 +59,7 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             }
         }
         else {
-            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Child));
+            newChildren.push(useJsxPropRegistrator(visitor, CTX, child, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Child.bind(createFactoryCode_1.generateFactory)));
         }
         return newChildren;
     }, []);
@@ -91,7 +91,7 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             EventExist = initializer;
         }
         else {
-            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Attribute)]);
+            newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Attribute.bind(createFactoryCode_1.generateFactory))]);
         }
     }
     /////////////////////////

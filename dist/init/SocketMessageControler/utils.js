@@ -11,6 +11,7 @@ const App_1 = require("../App");
 const loger_1 = require("../../Helpers/loger");
 const highlighter_1 = require("../../Helpers/highlighter");
 const chalk_1 = __importDefault(require("chalk"));
+const typescript_1 = require("typescript");
 const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true;
     // console.log("🚀 --> file: utils.js --> line 12 --> sendFileDiagnostics --> __compiledFilesThreshold", __compiledFilesThreshold)
@@ -76,7 +77,7 @@ exports.getProgramDiagnostics = getProgramDiagnostics;
 const cutCodeForHigliting = (errorInfo) => {
     const { line, column, path: filePath, fileCode } = errorInfo;
     var SPLITED = fileCode.split('\n').slice(line - 1, line + 4).join('\n');
-    return `\nat (${filePath}:${line}:${column})` + "\n " +
+    return `\nat (${(0, typescript_1.normalizeSlashes)(path_1.default.join(App_1.App.__RunDirName, filePath))}:${line}:${column})` + "\n " +
         (0, highlighter_1.highlighter)(SPLITED).split('\n').map((v, index) => {
             let leng = (String(Math.max(line - 2, line + 2)).length - String(line + index).length);
             // console.log("🚀 --> file: utils.js --> line 91 --> highlighter --> leng", leng)

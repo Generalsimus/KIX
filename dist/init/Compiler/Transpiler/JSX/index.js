@@ -3,9 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JSXTransformersBefore = void 0;
 const typescript_1 = require("typescript");
 const utils_1 = require("./utils");
-const createFactoryCode_1 = require("../createFactoryCode");
-const { CREATE_CAll_Function } = createFactoryCode_1.generateFactory;
-const { createStringLiteral } = typescript_1.factory;
 exports.JSXTransformersBefore = {
     [typescript_1.SyntaxKind.JsxElement]: (NODE, visitor, CTX) => {
         const { openingElement: { tagName, attributes }, children } = NODE;

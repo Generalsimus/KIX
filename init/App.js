@@ -2,7 +2,6 @@ import yargs from "yargs"
 import {
     hideBin
 } from "yargs/helpers"
-// @ts-ignore
 import ts, {
     ModuleKind,
     visitEachChild,
@@ -29,10 +28,6 @@ import {
     parseJsonFile,
     resolveKixModule
 } from "../Helpers/utils.js"
-import {
-    transpilerBefore,
-    transpilerAfter
-} from "./Compiler/Transpiler/Module.js"
 import resolve from "resolve"
 import { buildApp } from "./build.js"
 import { createTemplate } from "./createTemplate/createTemplate.js"
@@ -54,6 +49,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     },
     priorityCompilerOptions = {
         module: ModuleKind.AMD,
+        checkJs: false,
         allowJs: true,
         allowSyntheticDefaultImports: true,
         resolveJsonModule: true,
@@ -63,22 +59,8 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         watch: true,
         jsx: "preserve",
         __Node_Module_Window_Name: getModuleWindowName(),
-        // jsx: "react",
-        // rootDir: __RunDirName,
-        // baseUrl: path.join(__dirname, "../../"),
-        // typeRoots: [
-        // __RunDirName,
-        // __dirname,
-        // path.join(__dirname, "../../")
-        // ],
-        // types: [__dirname, path.join(__dirname, "../../")], 
-        // resetServerDate: () => {
-        //     App.server.socketClientSender("RESTART_SERVER", {})
-        // },
         "noImplicitAny": true,
-        // "paths": {
-        //     "kix": [__dirname] // this mapping is relative to "baseUrl" 
-        // }
+
     },
     __diagnostics = [],
     // read package.json file 
@@ -113,7 +95,7 @@ export const App = {
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
-    __kixModuleLocation: resolveKixModule(__RunDirName),
+    __kixModuleLocation: resolveKixModule(__dirname),
     __kixLocalLocation: normalizeSlashes(path.join(__dirname, "../../main/index.js")),
     __TranspilingMeta,
     __ModuleUrlPath,
@@ -144,7 +126,7 @@ export const App = {
         }
         if (runBuild || runStart) {
             if (runStart) {
-                if (this.__kixModuleLocation && !this.__kixModuleLocation.includes(this.__RunDirName)) {
+                if (!this.__kixModuleLocation && !this.__kixModuleLocation?.includes(this.__RunDirName)) {
                     spawn('npm', ["run", "dev"], {
                         shell: true,
                         stdio: 'inherit'
