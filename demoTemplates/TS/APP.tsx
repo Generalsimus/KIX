@@ -1,9 +1,7 @@
-// import "./style.scss"
+import kix from "kix";
+import "./style.scss"
 
-import axios from "axios"
 
-
-console.log(axios)
 
 
 
@@ -23,5 +21,5 @@ var HTML = <div class="contain">
 
 
 
-declare var KD_: any;
-KD_(document.body, HTML);
+
+kix(document.body, HTML);
