@@ -3,3 +3,5 @@
 /package-lock.json
 
 /tsconfig.tsbuildinfo
+
+/dist/tsconfig.tsbuildinfo
