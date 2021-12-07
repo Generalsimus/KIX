@@ -8,7 +8,7 @@ import { listenSocketMessages } from "./SocketMessageControler"
 import path from "path"
 import { normalizeSlashes } from 'typescript';
 import { __compiledFilesThreshold } from "./Compiler/CompileFile";
-import { saveLog } from "../Helpers/loger"
+import { saveLog } from "../helpers/loger"
 
 
 export const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { port } }) => {

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDemoPackageObject = void 0;
-const utils_1 = require("../../Helpers/utils");
+const utils_1 = require("../../helpers/utils");
 const typescript_1 = __importDefault(require("typescript"));
 const fs_1 = __importDefault(require("fs"));
 const getDemoPackageObject = (appName) => {

@@ -14,7 +14,7 @@ const SocketMessageControler_1 = require("./SocketMessageControler");
 const path_1 = __importDefault(require("path"));
 const typescript_1 = require("typescript");
 const CompileFile_1 = require("./Compiler/CompileFile");
-const loger_1 = require("../Helpers/loger");
+const loger_1 = require("../helpers/loger");
 const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { port } }) => {
     const app = (0, express_1.default)();
     const server = http_1.default.createServer(app);

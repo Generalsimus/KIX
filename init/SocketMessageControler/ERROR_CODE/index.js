@@ -1,5 +1,5 @@
-import { highlighter } from "../../../Helpers/highlighter"
-import { logError } from "../../../Helpers/loger"
+import { highlighter } from "../../../helpers/highlighter"
+import { logError } from "../../../helpers/loger"
 import { App } from "../../../init/App"
 import { cutCodeForHigliting } from "../utils"
 import { decode } from "./decode"

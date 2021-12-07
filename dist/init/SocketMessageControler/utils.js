@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cutCodeForHigliting = exports.getProgramDiagnostics = exports.sendFileDiagnostics = void 0;
-const utils_1 = require("../../Helpers/utils");
+const utils_1 = require("../../helpers/utils");
 const CompileFile_1 = require("../Compiler/CompileFile");
 const path_1 = __importDefault(require("path"));
 const App_1 = require("../App");
-const loger_1 = require("../../Helpers/loger");
-const highlighter_1 = require("../../Helpers/highlighter");
+const loger_1 = require("../../helpers/loger");
+const highlighter_1 = require("../../helpers/highlighter");
 const chalk_1 = __importDefault(require("chalk"));
 const typescript_1 = require("typescript");
 const sendFileDiagnostics = (connectedWs, socketClientSender) => {

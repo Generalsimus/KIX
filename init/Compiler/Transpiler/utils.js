@@ -2,7 +2,7 @@ import { getDirectoryPath, SyntaxKind, visitEachChild, factory, normalizeSlashes
 import resolve from "resolve"
 import chokidar from "chokidar"
 import path from "path"
-import { getColumnName } from "../../../Helpers/utils"
+import { getColumnName } from "../../../helpers/utils"
 import { App } from "../../App"
 import { visited_SourceFiles } from "./Module"
 

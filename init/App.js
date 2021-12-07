@@ -27,7 +27,7 @@ import {
     getModuleWindowName,
     parseJsonFile,
     resolveKixModule
-} from "../Helpers/utils.js"
+} from "../helpers/utils.js"
 import resolve from "resolve"
 import { buildApp } from "./build.js"
 import { createTemplate } from "./createTemplate/createTemplate.js"

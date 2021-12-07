@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = exports.visited_SourceFiles = void 0;
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("./createFactoryCode");
-const utils_1 = require("../../../Helpers/utils");
+const utils_1 = require("../../../helpers/utils");
 const utils_2 = require("./utils");
 const amdBodyVisitor_1 = require("./amdBodyVisitor");
 const App_1 = require("../../App");

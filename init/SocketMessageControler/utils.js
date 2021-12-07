@@ -1,9 +1,9 @@
-import { filePathToUrl } from "../../Helpers/utils";
+import { filePathToUrl } from "../../helpers/utils";
 import { __compiledFilesThreshold } from "../Compiler/CompileFile"
 import path from "path"
 import { App } from "../App"
-import { log, logError } from "../../Helpers/loger";
-import { highlighter } from "../../Helpers/highlighter";
+import { log, logError } from "../../helpers/loger";
+import { highlighter } from "../../helpers/highlighter";
 import Chalk from "chalk"
 import { normalizeSlashes } from "typescript"
 

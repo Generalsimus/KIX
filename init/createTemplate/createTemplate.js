@@ -1,7 +1,7 @@
 import { App } from "../App"
 import prompts from "prompts"
 import path from "path"
-import { copyFolderSync } from "../../Helpers/copyFolderSync"
+import { copyFolderSync } from "../../helpers/copyFolderSync"
 import { spawn } from "child_process"
 import fs from "fs"
 import { getDemoPackageObject } from "./demo_package"

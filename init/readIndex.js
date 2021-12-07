@@ -9,7 +9,7 @@ import consola from "consola"
 import chokidar from "chokidar"
 import { JSDOM } from "jsdom"
 import { CompileFile } from "./Compiler/CompileFile"
-import { fixLibFileLocationInCompilerOptions } from "../Helpers/utils"
+import { fixLibFileLocationInCompilerOptions } from "../helpers/utils"
 import { __compiledFilesThreshold } from "./Compiler/CompileFile"
 
 

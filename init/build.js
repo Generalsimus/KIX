@@ -1,10 +1,10 @@
 import fs from "fs"
 import path from "path";
-import { copyFolderSync } from "../Helpers/copyFolderSync";
+import { copyFolderSync } from "../helpers/copyFolderSync";
 import { App } from "./App";
 import process from 'process';
-import { safeFileWrite } from "../Helpers/safeFileWrite";
-import { clareLog } from "../Helpers/loger";
+import { safeFileWrite } from "../helpers/safeFileWrite";
+import { clareLog } from "../helpers/loger";
 
 
 export const buildApp = () => {

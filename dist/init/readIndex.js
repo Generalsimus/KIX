@@ -11,7 +11,7 @@ const consola_1 = __importDefault(require("consola"));
 const chokidar_1 = __importDefault(require("chokidar"));
 const jsdom_1 = require("jsdom");
 const CompileFile_1 = require("./Compiler/CompileFile");
-const utils_1 = require("../Helpers/utils");
+const utils_1 = require("../helpers/utils");
 const CompileFile_2 = require("./Compiler/CompileFile");
 const ReadIndexHTML = (App) => {
     const { __requestsThreshold, __RunDirName, __ModuleUrlPath, __Host, __compilerOptions, __IndexHTMLRequesPaths } = App;

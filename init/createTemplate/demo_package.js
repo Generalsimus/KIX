@@ -1,4 +1,4 @@
-import { parseJsonFile } from "../../Helpers/utils"
+import { parseJsonFile } from "../../helpers/utils"
 import ts from "typescript"
 import { App } from "../App"
 import fs from "fs"

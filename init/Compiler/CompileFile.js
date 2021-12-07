@@ -3,7 +3,7 @@ import { App } from "../App"
 import ts, { createProgram, getDirectoryPath, getBaseFileName, normalizeSlashes } from "typescript"
 import chokidar from "chokidar"
 import path from "path"
-import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../Helpers/utils"
+import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../helpers/utils"
 import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/Module"
 import resolve from 'resolve'
 import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
@@ -11,7 +11,7 @@ import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
 import fs from "fs"
 import { getProgramDiagnostics } from "../SocketMessageControler/utils"
-import { clareLog, log } from "../../Helpers/loger"
+import { clareLog, log } from "../../helpers/loger"
 
 
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App

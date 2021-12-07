@@ -18,7 +18,7 @@ import { generateFactory } from "./createFactoryCode"
 import resolve from 'resolve'
 import path from "path/posix"
 import chokidar from "chokidar"
-import { FilesThree, getColumnName } from "../../../Helpers/utils"
+import { FilesThree, getColumnName } from "../../../helpers/utils"
 import { configModules, geModuleLocationMeta, getOrSetModuleInfo, ModulesThree, watchModuleFileChange } from "./utils"
 import { topLevelVisitor } from "./amdBodyVisitor"
 import { App } from "../../App"

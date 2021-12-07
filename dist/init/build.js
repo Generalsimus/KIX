@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildApp = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const copyFolderSync_1 = require("../Helpers/copyFolderSync");
+const copyFolderSync_1 = require("../helpers/copyFolderSync");
 const App_1 = require("./App");
 const process_1 = __importDefault(require("process"));
-const safeFileWrite_1 = require("../Helpers/safeFileWrite");
-const loger_1 = require("../Helpers/loger");
+const safeFileWrite_1 = require("../helpers/safeFileWrite");
+const loger_1 = require("../helpers/loger");
 const buildApp = () => {
     const { __compiledFilesThreshold } = require("./Compiler/CompileFile");
     const buildFolderPath = path_1.default.join(App_1.App.__RunDirName, App_1.App.__compilerOptions.outDir);

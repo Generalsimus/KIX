@@ -7,7 +7,7 @@ import ts, {
 } from "typescript";
 import {
     getColumnName
-} from "../../../Helpers/utils";
+} from "../../../helpers/utils";
 import {
     App
 } from "../../App";

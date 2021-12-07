@@ -6,7 +6,7 @@ import {
 } from "./createFactoryCode"
 import {
     getColumnName
-} from "../../../Helpers/utils"
+} from "../../../helpers/utils"
 import {
     geModuleLocationMeta
 } from "./utils"
