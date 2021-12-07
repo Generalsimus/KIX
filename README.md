@@ -3,7 +3,7 @@
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![bundle phobia][bundle-phobia-src]][bundle-phobia-href] 
+<!-- [![bundle phobia][bundle-phobia-src]][bundle-phobia-href]  -->
  
  
 
@@ -28,13 +28,14 @@ kix build
 ## Getting Started
 
 ```js
+import kix from "kix"
 import "./style.scss"
 
 var HTML = <div>
     <h1>KIX :)</h1> 
 </div>
 
-KD_(document.body, HTML);  
+kix(document.body, HTML);  
 ```
 
 
