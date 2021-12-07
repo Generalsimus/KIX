@@ -6,9 +6,40 @@ export const getRouteParams = () => params
 Object.defineProperty(window.location, "params", {
   get: () => params
 });
+
+Object.defineProperties(Object.prototype, {
+  useListener: {
+    value: function (property, runFunction) {
+      const descriptor = Object.getOwnPropertyDescriptor(this, property);
+      let value = this[property];
+      runFunction = runFunction.bind(this)
+
+      Object.defineProperty(this, property, {
+        get: function () {
+          return value
+        },
+        set: function (newValue) {
+          (descriptor.set && descriptor.set(newValue))
+          runFunction(newValue, property, value)
+          value = newValue
+
+        },
+      });
+
+
+      return "event"
+    }
+  }
+
+});
+const createSvgElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName);
 export const NodeMethods = {
-  svg(objectNode) {
-    return createSvgNode(null, objectNode);
+  svg(objectNode, nodeName, createElement, createKixElement) {
+    const newNode = { ...objectNode },
+      element = createSvgElement("svg");
+    delete newNode.svg;
+    createSvgNode(createKixElement(newNode, element), objectNode.svg)
+    return element
   },
   switch(switchObjectNode, nodeName, createElement, createKixElement) {
     let newSwitchObjectNode = {
@@ -212,6 +243,8 @@ export const AttributeMethods = {
   },
 };
 Object.assign(Node.prototype, AttributeMethods);
+// Object.setPrototypeOf(Node.prototype, AttributeMethods)
+
 const fillArray = (node) => (node.hasOwnProperty(0) ? node : [""])
 const toArrayAndFill = (node) => node instanceof Array ? fillArray(node) : [node]
 function replaceChildNodes(newValues, nod2, childIndex, nodeList, value, node) {
@@ -351,7 +384,7 @@ export function createNodeApp(createElement) {
   }
   return Kix;
 }
-const createSvgNode = createNodeApp((nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName));
+const createSvgNode = createNodeApp(createSvgElement);
 const kix = createNodeApp(document.createElement.bind(document));
 export const style = kix(document.head, {
   style: "",

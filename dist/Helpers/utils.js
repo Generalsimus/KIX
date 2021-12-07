@@ -73,7 +73,7 @@ const createHost = (__compilerOptions) => {
             return {
                 extension: tsserverlibrary_1.default.Extension.Dts,
                 isExternalLibraryImport: false,
-                resolvedFileName: path_1.default.join(path_1.default.dirname(containingFile), moduleName),
+                resolvedFileName: (0, typescript_1.normalizeSlashes)(path_1.default.join(path_1.default.dirname(containingFile), moduleName)),
             };
         }
         return (0, typescript_1.resolveModuleName)(moduleName, containingFile, __compilerOptions, Host, moduleResolutionCache, redirectedReference).resolvedModule;

@@ -56,7 +56,9 @@ const chooseAppTemplate = (appName) => {
         // }));
         // const npmInstall = spawn(appTemplatlocation, ['npm', '--prefix', appTemplatlocation, "install"]);
         // const npmInstall = spawn(appTemplatlocation, ['npm', "install"], { shell: true });
-        spawn('npm', ['--prefix', appTemplatlocation, "install"], {
+        
+        spawn('npm', ["install"], {
+            cwd: appTemplatlocation,
             shell: true,
             stdio: 'inherit'
         });

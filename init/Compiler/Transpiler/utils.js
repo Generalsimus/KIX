@@ -51,6 +51,7 @@ export function resolveModule(modulePath, fileDirectory) {
 export const ModulesThree = new Map()
 let Module_INDEX = 1
 export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
+    console.log("🚀 --> file: utils.js --> line 54 --> getOrSetModuleInfo --> modulePath", modulePath)
 
     const module = ModulesThree.get(modulePath)
 

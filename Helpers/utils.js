@@ -74,10 +74,10 @@ export const createHost = (__compilerOptions) => {
                 return {
                     extension: tsModule.Extension.Dts,
                     isExternalLibraryImport: false,
-                    resolvedFileName: path.join(
+                    resolvedFileName: normalizeSlashes(path.join(
                         path.dirname(containingFile),
                         moduleName,
-                    ),
+                    )),
                 };
             }
             return resolveModuleName(moduleName, containingFile, __compilerOptions, Host, moduleResolutionCache, redirectedReference).resolvedModule;

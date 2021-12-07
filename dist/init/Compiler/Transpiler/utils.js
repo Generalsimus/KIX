@@ -30,6 +30,7 @@ exports.resolveModule = resolveModule;
 exports.ModulesThree = new Map();
 let Module_INDEX = 1;
 const getOrSetModuleInfo = (modulePath, compilerOptions) => {
+    console.log("🚀 --> file: utils.js --> line 54 --> getOrSetModuleInfo --> modulePath", modulePath);
     const module = exports.ModulesThree.get(modulePath);
     const moduleInfo = module || {
         Module_INDEX: Module_INDEX++,
