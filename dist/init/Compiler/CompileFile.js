@@ -22,7 +22,7 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     // console.log("🚀 --> file: CompileFile.js --> line 28 --> CompileFile --> __compilerOptions", __compilerOptions)
     let resetModules = true;
     let oldProgram;
-    const outFile = path_1.default.relative(__RunDirName, FilePath), __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), REQUEST_PATH = (0, utils_1.filePathToUrl)(outFile), MAP_REQUEST_PATH = REQUEST_PATH + ".map", changeFileCallback = () => {
+    const __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), requestPath = (0, utils_1.filePathToUrl)(__compilerOptions.outFile), mapRequestPath = requestPath + ".map", changeFileCallback = () => {
         (0, loger_1.clareLog)({
             "Generating browser application bundles...": "yellow"
         });
@@ -45,7 +45,6 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         ...__compilerOptions,
         inlineSources: true,
         watch: true,
-        outFile,
         __Module_Window_Name,
         rootDir: __RunDirName,
         rootNames: [FilePath],
@@ -54,19 +53,19 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         resetModuleFiles: () => {
             resetModules = true;
         },
-        __Url_Dir_Path: path_1.default.dirname(REQUEST_PATH)
+        __Url_Dir_Path: path_1.default.dirname(requestPath)
     }, transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, index_1.JSXTransformersBefore], [Module_1.ModuleTransformersAfter]), defaultModules = [
         App_1.App.__kixModuleLocation || App_1.App.__kixLocalLocation,
         (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "./../../../main/codeController/index.js"))
     ], writeFileCallback = (fileName, content) => {
-        // console.log({ fileName, REQUEST_PATH })
+        // console.log({ fileName, requestPath })
         const ext = path_1.default.extname(fileName);
         if (ext === ".map") {
-            __requestsThreshold.set(MAP_REQUEST_PATH, content);
+            __requestsThreshold.set(mapRequestPath, content);
         }
         else if (ext === ".js") {
-            const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`;
-            __requestsThreshold.set(REQUEST_PATH, Module_Text);
+            const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`;
+            __requestsThreshold.set(requestPath, Module_Text);
             // console.log(Module_Text)
             // console.log(Module_Text.length)
         }

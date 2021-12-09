@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
+exports.getoutFilePath = exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -176,3 +176,7 @@ const resolveKixModule = (fileDirectory) => {
     }
 };
 exports.resolveKixModule = resolveKixModule;
+const getoutFilePath = (filePath) => {
+    return filePath.replace(/\.tsx?$/, new Date().getTime() + ".js");
+};
+exports.getoutFilePath = getoutFilePath;

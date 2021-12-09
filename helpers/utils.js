@@ -214,3 +214,8 @@ export const resolveKixModule = (fileDirectory) => {
 
 
 
+
+
+export const getoutFilePath = (filePath) => {
+    return filePath.replace(/\.tsx?$/, new Date().getTime() + ".js")
+}
