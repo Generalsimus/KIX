@@ -46,6 +46,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
             "es2015"
         ],
         sourceMap: true,
+        "minifyBuild": true,
     },
     priorityCompilerOptions = {
         module: ModuleKind.AMD,

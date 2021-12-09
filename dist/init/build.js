@@ -11,6 +11,7 @@ const App_1 = require("./App");
 const process_1 = __importDefault(require("process"));
 const safeFileWrite_1 = require("../helpers/safeFileWrite");
 const loger_1 = require("../helpers/loger");
+const minify_1 = require("../helpers/minify");
 const buildApp = () => {
     const { __compiledFilesThreshold } = require("./Compiler/CompileFile");
     const buildFolderPath = path_1.default.join(App_1.App.__RunDirName, App_1.App.__compilerOptions.outDir);
@@ -23,13 +24,29 @@ const buildApp = () => {
                 return program.getSourceFiles().map(file => path_1.default.resolve(file.originalFileName));
             }).flat(Infinity))
         ]);
+        const ignorePaths = new Set();
         App_1.App.__requestsThreshold.forEach((fileContent, pathKey) => {
             const filePath = App_1.App.__IndexHTMLRequesPaths.includes(pathKey) ? "index.html" : pathKey;
-            (0, safeFileWrite_1.safeFileWrite)(path_1.default.join(buildFolderPath, "zzsdsds/sadasd/s", filePath), String(fileContent));
+            const fileFullPath = path_1.default.join(buildFolderPath, filePath);
+            if (ignorePaths.has(filePath)) {
+                return;
+            }
+            if (path_1.default.extname(filePath) === ".js") {
+                const mapValue = App_1.App.__requestsThreshold.get(filePath + ".map");
+                const mapPath = fileFullPath + ".map";
+                const minifed = (0, minify_1.minify)(String(fileContent), mapValue);
+                fileContent = minifed.code;
+                ignorePaths.add(mapPath);
+                if (minifed.map) {
+                    const mapString = typeof minifed.map === "string" ? minifed.map : JSON.stringify(minifed.map);
+                    (0, safeFileWrite_1.safeFileWrite)(mapPath, mapString);
+                }
+            }
+            (0, safeFileWrite_1.safeFileWrite)(path_1.default.join(buildFolderPath, filePath), String(fileContent));
         }),
             (0, loger_1.clareLog)({
                 "\n√": "green",
-                "Compiled successfully.": "green"
+                "Compiled successfully.": "white"
             });
     });
 };

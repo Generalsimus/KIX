@@ -20,7 +20,7 @@ export const createErrorCode = ({
     const fileSplitCode = fileCode.split(/\r?\n/);
     const slicedCode = fileSplitCode.slice(Math.max(errorLine - 5, 0), 10 + Math.max(errorLine - 5, 0))
     if (!ErrorBodyTag) {
-        
+
         let iframe = kix(document.body, {
             iframe: [],
             style: `border: none;position: fixed;background: #262626;width: 100%;height: 100%;top: 0;left: 0;z-index:22222222222222222222222;`,

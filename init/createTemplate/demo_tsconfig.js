@@ -22,7 +22,8 @@ export const getDemoTsConfigObject = () => {
     return {
         compilerOptions: {
             module: ModuleKind.AMD[module],
-            moduleResolution: ModuleResolutionKind.NodeJs[moduleResolution],
+            // moduleResolution: ModuleResolutionKind.NodeJs[moduleResolution],
+            "moduleResolution": "Node",
             outDir,
             rootDir,
             baseUrl,
@@ -38,10 +39,6 @@ export const getDemoTsConfigObject = () => {
             sourceMap,
             lib,
             "noImplicitAny": true,
-        },
-        "include": [
-            "./node_modules/kix/lib/kix.dom.d.ts",
-            "./node_modules/kix/lib/kix.dom.iterable.d.ts"
-        ],
+        }
     }
 }
