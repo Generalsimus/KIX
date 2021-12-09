@@ -42,6 +42,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
         "es2015"
     ],
     sourceMap: true,
+    "minifyBuild": true,
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
     checkJs: false,

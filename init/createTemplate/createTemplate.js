@@ -6,6 +6,7 @@ import { spawn } from "child_process"
 import fs from "fs"
 import { getDemoPackageObject } from "./demo_package"
 import { getDemoTsConfigObject } from "./demo_tsconfig"
+import { clareLog } from "../../helpers/loger"
 
 export const createTemplate = () => {
     const appName = App.__args._[App.__args._.indexOf("new") + 1]
@@ -50,17 +51,16 @@ const chooseAppTemplate = (appName) => {
         fs.writeFileSync(path.join(appTemplatlocation, "package.json"), JSON.stringify(getDemoPackageObject(appName), null, 4), "utf8")
         fs.writeFileSync(path.join(appTemplatlocation, "tsconfig.json"), JSON.stringify(getDemoTsConfigObject(), null, 4), "utf8")
 
-        // `npm --prefix ${appTemplatlocation} install`
-        // console.log(exec(`npm --prefix ${appTemplatlocation} install`, (error, stdout, stderr) => {
-        //     console.log(stdout);
-        // }));
-        // const npmInstall = spawn(appTemplatlocation, ['npm', '--prefix', appTemplatlocation, "install"]);
-        // const npmInstall = spawn(appTemplatlocation, ['npm', "install"], { shell: true });
-        
+
         spawn('npm', ["install"], {
             cwd: appTemplatlocation,
             shell: true,
             stdio: 'inherit'
+        }).on("close", () => {
+            clareLog({
+                [`Project "${appName}" Created`]: "green",
+                [`\nLocation: ` + appTemplatlocation]: "white"
+            })
         });
 
 

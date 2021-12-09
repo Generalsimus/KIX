@@ -12,6 +12,7 @@ const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const demo_package_1 = require("./demo_package");
 const demo_tsconfig_1 = require("./demo_tsconfig");
+const loger_1 = require("../../helpers/loger");
 const createTemplate = () => {
     const appName = App_1.App.__args._[App_1.App.__args._.indexOf("new") + 1];
     if (validate(appName)) {
@@ -44,16 +45,15 @@ const chooseAppTemplate = (appName) => {
         (0, copyFolderSync_1.copyFolderSync)(path_1.default.join(__dirname, "../../../demoTemplates", value), appTemplatlocation);
         fs_1.default.writeFileSync(path_1.default.join(appTemplatlocation, "package.json"), JSON.stringify((0, demo_package_1.getDemoPackageObject)(appName), null, 4), "utf8");
         fs_1.default.writeFileSync(path_1.default.join(appTemplatlocation, "tsconfig.json"), JSON.stringify((0, demo_tsconfig_1.getDemoTsConfigObject)(), null, 4), "utf8");
-        // `npm --prefix ${appTemplatlocation} install`
-        // console.log(exec(`npm --prefix ${appTemplatlocation} install`, (error, stdout, stderr) => {
-        //     console.log(stdout);
-        // }));
-        // const npmInstall = spawn(appTemplatlocation, ['npm', '--prefix', appTemplatlocation, "install"]);
-        // const npmInstall = spawn(appTemplatlocation, ['npm', "install"], { shell: true });
         (0, child_process_1.spawn)('npm', ["install"], {
             cwd: appTemplatlocation,
             shell: true,
             stdio: 'inherit'
+        }).on("close", () => {
+            (0, loger_1.clareLog)({
+                [`Project "${appName}" Created`]: "green",
+                [`\nLocation: ` + appTemplatlocation]: "white"
+            });
         });
     });
 };

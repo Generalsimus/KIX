@@ -160,10 +160,15 @@ export const AttributeMethods = {
     const c = this.children;
     return index == undefined ? c : c[index];
   },
-  Inner(innerHTML) {
-    return innerHTML ?
-      (this.innerHTML = "" && kix(this, innerHTML)) :
-      this.innerHTML;
+  Inner(innerString) {
+    return innerString === undefined ?
+      this.innerHTML :
+      (
+        typeof innerString === "string" ?
+          ((this.innerHTML = innerString), this.firstChild) :
+          (this.innerHTML = "", kix(this, innerString))
+      );
+
   },
   Style(styleAttr) {
     styleAttr instanceof Object
@@ -174,7 +179,7 @@ export const AttributeMethods = {
   },
   e(eventsObject) {
     for (var eventNames in eventsObject) {
-      for (var eventName in eventNames.split("_")) {
+      for (var eventName of eventNames.split("_")) {
         this.addEventListener(eventName, eventsObject[eventName].bind(this));
       }
     }
@@ -243,7 +248,8 @@ export const AttributeMethods = {
   },
 };
 Object.assign(Node.prototype, AttributeMethods);
-// Object.setPrototypeOf(Node.prototype, AttributeMethods)
+// Object.setPrototypeOf(AttributeMethods, Node.prototype)
+// Object.setPrototypeOf(Node, AttributeMethods)
 
 const fillArray = (node) => (node.hasOwnProperty(0) ? node : [""])
 const toArrayAndFill = (node) => node instanceof Array ? fillArray(node) : [node]
