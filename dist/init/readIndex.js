@@ -32,21 +32,28 @@ const ReadIndexHTML = (App) => {
             // console.log("🚀 --> file: readIndex.js --> line 57 --> readJsDomHTML --> HTMLFilePaths", "HTMLFilePaths")
             const HtmlDom = new jsdom_1.JSDOM(fs_1.default.readFileSync(__IndexHTMLPath, "utf8")), window = HtmlDom.window, document = window.document;
             document.body[document.body.firstElementChild ? "insertBefore" : "appendChild"](Object.assign(document.createElement('script'), { src: __ModuleUrlPath }), document.body.firstElementChild);
-            const HTMLFilePaths = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (ELEMENT, index) => {
-                var UrlMeta = new window.URL(ELEMENT.src, 'http://e'), FilePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(UrlMeta.pathname)));
-                return FilePath;
-            });
+            const htmFiles = new Set();
             const compilerOptions = (0, utils_1.fixLibFileLocationInCompilerOptions)(__compilerOptions, __Host);
-            // Compiler(FilePath)
-            HTMLFilePaths.forEach(FilePath => (0, CompileFile_1.CompileFile)(FilePath, HTMLFilePaths, compilerOptions));
+            const scriptTagInfos = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
+                scriptElement.removeAttribute("lang");
+                const ulrMeta = new window.URL(scriptElement.src, 'http://e'), filePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))), outFile = (0, utils_1.getoutFilePath)(path_1.default.relative(__RunDirName, filePath));
+                if (htmFiles.has(filePath)) {
+                    scriptElement.remove();
+                    return;
+                }
+                htmFiles.add(filePath);
+                scriptElement.setAttribute("src", (0, utils_1.filePathToUrl)(path_1.default.relative(App.__RunDirName, outFile)));
+                return {
+                    filePath,
+                    compilerOptions: { ...compilerOptions, outFile }
+                };
+            });
+            for (const { filePath, compilerOptions } of scriptTagInfos) {
+                (0, CompileFile_1.CompileFile)(filePath, [...htmFiles], compilerOptions);
+            }
             const INDEX_HTML_STRING = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
             __IndexHTMLRequesPaths.forEach(INDEX_PATH => __requestsThreshold.set(INDEX_PATH, INDEX_HTML_STRING));
         },
-        // readIndexHTML() {
-        //     if (fs.existsSync(__IndexHTMLPath)) {
-        //         return fs.readFileSync(__IndexHTMLPath, "utf8")
-        //     }
-        // }
     };
 };
 exports.ReadIndexHTML = ReadIndexHTML;

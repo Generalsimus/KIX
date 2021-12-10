@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
+exports.getoutFilePath = exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -103,13 +103,11 @@ exports.createHost = createHost;
 const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     const defaultLibFileName = host.getDefaultLibFileName(compilerOptions);
     const libDirectory = path_1.default.dirname(defaultLibFileName);
-    // const libDirectory = normalizeSlashes(path.resolve(__dirname + "./../lib"))
-    const newLibs = new Set([defaultLibFileName, (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../kix.lib.d.ts"))]);
+    const newLibs = new Set([defaultLibFileName, (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../main/index.d.ts"))]);
     if (compilerOptions.lib) {
         for (const libKey in compilerOptions.lib) {
             const lib = compilerOptions.lib[libKey];
             const libFilePath = path_1.default.join(libDirectory, `./lib.${lib.toLowerCase()}.d.ts`);
-            // console.log("🚀 --> file: utils.js --> line 127 --> fixLibFileLocationInCompilerOptions --> libFilePath", libFilePath)
             if (fs_1.default.existsSync(libFilePath)) {
                 newLibs.add((0, typescript_1.normalizeSlashes)(libFilePath));
             }
@@ -119,9 +117,6 @@ const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
         newLibs.add(defaultLibFileName);
     }
     compilerOptions.lib = [...newLibs];
-    // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
-    // compilerOptions.lib = undefined
-    // console.log("🚀 --> file: utils.js --> line 136 --> fixLibFileLocationInCompilerOptions --> compilerOptions.lib", compilerOptions.lib)
     return compilerOptions;
 };
 exports.fixLibFileLocationInCompilerOptions = fixLibFileLocationInCompilerOptions;
@@ -176,3 +171,7 @@ const resolveKixModule = (fileDirectory) => {
     }
 };
 exports.resolveKixModule = resolveKixModule;
+const getoutFilePath = (filePath) => {
+    return filePath.replace(/\.tsx?$/, new Date().getTime() + ".js");
+};
+exports.getoutFilePath = getoutFilePath;

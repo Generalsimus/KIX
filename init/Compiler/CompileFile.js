@@ -3,7 +3,7 @@ import { App } from "../App"
 import ts, { createProgram, getDirectoryPath, getBaseFileName, normalizeSlashes } from "typescript"
 import chokidar from "chokidar"
 import path from "path"
-import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../helpers/utils"
+import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName, getoutFilePath } from "../../helpers/utils"
 import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/Module"
 import resolve from 'resolve'
 import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
@@ -29,11 +29,10 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 
     let resetModules = true;
     let oldProgram;
-    const outFile = path.relative(__RunDirName, FilePath),
-        __Import_Module_Name = getImportModuleName(),
+    const __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
-        REQUEST_PATH = filePathToUrl(outFile),
-        MAP_REQUEST_PATH = REQUEST_PATH + ".map",
+        requestPath = filePathToUrl(__compilerOptions.outFile),
+        mapRequestPath = requestPath + ".map",
         changeFileCallback = () => {
             clareLog({
                 "Generating browser application bundles...": "yellow"
@@ -80,7 +79,6 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             ...__compilerOptions,
             inlineSources: true,
             watch: true,
-            outFile,
             __Module_Window_Name,
             rootDir: __RunDirName,
             rootNames: [FilePath],
@@ -89,7 +87,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             resetModuleFiles: () => {
                 resetModules = true
             },
-            __Url_Dir_Path: path.dirname(REQUEST_PATH)
+            __Url_Dir_Path: path.dirname(requestPath)
         },
         transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
         defaultModules = [
@@ -97,16 +95,16 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             normalizeSlashes(path.join(__dirname, "./../../../main/codeController/index.js"))
         ],
         writeFileCallback = (fileName, content) => {
-            // console.log({ fileName, REQUEST_PATH })
+            // console.log({ fileName, requestPath })
 
             const ext = path.extname(fileName)
             if (ext === ".map") {
-                __requestsThreshold.set(MAP_REQUEST_PATH, content)
+                __requestsThreshold.set(mapRequestPath, content)
             } else if (ext === ".js") {
 
-                const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${MAP_REQUEST_PATH}`
+                const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`
 
-                __requestsThreshold.set(REQUEST_PATH, Module_Text)
+                __requestsThreshold.set(requestPath, Module_Text)
                 // console.log(Module_Text)
                 // console.log(Module_Text.length)
             }

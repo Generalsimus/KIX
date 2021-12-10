@@ -9,7 +9,7 @@ import consola from "consola"
 import chokidar from "chokidar"
 import { JSDOM } from "jsdom"
 import { CompileFile } from "./Compiler/CompileFile"
-import { fixLibFileLocationInCompilerOptions } from "../helpers/utils"
+import { filePathToUrl, fixLibFileLocationInCompilerOptions, getoutFilePath } from "../helpers/utils"
 import { __compiledFilesThreshold } from "./Compiler/CompileFile"
 
 
@@ -44,27 +44,36 @@ export const ReadIndexHTML = (App) => {
                 document.body.firstElementChild
             )
 
+            const htmFiles = new Set();
 
-            const HTMLFilePaths = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (ELEMENT, index) => {
-                var UrlMeta = new window.URL(ELEMENT.src, 'http://e'),
-                    FilePath = normalizeSlashes(path.join(__RunDirName, decodeURIComponent(UrlMeta.pathname)));
-
-                return FilePath
-
-            });
             const compilerOptions = fixLibFileLocationInCompilerOptions(__compilerOptions, __Host)
-            // Compiler(FilePath)
-            HTMLFilePaths.forEach(FilePath => CompileFile(FilePath, HTMLFilePaths, compilerOptions));
+            const scriptTagInfos = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
+                scriptElement.removeAttribute("lang");
+                const ulrMeta = new window.URL(scriptElement.src, 'http://e'),
+                    filePath = normalizeSlashes(path.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))),
+                    outFile = getoutFilePath(path.relative(__RunDirName, filePath));
+                if (htmFiles.has(filePath)) {
+                    scriptElement.remove()
+                    return;
+                }
+                htmFiles.add(filePath);
+                scriptElement.setAttribute("src", filePathToUrl(path.relative(App.__RunDirName, outFile)));
+
+                return {
+                    filePath,
+                    compilerOptions: { ...compilerOptions, outFile }
+                }
+            });
+            
+
+            for (const { filePath, compilerOptions } of scriptTagInfos) {
+                CompileFile(filePath, [...htmFiles], compilerOptions)
+            }
 
             const INDEX_HTML_STRING = "<!DOCTYPE html> \n" + document.documentElement.outerHTML
             __IndexHTMLRequesPaths.forEach(INDEX_PATH => __requestsThreshold.set(INDEX_PATH, INDEX_HTML_STRING))
 
         },
-        // readIndexHTML() {
-        //     if (fs.existsSync(__IndexHTMLPath)) {
-        //         return fs.readFileSync(__IndexHTMLPath, "utf8")
-        //     }
 
-        // }
     }
 }
