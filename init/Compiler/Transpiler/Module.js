@@ -35,14 +35,9 @@ const {
     createIdentifier,
 } = factory
 
-// defaultModulePaths
 
 
-// const watcher = chokidar.watch([]);
-// let STATEMENTS = []
-// let stateNode = CREATE_Call_Function(STATEMENTS)
-// let UNICNAME = ts.createUniqueName('AAA')
-// let incremm = 0
+
 export const visited_SourceFiles = new Map()
 export const ModuleTransformersBefore = {
     [SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
@@ -62,18 +57,12 @@ export const ModuleTransformersBefore = {
             return visited_NODE
         }
 
-        // console.log("🚀 --> file: Module.js --> line 65 --> NODE.originalFileName", NODE.originalFileName);
-        // console.log("🚀 --> file: Module.js --> line 60 --> NODE.before_visited", NODE.before_visited);
+        
 
         const compilerOptions = CTX.getCompilerOptions()
-        // console.log("🚀 --> file: Module.js --> line 75 --> compilerOptions", compilerOptions);
-        // console.log("🚀 --> file: Module.js --> line 75 --> CTX", CTX);
-        // getEmitHost:
-        // getEmitResolver
-        // getEmitHelperFactory
-        // console.log("🚀 --> file: Module.js --> line 75 --> CTX", CTX.getEmitHelperFactory());
-        // console.log("🚀 --> file: Module.js --> line 75 --> CTX", CTX.getEmitHost());
-        // console.log("🚀 --> file: Module.js --> line 75 --> CTX", CTX.getEmitResolver());
+        
+
+
         const moduleInfo = getOrSetModuleInfo(NODE.originalFileName, compilerOptions)
 
         CTX.ModuleColection = configModules(NODE, moduleInfo, compilerOptions)
@@ -85,11 +74,24 @@ export const ModuleTransformersBefore = {
         try {
 
             if (ts.isJsonSourceFile(NODE)) {
+                
+                NODE = ts.updateSourceFileNode(NODE, [
+                    createExpressionStatement(
+                        generateFactory.CREATE_Export_File_Function(
+                            NODE.statements.map((node) => {
+                                return factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
+                                    generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
+                                    node.expression
+                                ]))
+                            }),
+                            compilerOptions.__Import_Module_Name,
+                            moduleInfo.Module_INDEX,
+                            compilerOptions.rootNames.includes(NODE.originalFileName)
+                        )
+                    )
+                ])
 
-                NODE = ts.updateSourceFileNode(NODE, [createExpressionStatement(generateFactory.CREATE_Property_Access_Equals_Token(generateFactory.CREATE_Object_WiTH_String_Keys([
-                    [createIdentifier("default"), ...NODE.statements]
-                ]), [compilerOptions.__Import_Module_Name, getColumnName(moduleInfo.Module_INDEX)]))])
-
+                // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
                 NODE.scriptKind = ScriptKind.Unknown
             } else {
                 NODE = ts.updateSourceFileNode(NODE, [
@@ -113,17 +115,15 @@ export const ModuleTransformersBefore = {
         }
 
         if (!CTX.Module_GET_POLYFIL) {
-            // console.log("🚀 --> file: Module.js --> line 117 --> compilerOptions.__Import_Module_Name", compilerOptions.__Import_Module_Name)
+            
             NODE.statements.splice(0, 0, (CTX.Module_GET_POLYFIL = generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name)))
         }
 
         NODE = visitEachChild(NODE, visitor, CTX)
-        // NODE.before_visited = true; 
+        
         visited_SourceFiles.set(NODE.originalFileName, NODE)
-        // setFileinThree.set(NODE.originalFileName, NODE)
-        // App.__Host.setFileinThree(NODE.originalFileName.toLowerCase(), NODE)
-        // .set(NODE.originalFileName)
-        // FilesThree.set(NODE.path, NODE)
+        
+        
         return NODE
     }
 }
