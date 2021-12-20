@@ -27,12 +27,9 @@ const factory = typescript_1.default.factory;
 const { ExportKeyword } = typescript_1.SyntaxKind;
 const { createUniqueName, createObjectLiteralExpression, createCallExpression, createIdentifier } = factory;
 function topLevelVisitor(node, currentSourceFile, CTX) {
-    // console.log("🚀 --> file: amdBodyVisitor.js --> line 9 --> topLevelVisitor --> node.kind", node.kind, SyntaxKind[node.kind]);
     switch (node.kind) {
         case typescript_1.SyntaxKind.ImportDeclaration:
             return visitImportDeclaration(node, currentSourceFile, CTX);
-        // case 263:
-        //     return visitImportEqualsDeclaration(node);
         case typescript_1.SyntaxKind.ExportDeclaration:
             return visitExportDeclaration(node, CTX);
         case typescript_1.SyntaxKind.ExportAssignment:
@@ -43,10 +40,6 @@ function topLevelVisitor(node, currentSourceFile, CTX) {
             return visitFunctionDeclaration(node);
         case typescript_1.SyntaxKind.ClassDeclaration:
             return visitClassDeclaration(node);
-        // case 347:
-        //     return visitMergeDeclarationMarker(node);
-        // case 348:
-        //     return visitEndOfDeclarationMarker(node);
         default:
             return [node];
     }
@@ -84,20 +77,14 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
     }
     else if (node.exportClause) {
         const ModuleData = (0, utils_1.geModuleLocationMeta)(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions);
-        // if (typeof Module_INDEX !== "number") {
-        //     return newNodes
-        // }
         newNodes.push(factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
             createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", node.exportClause.name]),
             ((ModuleData) ?
                 createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                 createIdentifier("undefined"))
         ])));
-        // export * as ns from "mod";
-        // export * as default from "mod";
     }
     else {
-        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
         const ModuleData = (0, utils_1.geModuleLocationMeta)(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions);
         CTX.assignPolyfill = createUniqueName(compilerOptions.__Import_Module_Name + "_Assign");
         newNodes.push(createCallExpression((CTX.assignPolyfill), undefined, [
@@ -106,7 +93,6 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
                 createFactoryCode_1.generateFactory.CREATE_Element_Access_Expression(ModuleData) :
                 createObjectLiteralExpression([], false))
         ]));
-        // export * from "mod";
     }
     return newNodes;
 }

@@ -35,24 +35,16 @@ const initServer = ({ __RunDirName, __requestsThreshold, __compilerOptions: { po
             next();
         }
     });
-    // 
     app.use("./", express_1.default.static(__RunDirName));
     const listener = server.listen(port, function () {
         const http_url = `http://${`localhost:${listener.address()["port"]}`}`;
         (0, open_1.default)(http_url);
-        // console.log(http_url)
-        // √ Compiled successfully.
-        // Browser application bundle generation
-        // Generating browser application bundles
         (0, loger_1.saveLog)({
             "\nYou can now view in the browser: ": "white",
             [http_url]: "blue",
-            // "green",
             "\nTo create a production build, use": "white",
             "npm build": "blue",
         });
-        // console.save(`\nYou can now view in the browser: `, "white", http_url, 'blue', `\nTo create a production build, use: `, "white", 'npm build', 'blue')
-        // console.log('\x1b[32m%s\x1b[0m',);
     });
     const socketClientSender = (action, data) => {
         WebSocketServer.clients.forEach(ws => {

@@ -23,23 +23,12 @@ exports.visitFunctionDeclarationForJsxRegistrator = exports.PropertyAccessExpres
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("../createFactoryCode");
 const { createStringLiteral, createIdentifier, createArrayLiteralExpression, createUniqueName } = typescript_1.factory;
-// const {
-// generateFactory.CREATE_Object_WiTH_String_Keys,
-// generateFactory.CREATE_Spread_Assignment,
-// generateFactory.CREATE_CAll_Function,
-// generateFactory.CREATE_Prop_Registrator_For_Attribute,
-// generateFactory.CREATE_Prop_Registrator_For_Child
-// } = generateFactory
 const useJsxPropRegistrator = (visitor, CTX, NODE, getRegistratorBody) => {
-    // იქმნება jsx ში მოთავსებული პროპების რეგისტრატორი
     const OldRegistrator = CTX.getJSXPropertyRegistrator;
     let getRegistratorName;
     CTX.getJSXPropertyRegistrator = () => (getRegistratorName || (getRegistratorName = createUniqueName("__JSX_PROP_REGISTRATOR")));
-    /////////////////////////////////////////////////////
     const newNode = visitor(NODE);
-    // jsx მოთავსებული პროპების რეგისტრატორი უბრუნდება საწყის მნიშვნელობას
     CTX.getJSXPropertyRegistrator = OldRegistrator;
-    /////////////////////////////////////////////////////////////////////////
     if (getRegistratorName) {
         return getRegistratorBody(newNode, getRegistratorName);
     }
@@ -47,7 +36,6 @@ const useJsxPropRegistrator = (visitor, CTX, NODE, getRegistratorBody) => {
 };
 const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
     const newPropertys = [];
-    // გენერირდება ტეგის სახელი და მისი შვილები
     const newChildren = children.reduce((newChildren, child, index) => {
         child = getInitializer(child);
         if (!child) {
@@ -74,8 +62,6 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
     else {
         newPropertys.push([tagName, (0, typescript_1.createNull)()]);
     }
-    ////////////////////////////////////////////
-    // გენერირდება ატრიბუები
     const EventsKeys = [];
     let EventExist;
     for (const attribute of attributes.properties) {
@@ -94,8 +80,6 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
             newPropertys.push([attribute.name, useJsxPropRegistrator(visitor, CTX, initializer, createFactoryCode_1.generateFactory.CREATE_Prop_Registrator_For_Attribute.bind(createFactoryCode_1.generateFactory))]);
         }
     }
-    /////////////////////////
-    // გენერირდება ევენთები
     if (EventExist) {
         const eKind = EventExist.kind;
         if (eKind === typescript_1.SyntaxKind.ObjectLiteralExpression) {
@@ -108,7 +92,6 @@ const ConvertJsxToObject = (visitor, CTX, tagName, attributes, children) => {
     if (EventsKeys.length) {
         newPropertys.push([createIdentifier("e"), createFactoryCode_1.generateFactory.CREATE_Object_WiTH_String_Keys(EventsKeys)]);
     }
-    ///////////////////////
     return createFactoryCode_1.generateFactory.CREATE_Object_WiTH_String_Keys(newPropertys);
 };
 exports.ConvertJsxToObject = ConvertJsxToObject;

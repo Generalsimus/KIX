@@ -12,7 +12,9 @@ import {
     App
 } from "../../App";
 import {
-    createObjectPropertyLoop
+    codePolyfillPath,
+    createObjectPropertyLoop,
+    nodeModuleThree
 } from "./utils";
 const {
     createToken,
@@ -73,6 +75,19 @@ export const generateFactory = {
             )
         );
     },
+    // CREATE_Async_Import_Function(compilerOptions, moduleInfo) {
+    //     return factory.createArrowFunction(
+    //         undefined,
+    //         undefined,
+    //         [],
+    //         undefined,
+    //         factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+    //         factory.createElementAccessExpression(
+    //             factory.createIdentifier(compilerOptions.__Module_Window_Name),
+    //             factory.createNumericLiteral(moduleInfo.moduleIndex)
+    //         )
+    //     )
+    // },
     CREATE_Arrow_Function_With_Parenthesized_Expression(
         ClildNode,
         ArgumentsNodes
@@ -122,11 +137,9 @@ export const generateFactory = {
     },
     CREATE_CAll_Function(CallNameOrNode, Arguments) {
         return createCallExpression(
-            typeof CallNameOrNode === "string" ?
-                createIdentifier(CallNameOrNode) :
-                CallNameOrNode,
+            this.CREATE_Identifier(CallNameOrNode),
             undefined,
-            Arguments
+            Arguments.map((arg) => this.CREATE_Identifier(arg))
         );
     },
     CREATE_Const_Variable(Nodes, flag = ts.NodeFlags.Const) {
@@ -228,11 +241,10 @@ export const generateFactory = {
     CREATE_Export_File_Function(
         body,
         __Import_Module_Name,
-        Module_INDEX,
-        ifNeedRunTime
+        moduleIndex
     ) {
         return this.CREATE_CAll_Function(__Import_Module_Name + "_Module", [
-            factory.createNumericLiteral(Module_INDEX),
+            factory.createNumericLiteral(moduleIndex),
             factory.createArrowFunction(
                 undefined,
                 undefined,
@@ -240,8 +252,7 @@ export const generateFactory = {
                 undefined,
                 factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 factory.createBlock(body, true)
-            ),
-            ...(ifNeedRunTime ? [factory.createNumericLiteral("1")] : []),
+            )
         ]);
     },
 
@@ -258,93 +269,75 @@ export const generateFactory = {
         );
     },
     CREATE_Module_GET_POLYFIL(__Import_Module_Name) {
-        // return  factory.createIdentifier("k")
-        // console.log(generateFactory.CREATE_Bind_Function, this)
-        return this.CREATE_Bind_Function(
-            __Import_Module_Name + "_Module",
+        return this.CREATE_Const_Variable([
             [
-                factory.createExpressionStatement(
-                    factory.createCallExpression(
-                        this.CREATE_Property_Access_Expression([
-                            "Object",
-                            "defineProperty",
-                        ]),
-                        undefined,
+                __Import_Module_Name + "_Module",
+                this.CREATE_Arrow_Function_With_Parenthesized_Expression(
+                    this.CREATE_CAll_Function(
+                        this.CREATE_Property_Access_Expression(["Object", "defineProperty"]),
                         [
-                            factory.createIdentifier(__Import_Module_Name),
-                            factory.createIdentifier("k"),
-                            factory.createObjectLiteralExpression(
+                            __Import_Module_Name,
+                            "accessKey",
+                            this.CREATE_Object_WiTH_String_Keys([
                                 [
-                                    factory.createPropertyAssignment(
-                                        factory.createIdentifier("get"),
-                                        factory.createFunctionExpression(
-                                            undefined,
-                                            undefined,
-                                            undefined,
-                                            undefined,
-                                            [],
-                                            undefined,
-                                            factory.createBlock(
-                                                [
-                                                    factory.createReturnStatement(
-                                                        this.CREATE_Token_Nodes([
-                                                            factory.createIdentifier("e"),
-                                                            this.CREATE_Token_Nodes(
-                                                                [
-                                                                    factory.createCallExpression(
-                                                                        factory.createIdentifier("f"),
-                                                                        undefined,
-                                                                        [
-
-                                                                            factory.createParenthesizedExpression(
-                                                                                this.CREATE_Token_Nodes([
-                                                                                    factory.createIdentifier("e"),
-                                                                                    factory.createObjectLiteralExpression(
-                                                                                        [],
-                                                                                        false
-                                                                                    )
-                                                                                ], ts.SyntaxKind.EqualsToken),
-                                                                            ),
-                                                                        ]
-                                                                    ),
-                                                                    factory.createIdentifier("e")
-                                                                ],
-                                                                ts.SyntaxKind.CommaToken
-                                                            )
-
-                                                        ], ts.SyntaxKind.BarBarToken)
-
-                                                    ),
-                                                ],
-                                                true
+                                    "get",
+                                    this.CREATE_Arrow_Function_With_Parenthesized_Expression(
+                                        this.CREATE_Token_Nodes([
+                                            factory.createIdentifier("exported"),
+                                            this.CREATE_Token_Nodes([
+                                                this.CREATE_CAll_Function("moduleBlockFunction", [
+                                                    this.CREATE_Token_Nodes([
+                                                        factory.createIdentifier("exported"),
+                                                        this.CREATE_Object_WiTH_String_Keys([])
+                                                    ], ts.SyntaxKind.EqualsToken)
+                                                ]),
+                                                factory.createIdentifier("exported")
+                                            ],
+                                                ts.SyntaxKind.CommaToken
                                             )
-                                        )
-                                    ),
-                                ],
-                                true
-                            ),
-                        ]
-                    )
-                ),
-                factory.createExpressionStatement(
-                    this.CREATE_Token_Nodes(
-                        [
-                            "i",
-                            this.CREATE_Element_Access_Expression([
-                                __Import_Module_Name,
-                                "k",
+                                        ], ts.SyntaxKind.BarBarToken),
+                                        []
+                                    )
+                                ]
                             ])
-                        ],
-                        ts.SyntaxKind.AmpersandAmpersandToken
-                    )
+                        ]
+                    ),
+                    [
+                        "accessKey",
+                        "moduleBlockFunction",
+                        "exported",
+                    ]
                 ),
-            ],
-            [
-                "k",
-                "f",
-                "i",
-                "e"
             ]
-        );
+        ])
     },
+    CREATE_Async_Module_SourceFile(sourceFile, moduleInfo, compilerOptions) {
+        const polyfillModuleInfo = nodeModuleThree.get(codePolyfillPath)
+        /*
+        sadas[2a] = (url)=>mod.ss(url,()=>location)
+        */
+        return ts.updateSourceFileNode(sourceFile, [
+            factory.createExpressionStatement(
+                this.CREATE_Token_Nodes([
+                    this.CREATE_Element_Access_Expression([
+                        compilerOptions.__Import_Module_Name,
+                        /* a === async */
+                        factory.createStringLiteral(moduleInfo.moduleIndex + "a")
+                    ]),
+                    this.CREATE_Arrow_Function_With_Parenthesized_Expression(
+                        this.CREATE_CAll_Function(
+                            this.CREATE_Element_Access_Expression([
+                                polyfillModuleInfo.__Module_Window_Name,
+                                /* a === async */
+                                factory.createStringLiteral("A")
+                            ]),
+                            ["u"]
+                        ),
+                        ["u"]
+                    )
+                ], ts.SyntaxKind.EqualsToken)
+
+            )
+        ])
+    }
 };

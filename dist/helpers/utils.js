@@ -54,7 +54,6 @@ exports.getColumnName = getColumnName;
 exports.FilesThree = new Map();
 const createHost = (__compilerOptions) => {
     const getSourceFileByExtName = (fileName, languageVersion) => {
-        // console.log("🚀 getSourceFileByExtName ---> fileName", fileName)
         switch (path_1.default.extname(fileName).toLocaleLowerCase()) {
             case ".ts":
             case ".tsx":
@@ -65,7 +64,6 @@ const createHost = (__compilerOptions) => {
             case ".scss":
             case ".css":
                 return (0, createCssSourceFile_1.default)(fileName, (0, fs_1.readFileSync)(fileName, "utf-8"), languageVersion);
-            // default
         }
     };
     const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/, _HOST = (0, typescript_1.createCompilerHost)(__compilerOptions, true), currentDirectory = _HOST.getCurrentDirectory(), getCanonicalFileName = (0, typescript_1.createGetCanonicalFileName)(_HOST.useCaseSensitiveFileNames()), moduleResolutionCache = (0, typescript_1.createModuleResolutionCache)(currentDirectory, getCanonicalFileName), Module_loader = function (moduleName, containingFile, redirectedReference) {
@@ -80,14 +78,8 @@ const createHost = (__compilerOptions) => {
     }, Host = Object.assign(_HOST, {
         getSourceFile: (fileName, languageVersion) => {
             if ((0, fs_1.existsSync)(fileName)) {
-                // let sourceFile = FilesThree.get(fileName)
-                // if (sourceFile) {
-                //     return sourceFile
-                //     // FilesThree.set(fileName,sourceFile)
-                // }
-                // sourceFile = getSourceFileByExtName(fileName, languageVersion)
-                // return FilesThree.set(fileName, sourceFile), sourceFile
-                return exports.FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion);
+                const fff = exports.FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion);
+                return fff;
             }
         },
         resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
@@ -95,7 +87,6 @@ const createHost = (__compilerOptions) => {
         },
         resetFilesThree: (newFilesMap) => (exports.FilesThree = new Map([...exports.FilesThree, ...newFilesMap])),
         deleteFileinThree: (filesThreeLocationPath) => (exports.FilesThree.delete(filesThreeLocationPath)),
-        // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../../lib")),
     });
     return Host;
 };
@@ -120,24 +111,26 @@ const fixLibFileLocationInCompilerOptions = (compilerOptions, host) => {
     return compilerOptions;
 };
 exports.fixLibFileLocationInCompilerOptions = fixLibFileLocationInCompilerOptions;
-// "../../../node_modules/typescript/lib"
-// import sss from 
 const parseJsonFile = (fileName) => {
     return fs_1.default.existsSync(fileName) ? (0, typescript_1.parseConfigFileTextToJson)(fileName, (0, fs_1.readFileSync)(fileName, "utf8")).config : {};
 };
 exports.parseJsonFile = parseJsonFile;
 const getImportModuleName = () => `________KIX__IMPORT__MODULE__${new Date().getTime()}__`;
 exports.getImportModuleName = getImportModuleName;
-const getModuleFiles = (Module, ModuleFiles, parsedPaths = new Set()) => {
-    for (const MODULE_PATH in Module.NodeModules) {
-        ModuleFiles.add(MODULE_PATH);
-    }
-    for (const LocalModulesPathKey in Module.LocalModules) {
-        if (!parsedPaths.has(LocalModulesPathKey)) {
-            parsedPaths.add(LocalModulesPathKey);
-            (0, exports.getModuleFiles)(Module.LocalModules[LocalModulesPathKey], ModuleFiles, parsedPaths);
+const getModuleFiles = (moduleInfo, moduleFiles, parsedPaths = new Set()) => {
+    if (!parsedPaths.has(moduleInfo.modulePath)) {
+        parsedPaths.add(moduleInfo.modulePath);
+        for (const importPath in moduleInfo.moduleColection) {
+            const importModuleInfo = moduleInfo.moduleColection[importPath];
+            if (importModuleInfo.isNodeModule) {
+                moduleFiles.add(importModuleInfo.modulePath);
+            }
+            else {
+                (0, exports.getModuleFiles)(importModuleInfo, moduleFiles, parsedPaths);
+            }
         }
     }
+    return moduleFiles;
 };
 exports.getModuleFiles = getModuleFiles;
 let ModuleUnnesesaryIndex = 0;
@@ -156,7 +149,6 @@ const createCancellationToken = () => {
 exports.createCancellationToken = createCancellationToken;
 const filePathToUrl = (filePath) => {
     return ("./" + filePath).replace(/(^[\.\.\/]+)|([\\]+)/g, "/");
-    // return ("./" + filePath).replace(/(^[\.\.\/]+)|(\/+)/g, "\\")
 };
 exports.filePathToUrl = filePathToUrl;
 const resolveKixModule = (fileDirectory) => {
@@ -167,7 +159,8 @@ const resolveKixModule = (fileDirectory) => {
         }));
     }
     catch {
-        return;
+        const location = (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../main/index.js"));
+        return fs_1.default.existsSync(location) && location;
     }
 };
 exports.resolveKixModule = resolveKixModule;

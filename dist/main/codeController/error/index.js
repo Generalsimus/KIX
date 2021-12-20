@@ -15,5 +15,5 @@ const catchError = (event) => {
         };
         (0, webSocket_1.sendWebSocketMessage)("ERROR_CODE", errorData);
     }
-}; // end catchError
+};
 exports.catchError = catchError;

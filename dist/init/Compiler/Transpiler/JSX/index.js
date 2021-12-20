@@ -11,10 +11,6 @@ exports.JSXTransformersBefore = {
     [typescript_1.SyntaxKind.JsxSelfClosingElement]: (NODE, visitor, CTX) => {
         return (0, utils_1.ConvertJsxToObject)(visitor, CTX, NODE.tagName, NODE.attributes, []);
     },
-    // [SyntaxKind.JsxFragment]: ({ children }, visitor, CTX) => {
-    //     return ConvertJsxToObject(NODE, visitor, CTX, tagName, attributes, children)
-    //     // return FLAT_JSX_CHILDS(children, DATA, VISITOR, CTX)
-    // },
     [typescript_1.SyntaxKind.ArrowFunction]: utils_1.visitFunctionDeclarationForJsxRegistrator,
     [typescript_1.SyntaxKind.FunctionDeclaration]: utils_1.visitFunctionDeclarationForJsxRegistrator,
     [typescript_1.SyntaxKind.PropertyAccessExpression]: utils_1.PropertyAccessExpressionOrElementAccessExpression,

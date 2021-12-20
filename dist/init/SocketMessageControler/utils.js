@@ -14,7 +14,6 @@ const chalk_1 = __importDefault(require("chalk"));
 const typescript_1 = require("typescript");
 const sendFileDiagnostics = (connectedWs, socketClientSender) => {
     let ifNoHaveError = true;
-    // console.log("🚀 --> file: utils.js --> line 12 --> sendFileDiagnostics --> __compiledFilesThreshold", __compiledFilesThreshold)
     for (const [compiledFilePath, program] of CompileFile_1.__compiledFilesThreshold) {
         const diagnostics = (0, exports.getProgramDiagnostics)(program);
         for (var diagnose of diagnostics) {
@@ -45,29 +44,6 @@ const sendFileDiagnostics = (connectedWs, socketClientSender) => {
 };
 exports.sendFileDiagnostics = sendFileDiagnostics;
 const getProgramDiagnostics = (program) => {
-    // console.log("🚀 --> file: utils.js --> line 22 --> getProgramDiagnostics --> program", program)
-    // const diagnostics = []; 
-    // for (const sourceFile of program.getSourceFiles()) {
-    //     if (!sourceFile.isDeclarationFile) {
-    //         diagnostics.push(...sourceFile.parseDiagnostics);
-    //         diagnostics.push(...sourceFile.semanticDiagnostics);
-    //         diagnostics.push(...sourceFile.syntacticDiagnostics);
-    //     }
-    // }
-    // return Object.entries(program).flatMap(([key, value]) => {
-    //     console.log("🚀 --> file: utils.js --> line 46 --> returnObject.entries --> key", key.includes("Diagnostics"), key)
-    //     if (key.includes("Diagnostics") && ![
-    //         "getSuggestionDiagnostics",
-    //         "getBindAndCheckDiagnostics",
-    //         "getProgramDiagnostics",
-    //         "getCachedSemanticDiagnostics",
-    //         "getDiagnosticsProducingTypeChecker",
-    //         "getFileProcessingDiagnostics",
-    //     ].includes(key)) {
-    //         return value()
-    //     }
-    //     return []
-    // })
     return [
         ...program.getSemanticDiagnostics(),
         ...program.getSyntacticDiagnostics(),
@@ -80,7 +56,6 @@ const cutCodeForHigliting = (errorInfo) => {
     return `\nat (${(0, typescript_1.normalizeSlashes)(path_1.default.join(App_1.App.__RunDirName, filePath))}:${line}:${column})` + "\n " +
         (0, highlighter_1.highlighter)(SPLITED).split('\n').map((v, index) => {
             let leng = (String(Math.max(line - 2, line + 2)).length - String(line + index).length);
-            // console.log("🚀 --> file: utils.js --> line 91 --> highlighter --> leng", leng)
             let left_join = Array.from(Array(Math.max(0, leng)), x => " ").join("");
             return chalk_1.default[index ? "grey" : "redBright"](left_join + ((line) + index) + '|' + (index ? "  " : "> ")) + v;
         }).join('\n');

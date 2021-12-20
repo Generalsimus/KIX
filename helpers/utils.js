@@ -63,7 +63,7 @@ export const createHost = (__compilerOptions) => {
         }
     }
     const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/,
-        _HOST = createCompilerHost(__compilerOptions, true),
+        _HOST = createCompilerHost(__compilerOptions, /* setParentNodes */  true),
         currentDirectory = _HOST.getCurrentDirectory(),
         getCanonicalFileName = createGetCanonicalFileName(_HOST.useCaseSensitiveFileNames()),
         moduleResolutionCache = createModuleResolutionCache(currentDirectory, getCanonicalFileName),
@@ -93,7 +93,10 @@ export const createHost = (__compilerOptions) => {
                     // sourceFile = getSourceFileByExtName(fileName, languageVersion)
                     // return FilesThree.set(fileName, sourceFile), sourceFile
 
-                    return FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion)
+                    const fff = FilesThree.get(fileName.toLowerCase()) || getSourceFileByExtName(fileName, languageVersion)
+                    // console.log("🚀 --> file: utils.js --> line 97 --> createHost --> fff", fff.imports)
+
+                    return fff
                 }
             },
             resolveModuleNames: function (moduleNames, containingFile, _reusedNames, redirectedReference) {
@@ -105,6 +108,9 @@ export const createHost = (__compilerOptions) => {
             // getDefaultLibLocation: () => normalizeSlashes(path.resolve(__dirname + "./../../lib")),
 
         })
+
+
+    // console.log("🚀 --> file: utils.js --> line 115 --> createHost --> Host", Host)
 
     return Host
 
@@ -147,24 +153,32 @@ export const getImportModuleName = () => `________KIX__IMPORT__MODULE__${new Dat
 
 
 
-export const getModuleFiles = (Module, ModuleFiles, parsedPaths = new Set()) => {
+export const getModuleFiles = (moduleInfo, moduleFiles, parsedPaths = new Set()) => {
 
-    for (const MODULE_PATH in Module.NodeModules) {
-        ModuleFiles.add(MODULE_PATH)
-    }
-    for (const LocalModulesPathKey in Module.LocalModules) {
-        if (!parsedPaths.has(LocalModulesPathKey)) {
-            parsedPaths.add(LocalModulesPathKey)
-            getModuleFiles(Module.LocalModules[LocalModulesPathKey], ModuleFiles, parsedPaths)
+    if (!parsedPaths.has(moduleInfo.modulePath)) {
+        parsedPaths.add(moduleInfo.modulePath)
+
+        for (const importPath in moduleInfo.moduleColection) {
+            const importModuleInfo = moduleInfo.moduleColection[importPath];
+            // console.log("🚀 --> file: utils.js --> line 157 --> getModuleFiles --> importPath", importPath)
+
+            if (importModuleInfo.isNodeModule) {
+                moduleFiles.add(importModuleInfo.modulePath)
+
+            } else {
+                getModuleFiles(importModuleInfo, moduleFiles, parsedPaths)
+            }
         }
     }
+
+
+    return moduleFiles;
 }
 
 let ModuleUnnesesaryIndex = 0;
 export const getModuleWindowName = () => {
     return `_KIX${++ModuleUnnesesaryIndex}${new Date().getTime()}`
 }
-
 
 
 
@@ -203,7 +217,8 @@ export const resolveKixModule = (fileDirectory) => {
             extensions: ['.js', '.ts', '.jsx', '.tsx'],
         }))
     } catch {
-        return
+        const location = normalizeSlashes(path.join(__dirname, "../../main/index.js"))
+        return fs.existsSync(location) && location
     }
 }
 

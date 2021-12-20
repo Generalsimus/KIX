@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateFactory = void 0;
 const typescript_1 = __importStar(require("typescript"));
+const utils_1 = require("./utils");
 const { createToken, createBinaryExpression, createVariableStatement, createVariableDeclarationList, createVariableDeclaration, createBlock, createIdentifier, createPropertyAccessExpression, createObjectLiteralExpression, createParameterDeclaration, createParenthesizedExpression, createArrowFunction, createCallExpression, createObjectBindingPattern, createBindingElement, createExpressionStatement, createElementAccessExpression, createForInStatement, createPropertyAssignment, createStringLiteral, createSpreadAssignment, createUniqueName, createReturnStatement, } = typescript_1.factory;
 const { PlusToken, EqualsToken } = typescript_1.SyntaxKind;
 exports.generateFactory = {
@@ -72,9 +73,7 @@ exports.generateFactory = {
         return createObjectBindingPattern(returnValue);
     },
     CREATE_CAll_Function(CallNameOrNode, Arguments) {
-        return createCallExpression(typeof CallNameOrNode === "string" ?
-            createIdentifier(CallNameOrNode) :
-            CallNameOrNode, undefined, Arguments);
+        return createCallExpression(this.CREATE_Identifier(CallNameOrNode), undefined, Arguments.map((arg) => this.CREATE_Identifier(arg)));
     },
     CREATE_Const_Variable(Nodes, flag = typescript_1.default.NodeFlags.Const) {
         return createVariableStatement(undefined, createVariableDeclarationList(Nodes.map(([NameNode, ValueNode]) => {
@@ -122,55 +121,60 @@ exports.generateFactory = {
             Node,
         ]);
     },
-    CREATE_Export_File_Function(body, __Import_Module_Name, Module_INDEX, ifNeedRunTime) {
+    CREATE_Export_File_Function(body, __Import_Module_Name, moduleIndex) {
         return this.CREATE_CAll_Function(__Import_Module_Name + "_Module", [
-            typescript_1.factory.createNumericLiteral(Module_INDEX),
-            typescript_1.factory.createArrowFunction(undefined, undefined, this.CREATE_Parameter_Declaration(["exports"]), undefined, typescript_1.factory.createToken(typescript_1.default.SyntaxKind.EqualsGreaterThanToken), typescript_1.factory.createBlock(body, true)),
-            ...(ifNeedRunTime ? [typescript_1.factory.createNumericLiteral("1")] : []),
+            typescript_1.factory.createNumericLiteral(moduleIndex),
+            typescript_1.factory.createArrowFunction(undefined, undefined, this.CREATE_Parameter_Declaration(["exports"]), undefined, typescript_1.factory.createToken(typescript_1.default.SyntaxKind.EqualsGreaterThanToken), typescript_1.factory.createBlock(body, true))
         ]);
     },
     CREATE_Bind_Function(Name, ClildNode, ArgumentsNodes) {
         return typescript_1.factory.createFunctionDeclaration(undefined, undefined, undefined, typescript_1.factory.createIdentifier(Name), undefined, this.CREATE_Parameter_Declaration(ArgumentsNodes), undefined, typescript_1.factory.createBlock(ClildNode, true));
     },
     CREATE_Module_GET_POLYFIL(__Import_Module_Name) {
-        // return  factory.createIdentifier("k")
-        // console.log(generateFactory.CREATE_Bind_Function, this)
-        return this.CREATE_Bind_Function(__Import_Module_Name + "_Module", [
-            typescript_1.factory.createExpressionStatement(typescript_1.factory.createCallExpression(this.CREATE_Property_Access_Expression([
-                "Object",
-                "defineProperty",
-            ]), undefined, [
-                typescript_1.factory.createIdentifier(__Import_Module_Name),
-                typescript_1.factory.createIdentifier("k"),
-                typescript_1.factory.createObjectLiteralExpression([
-                    typescript_1.factory.createPropertyAssignment(typescript_1.factory.createIdentifier("get"), typescript_1.factory.createFunctionExpression(undefined, undefined, undefined, undefined, [], undefined, typescript_1.factory.createBlock([
-                        typescript_1.factory.createReturnStatement(this.CREATE_Token_Nodes([
-                            typescript_1.factory.createIdentifier("e"),
-                            this.CREATE_Token_Nodes([
-                                typescript_1.factory.createCallExpression(typescript_1.factory.createIdentifier("f"), undefined, [
-                                    typescript_1.factory.createParenthesizedExpression(this.CREATE_Token_Nodes([
-                                        typescript_1.factory.createIdentifier("e"),
-                                        typescript_1.factory.createObjectLiteralExpression([], false)
-                                    ], typescript_1.default.SyntaxKind.EqualsToken)),
-                                ]),
-                                typescript_1.factory.createIdentifier("e")
-                            ], typescript_1.default.SyntaxKind.CommaToken)
-                        ], typescript_1.default.SyntaxKind.BarBarToken)),
-                    ], true))),
-                ], true),
-            ])),
-            typescript_1.factory.createExpressionStatement(this.CREATE_Token_Nodes([
-                "i",
-                this.CREATE_Element_Access_Expression([
+        return this.CREATE_Const_Variable([
+            [
+                __Import_Module_Name + "_Module",
+                this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(this.CREATE_Property_Access_Expression(["Object", "defineProperty"]), [
                     __Import_Module_Name,
-                    "k",
-                ])
-            ], typescript_1.default.SyntaxKind.AmpersandAmpersandToken)),
-        ], [
-            "k",
-            "f",
-            "i",
-            "e"
+                    "accessKey",
+                    this.CREATE_Object_WiTH_String_Keys([
+                        [
+                            "get",
+                            this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_Token_Nodes([
+                                typescript_1.factory.createIdentifier("exported"),
+                                this.CREATE_Token_Nodes([
+                                    this.CREATE_CAll_Function("moduleBlockFunction", [
+                                        this.CREATE_Token_Nodes([
+                                            typescript_1.factory.createIdentifier("exported"),
+                                            this.CREATE_Object_WiTH_String_Keys([])
+                                        ], typescript_1.default.SyntaxKind.EqualsToken)
+                                    ]),
+                                    typescript_1.factory.createIdentifier("exported")
+                                ], typescript_1.default.SyntaxKind.CommaToken)
+                            ], typescript_1.default.SyntaxKind.BarBarToken), [])
+                        ]
+                    ])
+                ]), [
+                    "accessKey",
+                    "moduleBlockFunction",
+                    "exported",
+                ]),
+            ]
         ]);
     },
+    CREATE_Async_Module_SourceFile(sourceFile, moduleInfo, compilerOptions) {
+        const polyfillModuleInfo = utils_1.nodeModuleThree.get(utils_1.codePolyfillPath);
+        return typescript_1.default.updateSourceFileNode(sourceFile, [
+            typescript_1.factory.createExpressionStatement(this.CREATE_Token_Nodes([
+                this.CREATE_Element_Access_Expression([
+                    compilerOptions.__Import_Module_Name,
+                    typescript_1.factory.createStringLiteral(moduleInfo.moduleIndex + "a")
+                ]),
+                this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(this.CREATE_Element_Access_Expression([
+                    polyfillModuleInfo.__Module_Window_Name,
+                    typescript_1.factory.createStringLiteral("A")
+                ]), ["u"]), ["u"])
+            ], typescript_1.default.SyntaxKind.EqualsToken))
+        ]);
+    }
 };

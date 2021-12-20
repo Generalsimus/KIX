@@ -46,7 +46,7 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
             "es2015"
         ],
         sourceMap: true,
-        "minifyBuild": true,
+        "minifyBuild": true
     },
     priorityCompilerOptions = {
         module: ModuleKind.AMD,
@@ -61,7 +61,6 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
         jsx: "preserve",
         __Node_Module_Window_Name: getModuleWindowName(),
         "noImplicitAny": true,
-
     },
     __diagnostics = [],
     // read package.json file 
@@ -86,7 +85,12 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
 
 // console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", path.join(__dirname, "../../main/index.js"),)
 
-
+// "references": [
+//     {
+//       "path": "../package2"
+//     }
+//   ]
+// const 
 export const App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,
@@ -96,8 +100,7 @@ export const App = {
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
-    __kixModuleLocation: resolveKixModule(__dirname),
-    __kixLocalLocation: normalizeSlashes(path.join(__dirname, "../../main/index.js")),
+    __kixModuleLocation: resolveKixModule(__RunDirName),
     __TranspilingMeta,
     __ModuleUrlPath,
     __IndexHTMLRequesPaths: ["/", "/index.html"],

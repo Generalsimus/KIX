@@ -1,17 +1,13 @@
-import { readSourceFiles } from "./readSourceFiles"
 import { App } from "../App"
-import ts, { createProgram, getDirectoryPath, getBaseFileName, normalizeSlashes } from "typescript"
-import chokidar from "chokidar"
+import { createProgram, normalizeSlashes } from "typescript"
 import path from "path"
-import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName, getoutFilePath } from "../../helpers/utils"
+import { createCancellationToken, filePathToUrl, getImportModuleName, getModuleFiles, getModuleWindowName } from "../../helpers/utils"
 import { ModuleTransformersAfter, ModuleTransformersBefore } from "./Transpiler/Module"
 import resolve from 'resolve'
-import { getTransformersObject, ModulesThree, resolveModule } from "./Transpiler/utils"
+import { codeControlerIndex, codeControlerPath, codePolyfillPath, defaultModuleThree, getTransformersObject, nodeModuleThree, startModulesIndex, useLocalFileHostModuleRegistrator, useModuleFileHostModuleRegistrator } from "./Transpiler/utils"
 import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
-import fs from "fs"
-import { getProgramDiagnostics } from "../SocketMessageControler/utils"
-import { clareLog, log } from "../../helpers/loger"
+import { clareLog } from "../../helpers/loger"
 
 
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
@@ -31,6 +27,17 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
     let oldProgram;
     const __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
+        compilingModuleInfo = {
+            moduleIndex: startModulesIndex++,
+            modulePath: FilePath,
+            isNodeModule: false,
+            __Module_Window_Name,
+            moduleColection: {},
+        },
+        moduleThree = new Map([
+            ...defaultModuleThree,
+            [FilePath, compilingModuleInfo]
+        ]),
         requestPath = filePathToUrl(__compilerOptions.outFile),
         mapRequestPath = requestPath + ".map",
         changeFileCallback = () => {
@@ -42,9 +49,9 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             compilerOptions.cancellationToken = createCancellationToken()
 
             oldProgram = createProgram(
-                compilerOptions.rootNames,
+                [FilePath],
                 compilerOptions,
-                __Host,
+                host,
                 oldProgram
             );
             __compiledFilesThreshold.set(FilePath, oldProgram)
@@ -59,12 +66,13 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             )
             // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
             if (resetModules) {
-                const Modules = new Set(defaultModules)
+                const Modules = new Set([codeControlerPath, codePolyfillPath])
+
 
                 for (const ModuleFilePath of HTMLFilePaths) {
-
-                    ModuleFilePath && getModuleFiles(ModulesThree.get(ModuleFilePath), Modules)
+                    getModuleFiles(compilerOptions.moduleThree.get(ModuleFilePath), Modules)
                 }
+
                 resetModules = false
                 Compile_Node_Modules(
                     [...Modules],
@@ -79,9 +87,10 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             ...__compilerOptions,
             inlineSources: true,
             watch: true,
+            moduleThree,
             __Module_Window_Name,
             rootDir: __RunDirName,
-            rootNames: [FilePath],
+            // rootNames: [FilePath],
             __Import_Module_Name,
             changeFileCallback,
             resetModuleFiles: () => {
@@ -89,11 +98,9 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             },
             __Url_Dir_Path: path.dirname(requestPath)
         },
+        host = useLocalFileHostModuleRegistrator(__Host, compilerOptions),
         transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
-        defaultModules = [
-            App.__kixModuleLocation || App.__kixLocalLocation,
-            normalizeSlashes(path.join(__dirname, "./../../../main/codeController/index.js"))
-        ],
+
         writeFileCallback = (fileName, content) => {
             // console.log({ fileName, requestPath })
 
@@ -102,7 +109,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
                 __requestsThreshold.set(mapRequestPath, content)
             } else if (ext === ".js") {
 
-                const Module_Text = `(function(${__Import_Module_Name}){${content} \n return ${__Import_Module_Name}; })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`
+                const Module_Text = `(function(${__Import_Module_Name}){${content} \n ${__Import_Module_Name}[${compilingModuleInfo.moduleIndex}];\n})(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`
 
                 __requestsThreshold.set(requestPath, Module_Text)
                 // console.log(Module_Text)
@@ -155,49 +162,24 @@ const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
 
     let Node_oldProgram;
     const transformers = getTransformersObject([ModuleTransformersBefore, NodeModuleTransformersBefore], [ModuleTransformersAfter]),
-        __Module_Window_Name = defaultcompilerOptions.__Node_Module_Window_Name;
-
-
-
-
-    const compilerOptions = {
-        ...defaultcompilerOptions,
-        outFile: __ModuleUrlPath,
-        // removeComments: false,
-        lib: undefined,
-        sourceMap: false,
-        rootNames: NodeModuelsPaths,
-        __Import_Module_Name: __Module_Window_Name,
-        __Module_Window_Name,
-        resetModuleFiles: () => { },
-    }
-
-
+        __Module_Window_Name = defaultcompilerOptions.__Node_Module_Window_Name,
+        compilerOptions = {
+            ...defaultcompilerOptions,
+            outFile: __ModuleUrlPath,
+            // removeComments: false, 
+            moduleThree: nodeModuleThree,
+            lib: undefined,
+            sourceMap: false,
+            __isNodeModuleBuilding: true,
+            // rootNames: NodeModuelsPaths,
+            __Import_Module_Name: __Module_Window_Name,
+            __Module_Window_Name,
+            resetModuleFiles: () => { },
+        },
+        executeCodeControler = App.__Dev_Mode ? `${compilerOptions.__Import_Module_Name}[${codeControlerIndex}]` : ""
     Node_oldProgram = createProgram(NodeModuelsPaths,
         compilerOptions,
-        {
-            ...__Host,
-            resolveModuleNames: (moduleNames, containingFile, reusedNames, redirectedReference) => {
-                // 
-                return moduleNames.map((ModuleText) => {
-                    try {
-                        const modulePath = resolve.sync(ModuleText, {
-                            basedir: path.dirname(containingFile),
-                            extensions: ['.js', '.ts'],
-                        })
-                        return {
-                            resolvedFileName: normalizeSlashes(modulePath),
-                            originalPath: undefined,
-                            extension: path.extname(modulePath),
-                            isExternalLibraryImport: false,
-                            packageId: undefined
-                        }
-                    } catch (e) {
-                        return undefined
-                    }
-                })
-            }
-        },
+        useModuleFileHostModuleRegistrator(__Host, compilerOptions),
         Node_oldProgram
     );
     Node_oldProgram.emit(
@@ -207,12 +189,9 @@ const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
             if (path.extname(fileName) == ".js") {
                 __requestsThreshold.set(
                     __ModuleUrlPath,
-                    `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
+                    `(function(${compilerOptions.__Import_Module_Name}){${content}\n${executeCodeControler}\n})((window.${__Module_Window_Name}={}))`
                 )
-                // console.log(
-                //     __ModuleUrlPath,
-                //     `(function(${compilerOptions.__Import_Module_Name}){${content} \n return ${compilerOptions.__Import_Module_Name};})((window.${__Module_Window_Name}={}))`
-                // )
+
             }
 
         }

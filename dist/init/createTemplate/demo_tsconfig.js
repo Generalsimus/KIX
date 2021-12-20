@@ -8,16 +8,13 @@ const getDemoTsConfigObject = () => {
     return {
         compilerOptions: {
             module: typescript_1.ModuleKind.AMD[module],
-            // moduleResolution: ModuleResolutionKind.NodeJs[moduleResolution],
             "moduleResolution": "Node",
             outDir,
             rootDir,
             baseUrl,
-            // jsx,
             "jsx": "preserve",
             watch,
             forceConsistentCasingInFileNames,
-            // suppressOutputPathCheck,
             resolveJsonModule,
             allowSyntheticDefaultImports,
             allowJs,

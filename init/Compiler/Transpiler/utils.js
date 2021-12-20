@@ -1,10 +1,22 @@
-import { getDirectoryPath, SyntaxKind, visitEachChild, factory, normalizeSlashes } from "typescript"
+import {
+    getDirectoryPath, SyntaxKind, visitEachChild, factory, normalizeSlashes,
+    parseConfigFileTextToJson,
+    createSourceFile,
+    createCompilerHost,
+    resolveModuleName,
+    createGetCanonicalFileName,
+    createModuleResolutionCache,
+    Debug,
+    normalizeSlashes
+} from "typescript"
+import tsModule from 'typescript/lib/tsserverlibrary';
 import resolve from "resolve"
 import chokidar from "chokidar"
 import path from "path"
 import { getColumnName } from "../../../helpers/utils"
 import { App } from "../../App"
-import { visited_SourceFiles } from "./Module"
+import { visitedSourceFilesMap } from "./Module"
+import ts from "typescript/lib/tsserverlibrary";
 
 
 const {
@@ -27,60 +39,86 @@ const {
 
 
 
-export const defaultModulePaths = {
-    "kix": App.__kixLocalLocation,
-    [App.__kixLocalLocation]: "kix"
+
+
+
+export let startModulesIndex = 1;
+
+const defaultModules = {
+    kix: {
+        moduleIndex: startModulesIndex++,
+        modulePath: App.__kixModuleLocation,
+        isNodeModule: true,
+        __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
+        moduleColection: {},
+    }
+
 }
-export function resolveModule(modulePath, fileDirectory) {
+
+export const codeControlerPath = normalizeSlashes(path.join(__dirname, "./../../../../main/codeController/index.js"))
+export const codePolyfillPath = normalizeSlashes(path.join(__dirname, "./../../../../main/polyfill.js"))
+export const codeControlerIndex = startModulesIndex++
+export const defaultModuleThree = [
+    [defaultModules.kix.modulePath, defaultModules.kix],
+    [codeControlerPath, {
+        moduleIndex: codeControlerIndex,
+        modulePath: codeControlerPath,
+        isNodeModule: true,
+        __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
+        moduleColection: {},
+    }],
+    [codePolyfillPath, {
+        moduleIndex: startModulesIndex++,
+        modulePath: codePolyfillPath,
+        isNodeModule: true,
+        __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
+        moduleColection: {},
+    }],
+]
+
+export const nodeModuleThree = new Map(defaultModuleThree)
+
+
+
+
+export const nodeModuleResolver = (modulePath, fileDirectory) => {
     try {
+        return {
+            resolvedFileName: normalizeSlashes(resolve.sync(modulePath, {
+                basedir: fileDirectory,
+                extensions: ['.js', '.ts', '.jsx', '.tsx', path.extname(modulePath)],
+            })),
+            originalPath: undefined,
+            extension: tsModule.Extension.Js,
+            isExternalLibraryImport: false,
+            packageId: undefined
+        }
 
-        return normalizeSlashes(resolve.sync(modulePath, {
-            basedir: fileDirectory,
-            extensions: ['.js', '.ts', '.jsx', '.tsx'],
-        }))
     } catch {
-        return defaultModulePaths[modulePath]
+        return {
+            resolvedFileName: defaultModules[modulePath].modulePath,
+            originalPath: undefined,
+            extension: tsModule.Extension.Js,
+            isExternalLibraryImport: true,
+            packageId: undefined
+        }
+
     }
 }
 
 
 
-
-
-// მოდულის შესახებ ინფორმაციის ქეშირება
-export const ModulesThree = new Map()
-let Module_INDEX = 1
-export const getOrSetModuleInfo = (modulePath, compilerOptions) => {
-
-    const module = ModulesThree.get(modulePath)
-
-    const moduleInfo = module || {
-        Module_INDEX: Module_INDEX++,
-        __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
-    }
-    if (!module) {
-        ModulesThree.set(modulePath, moduleInfo)
-    }
-
-    // console.log("🚀 --> file: utils.js --> line 122 --> ModuleColection --> ModulesThree", ModulesThree.keys());
-    return moduleInfo
-}
 
 
 export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requesteCancell }, changeFileCallback }) => {
-    // .originalFileName
 
-    // console.log("🚀 --> file: utils.js --> line 77 --> moduleInfo.fileWatcher=chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
-    // deleteFileinThree
-    // console.log("🚀 --> file: utils.js --> line 74 --> watchModuleFileChange --> moduleInfo", moduleInfo);
-    // console.log("🚀 --> file: utils.js --> line 73 --> chokidar.watch --> NODE.originalFileName", NODE.originalFileName);
 
     moduleInfo.fileWatcher = chokidar.watch(NODE.originalFileName).on('change', (event, path) => {
-        // console.log("chokidar___", event, path);
-        // console.log("🚀 --> file: Module.js --> line 61 --> moduleInfo", moduleInfo);
+
+        delete moduleInfo.resolvedModuleNames
 
         App.__Host.deleteFileinThree(NODE.path)
-        visited_SourceFiles.delete(NODE.originalFileName)
+        visitedSourceFilesMap.delete(NODE.originalFileName)
         requesteCancell()
         changeFileCallback()
         App.server.socketClientSender("RESTART_SERVER", {})
@@ -100,63 +138,6 @@ export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { r
 
 
 
-
-
-
-
-export const configModules = (NODE, moduleInfo, compilerOptions) => {
-
-    const fileDirectory = getDirectoryPath(NODE.originalFileName)
-    const oldNodeModules = moduleInfo.NodeModules || {}
-    const NodeModules = {}
-    const LocalModules = {}
-
-    const ModuleColection = NODE.imports.reduce((ModuleColection, ModuleNode) => {
-        const { text, parent, kind } = ModuleNode
-
-        const modulePath = resolveModule(text, fileDirectory)
-
-        if (!modulePath) {
-            return ModuleColection
-        }
-
-        const module = ModulesThree.get(modulePath)
-
-        const childModuleInfo = module || {
-            Module_INDEX: Module_INDEX++,
-            __Module_Window_Name: defaultModulePaths[modulePath] ? compilerOptions.__Node_Module_Window_Name : compilerOptions.__Module_Window_Name
-        }
-        if (!module) {
-            ModulesThree.set(modulePath, childModuleInfo)
-        }
-        // console.log("🚀 --> file: utils.js --> line 122 --> ModuleColection --> ModulesThree", ModulesThree.keys());
-
-
-        const ModuleKindName = SyntaxKind[parent?.expression?.kind]
-        childModuleInfo.KindName = ModuleKindName
-
-
-        if ((/[/\\]node_modules[/\\]/).test(modulePath)) {
-            childModuleInfo.isNodeModule = true
-            childModuleInfo.__Module_Window_Name = compilerOptions.__Node_Module_Window_Name
-            NodeModules[modulePath] = childModuleInfo
-            if (!oldNodeModules[modulePath]) {
-                compilerOptions.resetModuleFiles()
-            }
-
-        } else {
-            LocalModules[modulePath] = childModuleInfo;
-        }
-        ModuleColection[text] = childModuleInfo
-        return ModuleColection
-    }, {})
-
-
-    moduleInfo.ModuleColection = ModuleColection
-    moduleInfo.NodeModules = NodeModules
-    moduleInfo.LocalModules = LocalModules
-    return ModuleColection
-}
 
 
 
@@ -210,18 +191,18 @@ export const getTransformersObject = (before, after) => {
                 return visitor
             }
         ],
-        // after: [
-        //     (CTX) => {
-        //         const visitor = (NODE) => {
+        after: [
+            (CTX) => {
+                const visitor = (NODE) => {
 
-        //             // console.log(SyntaxKind[NODE.kind])
+                    // console.log(SyntaxKind[NODE.kind])
 
-        //             return (transpilerAfter[NODE.kind] || visitEachChild)(NODE, visitor, CTX)
-        //         }
+                    return (transpilerAfter[NODE.kind] || visitEachChild)(NODE, visitor, CTX)
+                }
 
-        //         return visitor
-        //     }
-        // ]
+                return visitor
+            }
+        ]
     }
 }
 
@@ -257,16 +238,100 @@ export const createObjectPropertyLoop = (namesObject, returnValue = []) => {
 
 
 
-export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
-    // console.log("🚀 --> file: utils.js --> line 232 --> geModuleLocationMeta --> ModuleData", ModuleData);
-    if (!ModuleData) {
+export const geModuleLocationMeta = (moduleInfo, compilerOptions) => {
+    if (!moduleInfo) {
         return
     }
+    // moduleInfo. = true;
+    // moduleInfo.isAsyncModule = false;
 
-    const propNode = factory.createNumericLiteral(ModuleData.Module_INDEX)
-    return ModuleData.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
+    const propNode = factory.createNumericLiteral(moduleInfo.moduleIndex)
+    return moduleInfo.__Module_Window_Name === compilerOptions.__Import_Module_Name ?
         [compilerOptions.__Import_Module_Name, propNode] :
-        ["window", factory.createStringLiteral(ModuleData.__Module_Window_Name), propNode]
+        ["window", factory.createStringLiteral(moduleInfo.__Module_Window_Name), propNode]
+}
+
+
+
+export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
+    let incrementModuleIndex = startModulesIndex;
+    // const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/,
+    const moduleThree = compilerOptions.moduleThree,
+        currentDirectory = oldhost.getCurrentDirectory(),
+        getCanonicalFileName = createGetCanonicalFileName(oldhost.useCaseSensitiveFileNames()),
+        moduleResolutionCache = createModuleResolutionCache(currentDirectory, getCanonicalFileName),
+        Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isAsyncModule) => {
+            // console.log("🚀 --> file: utils.js --> line 255 --> useLocalFileHostModuleRegistrator --> redirectedReference", redirectedReference)
+            let resolvedModule = containinModuleInfo.moduleColection[moduleName];
+
+            if (resolvedModule) {
+                return resolvedModule.resolvedModule
+            }
+
+            resolvedModule = (
+                resolveModuleName(moduleName, containingFile, compilerOptions, newHost, moduleResolutionCache, redirectedReference).resolvedModule ||
+                nodeModuleResolver(moduleName, path.dirname(containingFile))
+            );
+
+            // console.log("🚀 --> file: utils.js --> line 263 --> useLocalFileHostModuleRegistrator --> resolvedModule", resolvedModule)
+            // console.log("🚀 --> file: utils.js --> line 263 --> useLocalFileHostModuleRegistrator --> resolvedModule", resolvedModule)
+
+            if (!resolvedModule) {
+                return;
+            }
+            if (resolvedModule.extension === tsModule.Extension.Dts) {
+                return resolvedModule;
+            }
+
+
+
+
+            const modulePath = resolvedModule.resolvedFileName;
+            const childModule = moduleThree.get(modulePath);
+            const moduleInfo = childModule || {
+                moduleIndex: incrementModuleIndex++,
+                modulePath: modulePath,
+                isNodeModule: containinModuleInfo.isNodeModule || (/[/\\]node_modules[/\\]/).test(modulePath),
+                __Module_Window_Name: compilerOptions.__Module_Window_Name,
+                isAsyncModule,
+                moduleColection: {},
+                resolvedModule,
+            };
+            if (!isAsyncModule) {
+                moduleInfo.isEs6Module = true;
+            }
+            containinModuleInfo.moduleColection[moduleName] = moduleInfo;
+
+            if (!childModule) {
+                moduleThree.set(modulePath, moduleInfo)
+            }
+            if (moduleInfo.isNodeModule) {
+                moduleInfo.__Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
+
+                nodeModuleThree.set(modulePath, moduleInfo)
+
+                compilerOptions.resetModuleFiles()
+
+            }
+
+
+            return resolvedModule
+        }
+    // console.log("🚀 --> file: utils.js --> line 348 --> useModuleFileHostModuleRegistrator --> moduleThree", moduleThree)
+    const newHost = {
+        ...oldhost,
+        resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
+
+            return loadWithLocalWithSourceFileCache(
+                sourceFile.imports,
+                containingFile,
+                moduleThree.get(containingFile),
+                redirectedReference,
+                Module_loader
+            )
+        }
+    }
+    return newHost
 }
 
 
@@ -275,4 +340,70 @@ export const geModuleLocationMeta = (ModuleData, compilerOptions) => {
 
 
 
+export const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
+    let incrementModuleIndex = startModulesIndex;
+    const moduleThree = compilerOptions.moduleThree;
+    const Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isAsyncModule) => {
+        let resolvedModule = containinModuleInfo.moduleColection[moduleName];
+
+        if (resolvedModule) {
+            return resolvedModule.resolvedModule
+        }
+
+        resolvedModule = nodeModuleResolver(moduleName, path.dirname(containingFile));
+        if (!resolvedModule) {
+            return;
+        }
+
+        const modulePath = resolvedModule.resolvedFileName;
+        const childModule = moduleThree.get(modulePath)
+
+
+
+        const moduleInfo = childModule || {
+            moduleIndex: incrementModuleIndex++,
+            modulePath: modulePath,
+            isNodeModule: true,
+            isAsyncModule,
+            isEs6Module: isAsyncModule === false,
+            __Module_Window_Name: compilerOptions.__Module_Window_Name,
+            moduleColection: {},
+            resolvedModule,
+        }
+        if (!isAsyncModule) {
+            moduleInfo.isEs6Module = true;
+        }
+        containinModuleInfo.moduleColection[moduleName] = moduleInfo;
+        if (!childModule) {
+            moduleThree.set(modulePath, moduleInfo)
+        }
+
+        return resolvedModule
+    }
+    return {
+        ...oldhost,
+        resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
+            return loadWithLocalWithSourceFileCache(
+                sourceFile.imports,
+                containingFile,
+                nodeModuleThree.get(containingFile),
+                redirectedReference,
+                Module_loader
+            )
+        }
+    }
+}
+
+
+const loadWithLocalWithSourceFileCache = (imports, containingFile, containinModuleInfo, redirectedReference, loader) => {
+
+
+
+    return containinModuleInfo.resolvedModuleNames || (containinModuleInfo.resolvedModuleNames = (imports || []).flatMap(({ text, parent }) => {
+        const resolved = loader(text, containingFile, containinModuleInfo, redirectedReference, parent?.expression?.kind === SyntaxKind.ImportKeyword);
+        return resolved ? [resolved] : []
+    }))
+
+
+}
 

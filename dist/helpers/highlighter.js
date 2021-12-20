@@ -6,9 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.highlighter = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const highlight_es_1 = __importDefault(require("highlight-es"));
-// const code = ` 
-//   var s = <div  ssss ="sds">sdsds{ss}</div>
-// `;
 var LAST_KEY, LAST_VALUE;
 var highlighterTokenizer = {
     string: str => {
@@ -28,9 +25,7 @@ var highlighterTokenizer = {
         return chalk_1.default.rgb(103, 205, 204)(str);
     },
     name: str => {
-        // console.log(LAST_KEY, LAST_VALUE)
         if (LAST_KEY == "punctuator" && LAST_VALUE == "<") {
-            // OPENED_JSX = true
             LAST_KEY = "OPEN_TAG";
             LAST_VALUE = str;
             return chalk_1.default.rgb(3, 141, 255)(str);

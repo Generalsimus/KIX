@@ -44,7 +44,6 @@ const createErrorCode = ({ fileCode, line, errorMessage, column, path, url }) =>
             style: "padding: 5vw"
         });
     }
-    // crearte errorr View
     (0, index_1.default)(ErrorBodyTag, {
         div: [{
                 h2: errorMessage,
@@ -86,6 +85,5 @@ const createErrorCode = ({ fileCode, line, errorMessage, column, path, url }) =>
             }],
         style: "border: 7px solid #a0111100;padding: 0 1vw;border-radius: 5px;border-left-color: #e33030;box-shadow: 0px 0px 20px #ff000073;    margin-bottom: 4em;"
     });
-    // end create error view
 };
 exports.createErrorCode = createErrorCode;

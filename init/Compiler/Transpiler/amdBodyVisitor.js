@@ -64,9 +64,10 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
 
     var importAliasName = ts.getLocalNameForExternalImport(factory, node, currentSourceFile);
 
+
     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
 
-    const moduleLocationNODE = ModuleData ?generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
+    const moduleLocationNODE = ModuleData ? generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
     if (node.moduleSpecifier && !importClause) {
         return [factory.createExpressionStatement(moduleLocationNODE)];
     }
@@ -97,8 +98,9 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         }
     } else if (node.exportClause) {
 
+
         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
-        // if (typeof Module_INDEX !== "number") {
+        // if (typeof moduleIndex !== "number") {
         //     return newNodes
         // }
         newNodes.push(factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
@@ -113,7 +115,9 @@ function visitExportDeclaration(node, CTX, newNodes = []) {
         // export * as ns from "mod";
         // export * as default from "mod";
     } else {
-        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.Module_INDEX
+        // const Module_INDEX = CTX.ModuleColection[node.moduleSpecifier.text]?.moduleIndex
+
+
         const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
         CTX.assignPolyfill = createUniqueName(compilerOptions.__Import_Module_Name + "_Assign")
         newNodes.push(createCallExpression(

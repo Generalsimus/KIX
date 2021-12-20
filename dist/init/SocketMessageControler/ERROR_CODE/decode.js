@@ -14,16 +14,16 @@ function decode(mappings) {
         0,
         0,
         0,
-        0, // name index
+        0,
     ];
     let j = 0;
     for (let i = 0, shift = 0, value = 0; i < mappings.length; i++) {
         const c = mappings.charCodeAt(i);
-        if (c === 44) { // ","
+        if (c === 44) {
             segmentify(line, segment, j);
             j = 0;
         }
-        else if (c === 59) { // ";"
+        else if (c === 59) {
             segmentify(line, segment, j);
             j = 0;
             decoded.push(line);
@@ -49,7 +49,7 @@ function decode(mappings) {
                 }
                 segment[j] += value;
                 j++;
-                value = shift = 0; // reset
+                value = shift = 0;
             }
         }
     }
@@ -59,13 +59,6 @@ function decode(mappings) {
 }
 exports.decode = decode;
 function segmentify(line, segment, j) {
-    // This looks ugly, but we're creating specialized arrays with a specific
-    // length. This is much faster than creating a new array (which v8 expands to
-    // a capacity of 17 after pushing the first item), or slicing out a subarray
-    // (which is slow). Length 4 is assumed to be the most frequent, followed by
-    // length 5 (since not everything will have an associated name), followed by
-    // length 1 (it's probably rare for a source substring to not have an
-    // associated segment data).
     if (j === 4)
         line.push([segment[0], segment[1], segment[2], segment[3]]);
     else if (j === 5)

@@ -206,27 +206,25 @@ exports.AttributeMethods = {
     },
 };
 Object.assign(Node.prototype, exports.AttributeMethods);
-// Object.setPrototypeOf(AttributeMethods, Node.prototype)
-// Object.setPrototypeOf(Node, AttributeMethods)
 const fillArray = (node) => (node.hasOwnProperty(0) ? node : [""]);
 const toArrayAndFill = (node) => node instanceof Array ? fillArray(node) : [node];
-function replaceChildNodes(newValues, nod2, childIndex, nodeList, value, node) {
-    while ((value = newValues[childIndex]), (node = nod2[childIndex]), ((childIndex < newValues.length) || (childIndex < nod2.length))) {
+function replaceChildNodes(newValues, oldNodes, childIndex, nodeList, lastNode, value, node) {
+    while ((value = newValues[childIndex]), (node = oldNodes[childIndex]), ((childIndex < newValues.length) || (childIndex < oldNodes.length))) {
         if (value instanceof Array) {
-            nodeList[childIndex] = replaceChildNodes(fillArray(value), [node], 0, []);
+            nodeList[childIndex] = replaceChildNodes(fillArray(value), [node], 0, [], lastNode);
         }
         else if (node instanceof Array) {
-            nodeList[childIndex] = replaceChildNodes([value], node, 0, [])[0];
+            nodeList[childIndex] = replaceChildNodes([value], node, 0, [], lastNode)[0];
         }
         else {
             if (node) {
                 if (childIndex < newValues.length) {
                     value = flatFunction(value, node.parentNode);
                     if (node.KD_OBJECT === value) {
-                        nodeList[childIndex] = last_node = node;
+                        nodeList[childIndex] = lastNode = node;
                     }
                     else {
-                        nodeList[childIndex] = last_node = node.Replace(value);
+                        nodeList[childIndex] = lastNode = node.Replace(value);
                     }
                 }
                 else {
@@ -234,7 +232,7 @@ function replaceChildNodes(newValues, nod2, childIndex, nodeList, value, node) {
                 }
             }
             else if (childIndex < newValues.length) {
-                nodeList[childIndex] = last_node = last_node.Insert("after", value);
+                nodeList[childIndex] = lastNode = lastNode.Insert("after", value);
             }
         }
         childIndex++;

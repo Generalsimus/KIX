@@ -29,7 +29,6 @@ const ReadIndexHTML = (App) => {
             chokidar_1.default.watch(__IndexHTMLPath).on('all', watchChange);
         },
         readJsDomHTML() {
-            // console.log("🚀 --> file: readIndex.js --> line 57 --> readJsDomHTML --> HTMLFilePaths", "HTMLFilePaths")
             const HtmlDom = new jsdom_1.JSDOM(fs_1.default.readFileSync(__IndexHTMLPath, "utf8")), window = HtmlDom.window, document = window.document;
             document.body[document.body.firstElementChild ? "insertBefore" : "appendChild"](Object.assign(document.createElement('script'), { src: __ModuleUrlPath }), document.body.firstElementChild);
             const htmFiles = new Set();

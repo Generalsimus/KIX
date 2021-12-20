@@ -18,75 +18,95 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = exports.visited_SourceFiles = void 0;
+exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = exports.visitedSourceFilesMap = void 0;
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("./createFactoryCode");
 const utils_1 = require("./utils");
 const amdBodyVisitor_1 = require("./amdBodyVisitor");
 const App_1 = require("../../App");
-// console.log("🚀 ---> file: Module.js ---> line 16 ---> TransformFlags", TransformFlags)
-const { ContainsDynamicImport } = typescript_1.TransformFlags;
-const { createStringLiteral, createCallExpression, createUniqueName, createExpressionStatement, createParenthesizedExpression, createReturnStatement, createIdentifier, } = typescript_1.factory;
-exports.visited_SourceFiles = new Map();
+const utils_2 = require("../../../helpers/utils");
+const path_1 = __importDefault(require("path"));
+exports.visitedSourceFilesMap = new Map();
 exports.ModuleTransformersBefore = {
     [typescript_1.SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
-        // console.log("🚀 --> file: Module.js --> line 49 --> NODE", NODE)/
+    },
+    [typescript_1.SyntaxKind.ImportKeyword]: (NODE, visitor, CTX) => {
+        if (NODE.parent && NODE.parent.arguments?.["0"]?.text) {
+            const moduleInfo = CTX.ModuleColection[NODE.parent.arguments["0"].text];
+            const compilerOptions = CTX.getCompilerOptions();
+            if (moduleInfo) {
+                NODE.parent.arguments = [
+                    typescript_1.default.createStringLiteral((0, utils_2.filePathToUrl)(path_1.default.relative(App_1.App.__RunDirName, moduleInfo.modulePath)))
+                ];
+                return typescript_1.factory.createElementAccessExpression(typescript_1.factory.createIdentifier(compilerOptions.__Import_Module_Name), typescript_1.factory.createStringLiteral(moduleInfo.moduleIndex + "a"));
+            }
+        }
+        return typescript_1.factory.createIdentifier("import");
     },
     [typescript_1.SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
-        // console.log("🚀 --> file: Module.js --> line 61 --> NODE", Object.keys(NODE));
-        // return NODE
-        // console.log("🚀 --> file: Module.js --> line 58 --> CTX", CTX);
-        // if (NODE.before_visited) return NODE
-        const visited_NODE = exports.visited_SourceFiles.get(NODE.originalFileName);
-        // const visited_NODE = FilesThree.get(NODE.path)
-        if (visited_NODE) {
-            return visited_NODE;
-        }
         const compilerOptions = CTX.getCompilerOptions();
-        const moduleInfo = (0, utils_1.getOrSetModuleInfo)(NODE.originalFileName, compilerOptions);
-        CTX.ModuleColection = (0, utils_1.configModules)(NODE, moduleInfo, compilerOptions);
-        if (!moduleInfo.isNodeModule && !moduleInfo.fileWatcher && App_1.App.__Dev_Mode) {
-            (0, utils_1.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
+        const moduleInfo = compilerOptions.moduleThree.get(NODE.originalFileName);
+        CTX.ModuleColection = moduleInfo.moduleColection;
+        if (moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding) {
+            NODE = typescript_1.default.updateSourceFileNode(NODE, []);
+            NODE.externalModuleIndicator = undefined;
+            return NODE;
         }
-        try {
-            if (typescript_1.default.isJsonSourceFile(NODE)) {
-                NODE = typescript_1.default.updateSourceFileNode(NODE, [
-                    createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.map((node) => {
-                        return typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
-                            createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
-                            node.expression
-                        ]));
-                    }), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX, compilerOptions.rootNames.includes(NODE.originalFileName)))
-                ]);
-                // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
-                NODE.scriptKind = typescript_1.ScriptKind.Unknown;
-            }
-            else {
-                NODE = typescript_1.default.updateSourceFileNode(NODE, [
-                    createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.Module_INDEX, compilerOptions.rootNames.includes(NODE.originalFileName)))
-                ]);
-                if (NODE.isCSSFile) {
-                    NODE.fileName = NODE.fileName + ".json";
+        const visitedSourceFile = exports.visitedSourceFilesMap.get(NODE.originalFileName);
+        if (visitedSourceFile) {
+            CTX.Module_GET_POLYFIL = (CTX.Module_GET_POLYFIL || visitedSourceFile.Module_GET_POLYFIL);
+            return visitedSourceFile;
+        }
+        if (moduleInfo.isAsyncModule) {
+            NODE = createFactoryCode_1.generateFactory.CREATE_Async_Module_SourceFile(NODE, moduleInfo, compilerOptions);
+        }
+        else {
+            try {
+                if (typescript_1.default.isJsonSourceFile(NODE)) {
+                    NODE = typescript_1.default.updateSourceFileNode(NODE, [
+                        typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.map((node) => {
+                            return typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
+                                createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
+                                node.expression
+                            ]));
+                        }), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
+                    ]);
+                    NODE.scriptKind = typescript_1.ScriptKind.Unknown;
+                }
+                else {
+                    NODE = typescript_1.default.updateSourceFileNode(NODE, [
+                        typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
+                    ]);
+                    if (NODE.isCSSFile) {
+                        NODE.fileName = NODE.fileName + ".json";
+                    }
                 }
             }
-            NODE.externalModuleIndicator = undefined;
+            catch (error) {
+                console.log(error);
+            }
         }
-        catch (error) {
-            console.log(error);
+        if ((!moduleInfo.fileWatcher && App_1.App.__Dev_Mode && !compilerOptions.__isNodeModuleBuilding) &&
+            (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))) {
+            (0, utils_1.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
         }
+        NODE.externalModuleIndicator = undefined;
         if (!CTX.Module_GET_POLYFIL) {
-            NODE.statements.splice(0, 0, (CTX.Module_GET_POLYFIL = createFactoryCode_1.generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name)));
+            NODE.statements.splice(0, 0, (CTX.Module_GET_POLYFIL =
+                (NODE.Module_GET_POLYFIL =
+                    createFactoryCode_1.generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name))));
         }
         NODE = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
-        exports.visited_SourceFiles.set(NODE.originalFileName, NODE);
+        exports.visitedSourceFilesMap.set(NODE.originalFileName, NODE);
         return NODE;
     }
 };
 exports.ModuleTransformersAfter = {
-// [SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
-//     if (NODE.After_visited) return NODE
-//     NODE.After_visited = true;
-//     return NODE
-// }
+    [typescript_1.SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
+        return NODE;
+    }
 };

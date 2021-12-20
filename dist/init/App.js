@@ -32,7 +32,6 @@ const utils_js_1 = require("../helpers/utils.js");
 const build_js_1 = require("./build.js");
 const createTemplate_js_1 = require("./createTemplate/createTemplate.js");
 const child_process_1 = require("child_process");
-// create default config 
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
     "outDir": "./build",
@@ -42,7 +41,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
         "es2015"
     ],
     sourceMap: true,
-    "minifyBuild": true,
+    "minifyBuild": true
 }, priorityCompilerOptions = {
     module: typescript_1.ModuleKind.AMD,
     checkJs: false,
@@ -56,15 +55,7 @@ const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("
     jsx: "preserve",
     __Node_Module_Window_Name: (0, utils_js_1.getModuleWindowName)(),
     "noImplicitAny": true,
-}, __diagnostics = [], 
-// read package.json file 
-__packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName + "/", fs_1.default.existsSync, "package.json")) || {}, 
-/////////////////////////
-// read tsConfig.json file 
-__TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, 
-/////////////////////////host.getDefaultLibFileName(options);
-__compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
-// console.log("🚀 --> file: App.js --> line 85 --> __compilerOptions", path.join(__dirname, "../../main/index.js"),)
+}, __diagnostics = [], __packageJson = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName + "/", fs_1.default.existsSync, "package.json")) || {}, __TsConfig = (0, utils_js_1.parseJsonFile)(typescript_1.default.findConfigFile(__RunDirName, fs_1.default.existsSync)) || {}, __compilerOptions = (0, typescript_1.fixupCompilerOptions)((0, utils_js_1.deepAssign)(defaultCompilerOptions, __TsConfig.compilerOptions, __packageJson.compilerOptions, priorityCompilerOptions), __diagnostics), __Host = (0, utils_js_1.createHost)(__compilerOptions), __TranspilingMeta = {}, __ModuleUrlPath = `/module${new Date().getTime()}.js`;
 exports.App = {
     __RunDirName: __RunDirName,
     __compilerOptions: __compilerOptions,
@@ -74,8 +65,7 @@ exports.App = {
     __Host,
     __packageJson: __packageJson,
     __requestsThreshold: new Map(),
-    __kixModuleLocation: (0, utils_js_1.resolveKixModule)(__dirname),
-    __kixLocalLocation: (0, typescript_1.normalizeSlashes)(path_1.default.join(__dirname, "../../main/index.js")),
+    __kixModuleLocation: (0, utils_js_1.resolveKixModule)(__RunDirName),
     __TranspilingMeta,
     __ModuleUrlPath,
     __IndexHTMLRequesPaths: ["/", "/index.html"],
