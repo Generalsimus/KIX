@@ -7,7 +7,7 @@ import resolve from 'resolve'
 import { codeControlerIndex, codeControlerPath, codePolyfillPath, defaultModuleThree, getTransformersObject, nodeModuleThree, startModulesIndex, useLocalFileHostModuleRegistrator, useModuleFileHostModuleRegistrator } from "./Transpiler/utils"
 import { NodeModuleTransformersBefore } from "./Transpiler/NodeModules"
 import { JSXTransformersBefore } from "./Transpiler/JSX/index"
-import { clareLog } from "../../helpers/loger"
+import { clareLog, log } from "../../helpers/loger"
 
 
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App
@@ -20,8 +20,13 @@ const { resetFilesThree } = __Host
 
 // let increm = 0;
 export const __compiledFilesThreshold = new Map();
-export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
+export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions, priorityCompilerOptions = {}) => {
     // console.log("🚀 --> file: CompileFile.js --> line 28 --> CompileFile --> __compilerOptions", __compilerOptions)
+
+    // console.log("🚀 --> file: CompileFile.js --> line 133 --> CompileFile --> FilePath", FilePath)
+
+
+
 
     let resetModules = true;
     let oldProgram;
@@ -33,6 +38,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             isNodeModule: false,
             __Module_Window_Name,
             moduleColection: {},
+            isAsyncModule: false,
         },
         moduleThree = new Map([
             ...defaultModuleThree,
@@ -41,8 +47,12 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         requestPath = filePathToUrl(__compilerOptions.outFile),
         mapRequestPath = requestPath + ".map",
         changeFileCallback = () => {
+            // clareLog({
+            //     "Generating browser application bundles...": "yellow"
+            // })
+
             clareLog({
-                "Generating browser application bundles...": "yellow"
+                "Compiling...": "white"
             })
 
 
@@ -65,23 +75,7 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
                 transformers /*transformers*/
             )
             // console.log("🚀 --> file: CompileFile.js --> line 55 --> CompileFile --> getDeclarationDiagnostics", oldProgram.getOptionsDiagnostics());
-            if (resetModules) {
-                const Modules = new Set([codeControlerPath, codePolyfillPath])
-
-
-                for (const ModuleFilePath of HTMLFilePaths) {
-                    getModuleFiles(compilerOptions.moduleThree.get(ModuleFilePath), Modules)
-                }
-
-                resetModules = false
-                Compile_Node_Modules(
-                    [...Modules],
-                    compilerOptions
-                )
-
-            }
-
-            resetFilesThree(oldProgram.getFilesByNameMap())
+            compilerOptions.resetNodeModuleFilesFunc()
         },
         compilerOptions = {
             ...__compilerOptions,
@@ -96,25 +90,46 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
             resetModuleFiles: () => {
                 resetModules = true
             },
-            __Url_Dir_Path: path.dirname(requestPath)
+            visitedSourceFilesMap: new Map(),
+            resetNodeModuleFilesFunc: () => {
+                if (resetModules) {
+                    const Modules = new Set([codeControlerPath, codePolyfillPath])
+
+
+                    for (const ModuleFilePath of HTMLFilePaths) {
+                        getModuleFiles(compilerOptions.moduleThree.get(ModuleFilePath), Modules)
+                    }
+
+                    resetModules = false
+                    Compile_Node_Modules(
+                        [...Modules],
+                        compilerOptions
+                    )
+
+                }
+
+                resetFilesThree(oldProgram.getFilesByNameMap())
+            },
+            __Url_Dir_Path: path.dirname(requestPath),
+            ...priorityCompilerOptions
         },
         host = useLocalFileHostModuleRegistrator(__Host, compilerOptions),
         transformers = getTransformersObject([ModuleTransformersBefore, JSXTransformersBefore], [ModuleTransformersAfter]),
 
         writeFileCallback = (fileName, content) => {
-            // console.log({ fileName, requestPath })
-
             const ext = path.extname(fileName)
+
             if (ext === ".map") {
                 __requestsThreshold.set(mapRequestPath, content)
             } else if (ext === ".js") {
-
-                const Module_Text = `(function(${__Import_Module_Name}){${content} \n ${__Import_Module_Name}[${compilingModuleInfo.moduleIndex}];\n})(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`
+                const Module_Text = `(function(${__Import_Module_Name}){${content} \n ${__Import_Module_Name}[${compilingModuleInfo.moduleIndex}];\n})(window.${__Module_Window_Name}={})${compilerOptions.sourceMap ? `\n//# sourceMappingURL=${mapRequestPath}` : ""}`
 
                 __requestsThreshold.set(requestPath, Module_Text)
+                // console.table(__requestsThreshold.keys())
                 // console.log(Module_Text)
                 // console.log(Module_Text.length)
             }
+            // log({})
         };
 
 
@@ -157,7 +172,6 @@ export const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
 
 
 
-
 const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
 
     let Node_oldProgram;
@@ -168,6 +182,7 @@ const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
             outFile: __ModuleUrlPath,
             // removeComments: false, 
             moduleThree: nodeModuleThree,
+            visitedSourceFilesMap: new Map(),
             lib: undefined,
             sourceMap: false,
             __isNodeModuleBuilding: true,

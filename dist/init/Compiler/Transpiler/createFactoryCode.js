@@ -18,10 +18,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateFactory = void 0;
+const path_1 = __importDefault(require("path"));
 const typescript_1 = __importStar(require("typescript"));
-const utils_1 = require("./utils");
+const utils_1 = require("../../../helpers/utils");
+const App_1 = require("../../App");
+const CompileFile_1 = require("../CompileFile");
+const amdBodyVisitor_1 = require("./amdBodyVisitor");
+const utils_2 = require("./utils");
 const { createToken, createBinaryExpression, createVariableStatement, createVariableDeclarationList, createVariableDeclaration, createBlock, createIdentifier, createPropertyAccessExpression, createObjectLiteralExpression, createParameterDeclaration, createParenthesizedExpression, createArrowFunction, createCallExpression, createObjectBindingPattern, createBindingElement, createExpressionStatement, createElementAccessExpression, createForInStatement, createPropertyAssignment, createStringLiteral, createSpreadAssignment, createUniqueName, createReturnStatement, } = typescript_1.factory;
 const { PlusToken, EqualsToken } = typescript_1.SyntaxKind;
 exports.generateFactory = {
@@ -162,19 +170,71 @@ exports.generateFactory = {
             ]
         ]);
     },
-    CREATE_Async_Module_SourceFile(sourceFile, moduleInfo, compilerOptions) {
-        const polyfillModuleInfo = utils_1.nodeModuleThree.get(utils_1.codePolyfillPath);
-        return typescript_1.default.updateSourceFileNode(sourceFile, [
-            typescript_1.factory.createExpressionStatement(this.CREATE_Token_Nodes([
-                this.CREATE_Element_Access_Expression([
-                    compilerOptions.__Import_Module_Name,
-                    typescript_1.factory.createStringLiteral(moduleInfo.moduleIndex + "a")
-                ]),
-                this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(this.CREATE_Element_Access_Expression([
-                    polyfillModuleInfo.__Module_Window_Name,
-                    typescript_1.factory.createStringLiteral("A")
-                ]), ["u"]), ["u"])
-            ], typescript_1.default.SyntaxKind.EqualsToken))
+    CREATE_SourceFile_Polyfill_IF_NEEDED(sourceFile, CTX, compilerOptions) {
+        if (!CTX.Module_GET_POLYFIL) {
+            sourceFile.statements.splice(0, 0, (CTX.Module_GET_POLYFIL =
+                (sourceFile.Module_GET_POLYFIL =
+                    exports.generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name))));
+        }
+    },
+    CREATE_JSON_SourceFile(sourceFile, moduleInfo, compilerOptions) {
+        sourceFile = typescript_1.default.updateSourceFileNode(sourceFile, [
+            typescript_1.factory.createExpressionStatement(this.CREATE_Export_File_Function(sourceFile.statements.map((node) => {
+                return typescript_1.factory.createExpressionStatement(this.CREATE_Equals_Token_Nodes([
+                    this.CREATE_Property_Access_Expression(["exports", "default"]),
+                    node.expression
+                ]));
+            }), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
         ]);
-    }
+        sourceFile.scriptKind = typescript_1.default.ScriptKind.Unknown;
+        return sourceFile;
+    },
+    CREATE_IMPORT_JS_SourceFile(sourceFile, CTX, moduleInfo, compilerOptions) {
+        sourceFile = typescript_1.default.updateSourceFileNode(sourceFile, [
+            typescript_1.factory.createExpressionStatement(exports.generateFactory.CREATE_Export_File_Function(sourceFile.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, sourceFile, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
+        ]);
+        if (sourceFile.isCSSFile) {
+            sourceFile.fileName = sourceFile.fileName + ".json";
+        }
+        return sourceFile;
+    },
+    CREATE_Async_Module_SourceFile_IF_NEEDED(sourceFile, moduleInfo, compilerOptions) {
+        const polyfillModuleInfo = utils_2.nodeModuleThree.get(utils_2.codePolyfillPath);
+        if (!moduleInfo.isMainAsyncModule) {
+            return;
+        }
+        let accessPropertyes = [
+            "u",
+        ];
+        if (moduleInfo.isAsyncModule) {
+            console.log("AAAAAAAAAAAAAAAAAAAA: ", moduleInfo.modulePath);
+            if (!CompileFile_1.__compiledFilesThreshold.has(moduleInfo.modulePath)) {
+                (0, CompileFile_1.CompileFile)(moduleInfo.modulePath, [], {
+                    ...compilerOptions,
+                    outFile: (0, utils_1.getoutFilePath)(path_1.default.relative(App_1.App.__RunDirName, moduleInfo.modulePath))
+                }, {
+                    resetModuleFiles: compilerOptions.resetModuleFiles,
+                    resetNodeModuleFilesFunc: compilerOptions.resetNodeModuleFilesFunc,
+                });
+            }
+            const asyncModuleCompilerOptions = CompileFile_1.__compiledFilesThreshold.get(moduleInfo.modulePath)?.getCompilerOptions() || {};
+            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.moduleThree?.get(moduleInfo.modulePath);
+            accessPropertyes.push(typescript_1.factory.createStringLiteral(asyncModuleCompilerOptions.__Module_Window_Name), typescript_1.factory.createNumericLiteral(asyncModuleThreeModuleInfo.moduleIndex));
+        }
+        else {
+            accessPropertyes.push(typescript_1.factory.createStringLiteral(compilerOptions.__Module_Window_Name), typescript_1.factory.createNumericLiteral(moduleInfo.moduleIndex));
+        }
+        sourceFile.statements.push(typescript_1.factory.createExpressionStatement(this.CREATE_Token_Nodes([
+            this.CREATE_Element_Access_Expression([
+                compilerOptions.__Import_Module_Name,
+                typescript_1.factory.createStringLiteral(moduleInfo.moduleIndex + "a")
+            ]),
+            this.CREATE_Arrow_Function_With_Parenthesized_Expression(this.CREATE_CAll_Function(this.CREATE_Element_Access_Expression([
+                "window",
+                typescript_1.factory.createStringLiteral(polyfillModuleInfo.__Module_Window_Name),
+                typescript_1.factory.createNumericLiteral(polyfillModuleInfo.moduleIndex),
+                typescript_1.factory.createStringLiteral("A")
+            ]), accessPropertyes), ["u"])
+        ], typescript_1.default.SyntaxKind.EqualsToken)));
+    },
 };

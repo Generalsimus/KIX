@@ -15,7 +15,7 @@ import chokidar from "chokidar"
 import path from "path"
 import { getColumnName } from "../../../helpers/utils"
 import { App } from "../../App"
-import { visitedSourceFilesMap } from "./Module"
+
 import ts from "typescript/lib/tsserverlibrary";
 
 
@@ -51,6 +51,7 @@ const defaultModules = {
         isNodeModule: true,
         __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
         moduleColection: {},
+        isAsyncModule: false,
     }
 
 }
@@ -66,6 +67,7 @@ export const defaultModuleThree = [
         isNodeModule: true,
         __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
         moduleColection: {},
+        isAsyncModule: false,
     }],
     [codePolyfillPath, {
         moduleIndex: startModulesIndex++,
@@ -73,6 +75,7 @@ export const defaultModuleThree = [
         isNodeModule: true,
         __Module_Window_Name: App.__compilerOptions.__Node_Module_Window_Name,
         moduleColection: {},
+        isAsyncModule: false,
     }],
 ]
 
@@ -110,8 +113,11 @@ export const nodeModuleResolver = (modulePath, fileDirectory) => {
 
 
 
-export const watchModuleFileChange = (NODE, moduleInfo, { cancellationToken: { requesteCancell }, changeFileCallback }) => {
-
+export const watchModuleFileChange = (NODE, moduleInfo, {visitedSourceFilesMap, __isNodeModuleBuilding, cancellationToken: { requesteCancell }, changeFileCallback }) => {
+    if (!(
+        (!moduleInfo.fileWatcher && App.__Dev_Mode && !__isNodeModuleBuilding) &&
+        (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))
+    )) { return }
 
     moduleInfo.fileWatcher = chokidar.watch(NODE.originalFileName).on('change', (event, path) => {
 
@@ -191,18 +197,18 @@ export const getTransformersObject = (before, after) => {
                 return visitor
             }
         ],
-        after: [
-            (CTX) => {
-                const visitor = (NODE) => {
+        // after: [
+        //     (CTX) => {
+        //         const visitor = (NODE) => {
 
-                    // console.log(SyntaxKind[NODE.kind])
+        //             // console.log(SyntaxKind[NODE.kind])
 
-                    return (transpilerAfter[NODE.kind] || visitEachChild)(NODE, visitor, CTX)
-                }
+        //             return (transpilerAfter[NODE.kind] || visitEachChild)(NODE, visitor, CTX)
+        //         }
 
-                return visitor
-            }
-        ]
+        //         return visitor
+        //     }
+        // ]
     }
 }
 
@@ -260,7 +266,7 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
         currentDirectory = oldhost.getCurrentDirectory(),
         getCanonicalFileName = createGetCanonicalFileName(oldhost.useCaseSensitiveFileNames()),
         moduleResolutionCache = createModuleResolutionCache(currentDirectory, getCanonicalFileName),
-        Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isAsyncModule) => {
+        Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
             // console.log("🚀 --> file: utils.js --> line 255 --> useLocalFileHostModuleRegistrator --> redirectedReference", redirectedReference)
             let resolvedModule = containinModuleInfo.moduleColection[moduleName];
 
@@ -293,13 +299,44 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
                 modulePath: modulePath,
                 isNodeModule: containinModuleInfo.isNodeModule || (/[/\\]node_modules[/\\]/).test(modulePath),
                 __Module_Window_Name: compilerOptions.__Module_Window_Name,
-                isAsyncModule,
+                // isAsyncModule, 
                 moduleColection: {},
                 resolvedModule,
             };
-            if (!isAsyncModule) {
-                moduleInfo.isEs6Module = true;
-            }
+
+            // moduleInfo.isEs6Module = true;
+            moduleInfo.isMainAsyncModule = moduleInfo.isMainAsyncModule || !!isMainAsyncModule;
+            moduleInfo.isAsyncModule = (
+                moduleInfo.isAsyncModule === false ?
+                    false :
+                    (containinModuleInfo.isMainAsyncModule || moduleInfo.isAsyncModule || isMainAsyncModule)
+                // (moduleInfo.isMainAsyncModule ? true : containinModuleInfo.isMainAsyncModule || false)
+            );
+
+            //  (containinModuleInfo.isMainAsyncModule || (!!isMainAsyncModule))
+            //  || !isMainAsyncModule ? containinModuleInfo.isMainAsyncModule || false : true;
+            // moduleInfo.isAsyncModule === false || containinModuleInfo.isAsyncModule === false ?
+            //     false :
+            //     (containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule || !!isMainAsyncModule)
+            console.log(containinModuleInfo.modulePath, modulePath, moduleInfo.isMainAsyncModule, moduleInfo.isAsyncModule)
+            //  isMainAsyncModule
+            // moduleInfo.isAsyncModule = containinModuleInfo.isAsyncModule === false ? false : moduleInfo.isAsyncModule || isMainAsyncModule;
+
+            // !isMainAsyncModule || containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule
+            //  moduleInfo.hasOwnProperty("isAsyncModule") ?
+            //     moduleInfo.isAsyncModule :
+            //     (!isMainAsyncModule ?
+            //         false :
+            //         (containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule)
+            //     );
+
+            // moduleInfo.isAsyncModule = moduleInfo.isAsyncModule === false ? false : containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule;
+            // moduleInfo.isAsyncModule = moduleInfo.isAsyncModule === false ? false : containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule;
+            // moduleInfo.isParentAsyncModule = containinModuleInfo.isAsyncModule && !containinModuleInfo.isEs6Module
+            // if (!isMainAsyncModule) {
+            //     moduleInfo.isAsyncModule = false;
+            // }
+
             containinModuleInfo.moduleColection[moduleName] = moduleInfo;
 
             if (!childModule) {
@@ -343,7 +380,7 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
 export const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
     let incrementModuleIndex = startModulesIndex;
     const moduleThree = compilerOptions.moduleThree;
-    const Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isAsyncModule) => {
+    const Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
         let resolvedModule = containinModuleInfo.moduleColection[moduleName];
 
         if (resolvedModule) {
@@ -364,15 +401,22 @@ export const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => 
             moduleIndex: incrementModuleIndex++,
             modulePath: modulePath,
             isNodeModule: true,
-            isAsyncModule,
-            isEs6Module: isAsyncModule === false,
+            // isAsyncModule,
+            // isEs6Module: isAsyncModule === false,
             __Module_Window_Name: compilerOptions.__Module_Window_Name,
             moduleColection: {},
             resolvedModule,
         }
-        if (!isAsyncModule) {
-            moduleInfo.isEs6Module = true;
-        }
+        // if (!isAsyncModule) {
+        //     moduleInfo.isEs6Module = true;
+        // }
+
+        // moduleInfo.isAsyncModule = moduleInfo.isAsyncModule === false ? false : moduleInfo.isAsyncModule || isAsyncModule;
+        moduleInfo.isMainAsyncModule = moduleInfo.isMainAsyncModule || !!isMainAsyncModule;
+        moduleInfo.isAsyncModule = moduleInfo.isAsyncModule === false || containinModuleInfo.isAsyncModule === false ?
+            false :
+            (containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule || !!isMainAsyncModule)
+
         containinModuleInfo.moduleColection[moduleName] = moduleInfo;
         if (!childModule) {
             moduleThree.set(modulePath, moduleInfo)
@@ -400,6 +444,7 @@ const loadWithLocalWithSourceFileCache = (imports, containingFile, containinModu
 
 
     return containinModuleInfo.resolvedModuleNames || (containinModuleInfo.resolvedModuleNames = (imports || []).flatMap(({ text, parent }) => {
+
         const resolved = loader(text, containingFile, containinModuleInfo, redirectedReference, parent?.expression?.kind === SyntaxKind.ImportKeyword);
         return resolved ? [resolved] : []
     }))

@@ -22,15 +22,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = exports.visitedSourceFilesMap = void 0;
+exports.ModuleTransformersAfter = exports.ModuleTransformersBefore = void 0;
 const typescript_1 = __importStar(require("typescript"));
 const createFactoryCode_1 = require("./createFactoryCode");
 const utils_1 = require("./utils");
-const amdBodyVisitor_1 = require("./amdBodyVisitor");
 const App_1 = require("../../App");
 const utils_2 = require("../../../helpers/utils");
 const path_1 = __importDefault(require("path"));
-exports.visitedSourceFilesMap = new Map();
 exports.ModuleTransformersBefore = {
     [typescript_1.SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
     },
@@ -51,57 +49,35 @@ exports.ModuleTransformersBefore = {
         const compilerOptions = CTX.getCompilerOptions();
         const moduleInfo = compilerOptions.moduleThree.get(NODE.originalFileName);
         CTX.ModuleColection = moduleInfo.moduleColection;
-        if (moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding) {
+        const isNodeModuleOrNodeCompiler = moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding;
+        if (isNodeModuleOrNodeCompiler || (moduleInfo.isAsyncModule)) {
             NODE = typescript_1.default.updateSourceFileNode(NODE, []);
             NODE.externalModuleIndicator = undefined;
+            createFactoryCode_1.generateFactory.CREATE_Async_Module_SourceFile_IF_NEEDED(NODE, moduleInfo, compilerOptions);
             return NODE;
         }
-        const visitedSourceFile = exports.visitedSourceFilesMap.get(NODE.originalFileName);
+        const visitedSourceFile = compilerOptions.visitedSourceFilesMap.get(NODE.originalFileName);
         if (visitedSourceFile) {
             CTX.Module_GET_POLYFIL = (CTX.Module_GET_POLYFIL || visitedSourceFile.Module_GET_POLYFIL);
             return visitedSourceFile;
         }
-        if (moduleInfo.isAsyncModule) {
-            NODE = createFactoryCode_1.generateFactory.CREATE_Async_Module_SourceFile(NODE, moduleInfo, compilerOptions);
-        }
-        else {
-            try {
-                if (typescript_1.default.isJsonSourceFile(NODE)) {
-                    NODE = typescript_1.default.updateSourceFileNode(NODE, [
-                        typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.map((node) => {
-                            return typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Equals_Token_Nodes([
-                                createFactoryCode_1.generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
-                                node.expression
-                            ]));
-                        }), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
-                    ]);
-                    NODE.scriptKind = typescript_1.ScriptKind.Unknown;
-                }
-                else {
-                    NODE = typescript_1.default.updateSourceFileNode(NODE, [
-                        typescript_1.factory.createExpressionStatement(createFactoryCode_1.generateFactory.CREATE_Export_File_Function(NODE.statements.flatMap((statementNode) => (0, amdBodyVisitor_1.topLevelVisitor)(statementNode, NODE, CTX)), compilerOptions.__Import_Module_Name, moduleInfo.moduleIndex))
-                    ]);
-                    if (NODE.isCSSFile) {
-                        NODE.fileName = NODE.fileName + ".json";
-                    }
-                }
+        try {
+            if (typescript_1.default.isJsonSourceFile(NODE)) {
+                NODE = createFactoryCode_1.generateFactory.CREATE_JSON_SourceFile(NODE, moduleInfo, compilerOptions);
             }
-            catch (error) {
-                console.log(error);
+            else {
+                NODE = createFactoryCode_1.generateFactory.CREATE_IMPORT_JS_SourceFile(NODE, CTX, moduleInfo, compilerOptions);
             }
         }
-        if ((!moduleInfo.fileWatcher && App_1.App.__Dev_Mode && !compilerOptions.__isNodeModuleBuilding) &&
-            (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))) {
-            (0, utils_1.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
+        catch (error) {
+            console.log(error);
         }
+        createFactoryCode_1.generateFactory.CREATE_Async_Module_SourceFile_IF_NEEDED(NODE, moduleInfo, compilerOptions);
+        (0, utils_1.watchModuleFileChange)(NODE, moduleInfo, compilerOptions);
         NODE.externalModuleIndicator = undefined;
-        if (!CTX.Module_GET_POLYFIL) {
-            NODE.statements.splice(0, 0, (CTX.Module_GET_POLYFIL =
-                (NODE.Module_GET_POLYFIL =
-                    createFactoryCode_1.generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name))));
-        }
+        createFactoryCode_1.generateFactory.CREATE_SourceFile_Polyfill_IF_NEEDED(NODE, CTX, compilerOptions);
         NODE = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
-        exports.visitedSourceFilesMap.set(NODE.originalFileName, NODE);
+        compilerOptions.visitedSourceFilesMap.set(NODE.originalFileName, NODE);
         return NODE;
     }
 };

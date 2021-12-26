@@ -18,7 +18,7 @@ import path from "path"
 
 
 
-export const visitedSourceFilesMap = new Map()
+
 export const ModuleTransformersBefore = {
     [SyntaxKind.ExportKeyword]: (NODE, visitor, CTX) => {
         // console.log("🚀 --> file: Module.js --> line 49 --> NODE", NODE)/
@@ -71,90 +71,68 @@ getModule()?resolve(getModule()):kix(document.head, {
 
 
 
-
-        if (moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding) {
+        const isNodeModuleOrNodeCompiler = moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding;
+        // console.log("🚀 --> file: Module.js --> line 70 --> NODE.originalFileName", NODE.originalFileName, !!CTX.Module_GET_POLYFIL, compilerOptions.visitedSourceFilesMap.has(NODE.originalFileName))
+        if (isNodeModuleOrNodeCompiler || (moduleInfo.isAsyncModule)) {
             NODE = ts.updateSourceFileNode(NODE, [])
             NODE.externalModuleIndicator = undefined
+
+
+            generateFactory.CREATE_Async_Module_SourceFile_IF_NEEDED(NODE, moduleInfo, compilerOptions)
+
             return NODE
         }
-        const visitedSourceFile = visitedSourceFilesMap.get(NODE.originalFileName)
+
+
+
+        const visitedSourceFile = compilerOptions.visitedSourceFilesMap.get(NODE.originalFileName)
 
         if (visitedSourceFile) {
             CTX.Module_GET_POLYFIL = (CTX.Module_GET_POLYFIL || visitedSourceFile.Module_GET_POLYFIL)
             return visitedSourceFile
         }
- 
-        if (moduleInfo.isAsyncModule) {
-            NODE = generateFactory.CREATE_Async_Module_SourceFile(NODE, moduleInfo, compilerOptions);
-        } else {
 
-            try {
 
-                if (ts.isJsonSourceFile(NODE)) {
-                    NODE = ts.updateSourceFileNode(NODE, [
-                        factory.createExpressionStatement(
-                            generateFactory.CREATE_Export_File_Function(
-                                NODE.statements.map((node) => {
-                                    return factory.createExpressionStatement(generateFactory.CREATE_Equals_Token_Nodes([
-                                        generateFactory.CREATE_Property_Access_Expression(["exports", "default"]),
-                                        node.expression
-                                    ]))
-                                }),
-                                compilerOptions.__Import_Module_Name,
-                                moduleInfo.moduleIndex,
-                            )
-                        )
-                    ])
 
-                    // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
-                    NODE.scriptKind = ScriptKind.Unknown
-                } else {
-                    NODE = ts.updateSourceFileNode(NODE, [
-                        factory.createExpressionStatement(
-                            generateFactory.CREATE_Export_File_Function(
-                                NODE.statements.flatMap((statementNode) => topLevelVisitor(statementNode, NODE, CTX)),
-                                compilerOptions.__Import_Module_Name,
-                                moduleInfo.moduleIndex,
-                            )
-                        )
-                    ])
 
-                    if (NODE.isCSSFile) {
-                        NODE.fileName = NODE.fileName + ".json"
-                    }
-                }
+        // if (!moduleInfo.isAsyncModule) {
+        // if (!(moduleInfo.isAsyncModule && !moduleInfo.isEs6Module) || (moduleInfo.isAsyncModule && moduleInfo.isEs6Module)) {
 
-            } catch (error) {
-                console.log(error)
+
+        try {
+
+            if (ts.isJsonSourceFile(NODE)) {
+                NODE = generateFactory.CREATE_JSON_SourceFile(NODE, moduleInfo, compilerOptions)
+            } else {
+                NODE = generateFactory.CREATE_IMPORT_JS_SourceFile(NODE, CTX, moduleInfo, compilerOptions)
             }
-        }
 
-        if (
-            (!moduleInfo.fileWatcher && App.__Dev_Mode && !compilerOptions.__isNodeModuleBuilding) &&
-            (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))
-        ) {
-            watchModuleFileChange(NODE, moduleInfo, compilerOptions)
+        } catch (error) {
+            console.log(error)
         }
+        // }
+
+        generateFactory.CREATE_Async_Module_SourceFile_IF_NEEDED(NODE, moduleInfo, compilerOptions)
+
+
+
+
+        watchModuleFileChange(NODE, moduleInfo, compilerOptions)
+
 
 
         NODE.externalModuleIndicator = undefined;
 
 
-        if (!CTX.Module_GET_POLYFIL) {
-            NODE.statements.splice(0, 0,
-                (CTX.Module_GET_POLYFIL =
-                    (
-                        NODE.Module_GET_POLYFIL =
-                        generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name)
-                    )
-                )
-            )
-        }
+
+
+        generateFactory.CREATE_SourceFile_Polyfill_IF_NEEDED(NODE, CTX, compilerOptions)
+
 
 
         NODE = visitEachChild(NODE, visitor, CTX)
 
-        visitedSourceFilesMap.set(NODE.originalFileName, NODE)
+        compilerOptions.visitedSourceFilesMap.set(NODE.originalFileName, NODE)
 
 
         return NODE

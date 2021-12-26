@@ -1,16 +1,19 @@
 import {
     type
 } from "os";
+import path from "path";
 import ts, {
     factory,
     SyntaxKind
 } from "typescript";
 import {
-    getColumnName
+    getColumnName, getoutFilePath
 } from "../../../helpers/utils";
 import {
     App
 } from "../../App";
+import { CompileFile, __compiledFilesThreshold } from "../CompileFile";
+import { topLevelVisitor } from "./amdBodyVisitor";
 import {
     codePolyfillPath,
     createObjectPropertyLoop,
@@ -311,33 +314,118 @@ export const generateFactory = {
             ]
         ])
     },
-    CREATE_Async_Module_SourceFile(sourceFile, moduleInfo, compilerOptions) {
+    CREATE_SourceFile_Polyfill_IF_NEEDED(sourceFile, CTX, compilerOptions) {
+        if (!CTX.Module_GET_POLYFIL) {
+            sourceFile.statements.splice(0, 0,
+                (CTX.Module_GET_POLYFIL =
+                    (
+                        sourceFile.Module_GET_POLYFIL =
+                        generateFactory.CREATE_Module_GET_POLYFIL(compilerOptions.__Import_Module_Name)
+                    )
+                )
+            )
+        }
+    },
+    CREATE_JSON_SourceFile(sourceFile, moduleInfo, compilerOptions) {
+        // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
+        sourceFile = ts.updateSourceFileNode(sourceFile, [
+            factory.createExpressionStatement(
+                this.CREATE_Export_File_Function(
+                    sourceFile.statements.map((node) => {
+                        return factory.createExpressionStatement(this.CREATE_Equals_Token_Nodes([
+                            this.CREATE_Property_Access_Expression(["exports", "default"]),
+                            node.expression
+                        ]))
+                    }),
+                    compilerOptions.__Import_Module_Name,
+                    moduleInfo.moduleIndex,
+                )
+            )
+        ])
+        // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
+        sourceFile.scriptKind = ts.ScriptKind.Unknown
+        return sourceFile;
+    },
+    CREATE_IMPORT_JS_SourceFile(sourceFile, CTX, moduleInfo, compilerOptions) {
+        // ეს იმიტომ json ის ტრანსპილირება რო არ მოხდეს amd ში
+        sourceFile = ts.updateSourceFileNode(sourceFile, [
+            factory.createExpressionStatement(
+                generateFactory.CREATE_Export_File_Function(
+                    sourceFile.statements.flatMap((statementNode) => topLevelVisitor(statementNode, sourceFile, CTX)),
+                    compilerOptions.__Import_Module_Name,
+                    moduleInfo.moduleIndex,
+                )
+            )
+        ])
+
+        if (sourceFile.isCSSFile) {
+            sourceFile.fileName = sourceFile.fileName + ".json"
+        }
+        return sourceFile;
+    },
+    CREATE_Async_Module_SourceFile_IF_NEEDED(sourceFile, moduleInfo, compilerOptions) {
         const polyfillModuleInfo = nodeModuleThree.get(codePolyfillPath)
         /*
         sadas[2a] = (url)=>mod.ss(url,()=>location)
         */
-        return ts.updateSourceFileNode(sourceFile, [
-            factory.createExpressionStatement(
-                this.CREATE_Token_Nodes([
-                    this.CREATE_Element_Access_Expression([
-                        compilerOptions.__Import_Module_Name,
-                        /* a === async */
-                        factory.createStringLiteral(moduleInfo.moduleIndex + "a")
-                    ]),
-                    this.CREATE_Arrow_Function_With_Parenthesized_Expression(
-                        this.CREATE_CAll_Function(
-                            this.CREATE_Element_Access_Expression([
-                                polyfillModuleInfo.__Module_Window_Name,
-                                /* a === async */
-                                factory.createStringLiteral("A")
-                            ]),
-                            ["u"]
-                        ),
-                        ["u"]
-                    )
-                ], ts.SyntaxKind.EqualsToken)
+        if (!moduleInfo.isMainAsyncModule) {
+            return
+        }
+        let accessPropertyes = [
+            "u",
+        ]
+        if (moduleInfo.isAsyncModule) {
+            console.log("AAAAAAAAAAAAAAAAAAAA: ", moduleInfo.modulePath)
+            if (!__compiledFilesThreshold.has(moduleInfo.modulePath)) {
+                CompileFile(moduleInfo.modulePath, [], {
+                    ...compilerOptions,
+                    outFile: getoutFilePath(path.relative(App.__RunDirName, moduleInfo.modulePath))
+                }, {
+                    resetModuleFiles: compilerOptions.resetModuleFiles,
+                    resetNodeModuleFilesFunc: compilerOptions.resetNodeModuleFilesFunc,
+                })
+            }
 
+            const asyncModuleCompilerOptions = __compiledFilesThreshold.get(moduleInfo.modulePath)?.getCompilerOptions() || {}
+            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.moduleThree?.get(moduleInfo.modulePath)
+
+
+            accessPropertyes.push(
+                factory.createStringLiteral(asyncModuleCompilerOptions.__Module_Window_Name),
+                factory.createNumericLiteral(asyncModuleThreeModuleInfo.moduleIndex)
             )
-        ])
-    }
+        } else {
+            accessPropertyes.push(
+                factory.createStringLiteral(compilerOptions.__Module_Window_Name),
+                factory.createNumericLiteral(moduleInfo.moduleIndex)
+            )
+
+        }
+        sourceFile.statements.push(factory.createExpressionStatement(
+            this.CREATE_Token_Nodes([
+                this.CREATE_Element_Access_Expression([
+                    compilerOptions.__Import_Module_Name,
+                    /* a === async */
+                    factory.createStringLiteral(moduleInfo.moduleIndex + "a")
+                ]),
+                this.CREATE_Arrow_Function_With_Parenthesized_Expression(
+                    this.CREATE_CAll_Function(
+                        this.CREATE_Element_Access_Expression([
+                            "window",
+                            factory.createStringLiteral(polyfillModuleInfo.__Module_Window_Name),
+                            factory.createNumericLiteral(polyfillModuleInfo.moduleIndex),
+                            /* a === async */
+                            factory.createStringLiteral("A")
+                        ]),
+                        accessPropertyes
+                    ),
+                    ["u"]
+                )
+            ], ts.SyntaxKind.EqualsToken)
+
+        ))
+
+
+
+    },
 };

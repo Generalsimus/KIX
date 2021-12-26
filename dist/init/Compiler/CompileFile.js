@@ -16,7 +16,7 @@ const loger_1 = require("../../helpers/loger");
 const { __Host, __RunDirName, __ModuleUrlPath, __requestsThreshold } = App_1.App;
 const { resetFilesThree } = __Host;
 exports.__compiledFilesThreshold = new Map();
-const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
+const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions, priorityCompilerOptions = {}) => {
     let resetModules = true;
     let oldProgram;
     const __Import_Module_Name = (0, utils_1.getImportModuleName)(), __Module_Window_Name = (0, utils_1.getModuleWindowName)(), compilingModuleInfo = {
@@ -25,26 +25,19 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         isNodeModule: false,
         __Module_Window_Name,
         moduleColection: {},
+        isAsyncModule: false,
     }, moduleThree = new Map([
         ...utils_2.defaultModuleThree,
         [FilePath, compilingModuleInfo]
     ]), requestPath = (0, utils_1.filePathToUrl)(__compilerOptions.outFile), mapRequestPath = requestPath + ".map", changeFileCallback = () => {
         (0, loger_1.clareLog)({
-            "Generating browser application bundles...": "yellow"
+            "Compiling...": "white"
         });
         compilerOptions.cancellationToken = (0, utils_1.createCancellationToken)();
         oldProgram = (0, typescript_1.createProgram)([FilePath], compilerOptions, host, oldProgram);
         exports.__compiledFilesThreshold.set(FilePath, oldProgram);
         oldProgram.emit(undefined, writeFileCallback, undefined, undefined, transformers);
-        if (resetModules) {
-            const Modules = new Set([utils_2.codeControlerPath, utils_2.codePolyfillPath]);
-            for (const ModuleFilePath of HTMLFilePaths) {
-                (0, utils_1.getModuleFiles)(compilerOptions.moduleThree.get(ModuleFilePath), Modules);
-            }
-            resetModules = false;
-            Compile_Node_Modules([...Modules], compilerOptions);
-        }
-        resetFilesThree(oldProgram.getFilesByNameMap());
+        compilerOptions.resetNodeModuleFilesFunc();
     }, compilerOptions = {
         ...__compilerOptions,
         inlineSources: true,
@@ -57,14 +50,27 @@ const CompileFile = (FilePath, HTMLFilePaths, __compilerOptions) => {
         resetModuleFiles: () => {
             resetModules = true;
         },
-        __Url_Dir_Path: path_1.default.dirname(requestPath)
+        visitedSourceFilesMap: new Map(),
+        resetNodeModuleFilesFunc: () => {
+            if (resetModules) {
+                const Modules = new Set([utils_2.codeControlerPath, utils_2.codePolyfillPath]);
+                for (const ModuleFilePath of HTMLFilePaths) {
+                    (0, utils_1.getModuleFiles)(compilerOptions.moduleThree.get(ModuleFilePath), Modules);
+                }
+                resetModules = false;
+                Compile_Node_Modules([...Modules], compilerOptions);
+            }
+            resetFilesThree(oldProgram.getFilesByNameMap());
+        },
+        __Url_Dir_Path: path_1.default.dirname(requestPath),
+        ...priorityCompilerOptions
     }, host = (0, utils_2.useLocalFileHostModuleRegistrator)(__Host, compilerOptions), transformers = (0, utils_2.getTransformersObject)([Module_1.ModuleTransformersBefore, index_1.JSXTransformersBefore], [Module_1.ModuleTransformersAfter]), writeFileCallback = (fileName, content) => {
         const ext = path_1.default.extname(fileName);
         if (ext === ".map") {
             __requestsThreshold.set(mapRequestPath, content);
         }
         else if (ext === ".js") {
-            const Module_Text = `(function(${__Import_Module_Name}){${content} \n ${__Import_Module_Name}[${compilingModuleInfo.moduleIndex}];\n})(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${mapRequestPath}`;
+            const Module_Text = `(function(${__Import_Module_Name}){${content} \n ${__Import_Module_Name}[${compilingModuleInfo.moduleIndex}];\n})(window.${__Module_Window_Name}={})${compilerOptions.sourceMap ? `\n//# sourceMappingURL=${mapRequestPath}` : ""}`;
             __requestsThreshold.set(requestPath, Module_Text);
         }
     };
@@ -77,6 +83,7 @@ const Compile_Node_Modules = (NodeModuelsPaths, defaultcompilerOptions) => {
         ...defaultcompilerOptions,
         outFile: __ModuleUrlPath,
         moduleThree: utils_2.nodeModuleThree,
+        visitedSourceFilesMap: new Map(),
         lib: undefined,
         sourceMap: false,
         __isNodeModuleBuilding: true,
