@@ -44,6 +44,9 @@ const sendFileDiagnostics = (connectedWs, socketClientSender) => {
 };
 exports.sendFileDiagnostics = sendFileDiagnostics;
 const getProgramDiagnostics = (program) => {
+    const compilerOptions = program.getCompilerOptions();
+    if (compilerOptions.__isNodeModuleBuilding)
+        return [];
     return [
         ...program.getSemanticDiagnostics(),
         ...program.getSyntacticDiagnostics(),

@@ -66,6 +66,7 @@ function visitImportDeclaration(node, currentSourceFile, CTX) {
 
 
     const ModuleData = geModuleLocationMeta(CTX.ModuleColection[node.moduleSpecifier.text], compilerOptions)
+    // console.log("🚀 --> file: amdBodyVisitor.js --> line 69 --> visitImportDeclaration --> ModuleData", ModuleData, node.moduleSpecifier.text, Object.keys(CTX.ModuleColection))
 
     const moduleLocationNODE = ModuleData ? generateFactory.CREATE_Element_Access_Expression(ModuleData) : createIdentifier("undefined")
     if (node.moduleSpecifier && !importClause) {

@@ -35,7 +35,7 @@ const child_process_1 = require("child_process");
 const __RunDirName = (0, typescript_1.normalizeSlashes)(path_1.default.resolve("./")), __args = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv)).argv, defaultCompilerOptions = {
     "outFile": "app.js",
     "outDir": "./build",
-    "rootDir": "./",
+    rootDir: __RunDirName,
     "baseUrl": "./",
     "lib": [
         "es2015"

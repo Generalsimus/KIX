@@ -17,6 +17,7 @@ import path from "path"
 import tsModule from 'typescript/lib/tsserverlibrary';
 import createCssSourceFile from "./createCssSourceFile"
 import resolve from "resolve"
+import { App } from "../init/App";
 
 export const deepAssign = (target, ...sources) => {
     for (let source of sources) {
@@ -233,3 +234,41 @@ export const resolveKixModule = (fileDirectory) => {
 export const getoutFilePath = (filePath) => {
     return filePath.replace(/\.tsx?$/, new Date().getTime() + ".js")
 }
+
+
+
+
+
+
+
+
+export const getScriptTagInfos = (document, window) => {
+    const { __compilerOptions, __Host, __RunDirName } = App
+    const compilerOptions = fixLibFileLocationInCompilerOptions(__compilerOptions, __Host)
+
+    const htmlFiles = new Set();
+
+    return {
+        scriptTagInfos: Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
+            scriptElement.removeAttribute("lang");
+            const ulrMeta = new window.URL(scriptElement.src, 'http://e'),
+                filePath = normalizeSlashes(path.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))),
+                outFile = filePathToUrl(getoutFilePath(path.relative(__RunDirName, filePath)));
+            if (htmlFiles.has(filePath)) {
+                scriptElement.remove()
+                return;
+            }
+            htmlFiles.add(filePath);
+            scriptElement.setAttribute("src", outFile);
+
+            return {
+                filePath,
+                compilerOptions: { ...compilerOptions, outFile }
+            }
+        }),
+        indexHtmlMainFilePaths: [...htmlFiles]
+    }
+}
+
+
+

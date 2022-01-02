@@ -47,7 +47,7 @@ exports.ModuleTransformersBefore = {
     },
     [typescript_1.SyntaxKind.SourceFile]: (NODE, visitor, CTX) => {
         const compilerOptions = CTX.getCompilerOptions();
-        const moduleInfo = compilerOptions.moduleThree.get(NODE.originalFileName);
+        const moduleInfo = compilerOptions.__moduleThree.get(NODE.originalFileName);
         CTX.ModuleColection = moduleInfo.moduleColection;
         const isNodeModuleOrNodeCompiler = moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding;
         if (isNodeModuleOrNodeCompiler || (moduleInfo.isAsyncModule)) {
@@ -56,7 +56,7 @@ exports.ModuleTransformersBefore = {
             createFactoryCode_1.generateFactory.CREATE_Async_Module_SourceFile_IF_NEEDED(NODE, moduleInfo, compilerOptions);
             return NODE;
         }
-        const visitedSourceFile = compilerOptions.visitedSourceFilesMap.get(NODE.originalFileName);
+        const visitedSourceFile = compilerOptions.__visitedSourceFilesMap.get(NODE.originalFileName);
         if (visitedSourceFile) {
             CTX.Module_GET_POLYFIL = (CTX.Module_GET_POLYFIL || visitedSourceFile.Module_GET_POLYFIL);
             return visitedSourceFile;
@@ -77,7 +77,7 @@ exports.ModuleTransformersBefore = {
         NODE.externalModuleIndicator = undefined;
         createFactoryCode_1.generateFactory.CREATE_SourceFile_Polyfill_IF_NEEDED(NODE, CTX, compilerOptions);
         NODE = (0, typescript_1.visitEachChild)(NODE, visitor, CTX);
-        compilerOptions.visitedSourceFilesMap.set(NODE.originalFileName, NODE);
+        compilerOptions.__visitedSourceFilesMap.set(NODE.originalFileName, NODE);
         return NODE;
     }
 };

@@ -40,7 +40,8 @@ const __RunDirName = normalizeSlashes(path.resolve("./")),
     defaultCompilerOptions = {
         "outFile": "app.js",
         "outDir": "./build",
-        "rootDir": "./",
+        // "rootDir": "./", 
+        rootDir: __RunDirName,
         "baseUrl": "./",
         "lib": [
             "es2015"

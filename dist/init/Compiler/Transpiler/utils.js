@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useModuleFileHostModuleRegistrator = exports.useLocalFileHostModuleRegistrator = exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTransformersObject = exports.watchModuleFileChange = exports.nodeModuleResolver = exports.nodeModuleThree = exports.defaultModuleThree = exports.codeControlerIndex = exports.codePolyfillPath = exports.codeControlerPath = exports.startModulesIndex = void 0;
+exports.configCompilerOptions = exports.useModuleFileHostModuleRegistrator = exports.useLocalFileHostModuleRegistrator = exports.geModuleLocationMeta = exports.createObjectPropertyLoop = exports.getTransformersObject = exports.watchModuleFileChange = exports.nodeModuleResolver = exports.nodeModuleThree = exports.defaultModuleThree = exports.codeControlerIndex = exports.codePolyfillPath = exports.codeControlerPath = exports.startModulesIndex = void 0;
 const typescript_1 = require("typescript");
 const tsserverlibrary_1 = __importDefault(require("typescript/lib/tsserverlibrary"));
 const resolve_1 = __importDefault(require("resolve"));
@@ -69,7 +69,7 @@ const nodeModuleResolver = (modulePath, fileDirectory) => {
     }
 };
 exports.nodeModuleResolver = nodeModuleResolver;
-const watchModuleFileChange = (NODE, moduleInfo, { visitedSourceFilesMap, __isNodeModuleBuilding, cancellationToken: { requesteCancell }, changeFileCallback }) => {
+const watchModuleFileChange = (NODE, moduleInfo, { __visitedSourceFilesMap, __emitProgram, __isNodeModuleBuilding, cancellationToken: { requesteCancell } }) => {
     if (!((!moduleInfo.fileWatcher && App_1.App.__Dev_Mode && !__isNodeModuleBuilding) &&
         (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module)))) {
         return;
@@ -77,9 +77,9 @@ const watchModuleFileChange = (NODE, moduleInfo, { visitedSourceFilesMap, __isNo
     moduleInfo.fileWatcher = chokidar_1.default.watch(NODE.originalFileName).on('change', (event, path) => {
         delete moduleInfo.resolvedModuleNames;
         App_1.App.__Host.deleteFileinThree(NODE.path);
-        visitedSourceFilesMap.delete(NODE.originalFileName);
+        __visitedSourceFilesMap.delete(NODE.originalFileName);
         requesteCancell();
-        changeFileCallback();
+        __emitProgram();
         App_1.App.server.socketClientSender("RESTART_SERVER", {});
     });
 };
@@ -100,7 +100,6 @@ const concatBeforOrAfterTransformers = (BeforeOrAfter, transfromers = {}) => {
 };
 const getTransformersObject = (before, after) => {
     const transpilerBefore = concatBeforOrAfterTransformers(before);
-    const transpilerAfter = concatBeforOrAfterTransformers(after);
     return {
         before: [
             (CTX) => {
@@ -133,7 +132,8 @@ const geModuleLocationMeta = (moduleInfo, compilerOptions) => {
 exports.geModuleLocationMeta = geModuleLocationMeta;
 const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
     let incrementModuleIndex = exports.startModulesIndex;
-    const moduleThree = compilerOptions.moduleThree, currentDirectory = oldhost.getCurrentDirectory(), getCanonicalFileName = (0, typescript_1.createGetCanonicalFileName)(oldhost.useCaseSensitiveFileNames()), moduleResolutionCache = (0, typescript_1.createModuleResolutionCache)(currentDirectory, getCanonicalFileName), Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
+    const __moduleThree = compilerOptions.__moduleThree;
+    const currentDirectory = oldhost.getCurrentDirectory(), getCanonicalFileName = (0, typescript_1.createGetCanonicalFileName)(oldhost.useCaseSensitiveFileNames()), moduleResolutionCache = (0, typescript_1.createModuleResolutionCache)(currentDirectory, getCanonicalFileName), Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
         let resolvedModule = containinModuleInfo.moduleColection[moduleName];
         if (resolvedModule) {
             return resolvedModule.resolvedModule;
@@ -147,7 +147,7 @@ const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
             return resolvedModule;
         }
         const modulePath = resolvedModule.resolvedFileName;
-        const childModule = moduleThree.get(modulePath);
+        const childModule = __moduleThree.get(modulePath);
         const moduleInfo = childModule || {
             moduleIndex: incrementModuleIndex++,
             modulePath: modulePath,
@@ -160,22 +160,22 @@ const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
         moduleInfo.isAsyncModule = (moduleInfo.isAsyncModule === false ?
             false :
             (containinModuleInfo.isMainAsyncModule || moduleInfo.isAsyncModule || isMainAsyncModule));
-        console.log(containinModuleInfo.modulePath, modulePath, moduleInfo.isMainAsyncModule, moduleInfo.isAsyncModule);
         containinModuleInfo.moduleColection[moduleName] = moduleInfo;
         if (!childModule) {
-            moduleThree.set(modulePath, moduleInfo);
+            __moduleThree.set(modulePath, moduleInfo);
         }
         if (moduleInfo.isNodeModule) {
             moduleInfo.__Module_Window_Name = compilerOptions.__Node_Module_Window_Name;
             exports.nodeModuleThree.set(modulePath, moduleInfo);
-            compilerOptions.resetModuleFiles();
+            compilerOptions.__resetModuleFiles();
         }
         return resolvedModule;
     };
     const newHost = {
         ...oldhost,
         resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
-            return loadWithLocalWithSourceFileCache(sourceFile.imports, containingFile, moduleThree.get(containingFile), redirectedReference, Module_loader);
+            console.log(sourceFile.fileName);
+            return loadWithLocalWithSourceFileCache(sourceFile.imports, containingFile, __moduleThree.get(containingFile), redirectedReference, Module_loader);
         }
     };
     return newHost;
@@ -183,7 +183,7 @@ const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
 exports.useLocalFileHostModuleRegistrator = useLocalFileHostModuleRegistrator;
 const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
     let incrementModuleIndex = exports.startModulesIndex;
-    const moduleThree = compilerOptions.moduleThree;
+    const __moduleThree = compilerOptions.__moduleThree;
     const Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
         let resolvedModule = containinModuleInfo.moduleColection[moduleName];
         if (resolvedModule) {
@@ -194,7 +194,7 @@ const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
             return;
         }
         const modulePath = resolvedModule.resolvedFileName;
-        const childModule = moduleThree.get(modulePath);
+        const childModule = __moduleThree.get(modulePath);
         const moduleInfo = childModule || {
             moduleIndex: incrementModuleIndex++,
             modulePath: modulePath,
@@ -209,14 +209,14 @@ const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
             (containinModuleInfo.isMainAsyncModule || containinModuleInfo.isAsyncModule || !!isMainAsyncModule);
         containinModuleInfo.moduleColection[moduleName] = moduleInfo;
         if (!childModule) {
-            moduleThree.set(modulePath, moduleInfo);
+            __moduleThree.set(modulePath, moduleInfo);
         }
         return resolvedModule;
     };
     return {
         ...oldhost,
         resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
-            return loadWithLocalWithSourceFileCache(sourceFile.imports, containingFile, exports.nodeModuleThree.get(containingFile), redirectedReference, Module_loader);
+            return loadWithLocalWithSourceFileCache(sourceFile.imports, containingFile, __moduleThree.get(containingFile), redirectedReference, Module_loader);
         }
     };
 };
@@ -227,3 +227,31 @@ const loadWithLocalWithSourceFileCache = (imports, containingFile, containinModu
         return resolved ? [resolved] : [];
     }));
 };
+const configCompilerOptions = (compilerOptions) => {
+    let exeCuteCode = "";
+    if (compilerOptions.__isNodeModuleBuilding) {
+        compilerOptions.__moduleThree = new Map([...exports.nodeModuleThree]);
+        compilerOptions.__Host = compilerOptions.__Host || (0, exports.useModuleFileHostModuleRegistrator)(App_1.App.__Host, compilerOptions);
+        exeCuteCode += `\n${compilerOptions.__Node_Module_Window_Name}[${exports.codeControlerIndex}];`;
+    }
+    else {
+        compilerOptions.__moduleThree = new Map([
+            ...exports.defaultModuleThree,
+            ...compilerOptions.__mainFilesPaths.map((modulePath) => {
+                const moduleIndex = exports.startModulesIndex++;
+                exeCuteCode += `\n${compilerOptions.__Module_Window_Name}[${moduleIndex}];`;
+                return [modulePath, {
+                        moduleIndex,
+                        modulePath: modulePath,
+                        isNodeModule: false,
+                        __Module_Window_Name: compilerOptions.__Module_Window_Name,
+                        moduleColection: {},
+                        isAsyncModule: false,
+                    }];
+            })
+        ]);
+        compilerOptions.__Host = compilerOptions.__Host || (0, exports.useLocalFileHostModuleRegistrator)(App_1.App.__Host, compilerOptions);
+    }
+    compilerOptions.writeFile = (requestPath, content) => compilerOptions.__writeFile(requestPath, content, exeCuteCode, compilerOptions);
+};
+exports.configCompilerOptions = configCompilerOptions;

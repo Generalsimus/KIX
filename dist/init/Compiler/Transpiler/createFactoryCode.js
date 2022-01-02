@@ -206,19 +206,18 @@ exports.generateFactory = {
         let accessPropertyes = [
             "u",
         ];
+        const outFile = (0, utils_1.getoutFilePath)(path_1.default.relative(App_1.App.__RunDirName, moduleInfo.modulePath));
         if (moduleInfo.isAsyncModule) {
-            console.log("AAAAAAAAAAAAAAAAAAAA: ", moduleInfo.modulePath);
-            if (!CompileFile_1.__compiledFilesThreshold.has(moduleInfo.modulePath)) {
-                (0, CompileFile_1.CompileFile)(moduleInfo.modulePath, [], {
+            if (!CompileFile_1.__compiledFilesThreshold.has(moduleInfo.modulePath) && !compilerOptions.__mainFilesPaths.includes(moduleInfo.modulePath)) {
+                (0, CompileFile_1.Compiler)([moduleInfo.modulePath], {
                     ...compilerOptions,
-                    outFile: (0, utils_1.getoutFilePath)(path_1.default.relative(App_1.App.__RunDirName, moduleInfo.modulePath))
                 }, {
-                    resetModuleFiles: compilerOptions.resetModuleFiles,
-                    resetNodeModuleFilesFunc: compilerOptions.resetNodeModuleFilesFunc,
+                    __host: undefined,
+                    __moduleThree: compilerOptions.__getLocalModuleThree(moduleInfo.modulePath),
                 });
             }
             const asyncModuleCompilerOptions = CompileFile_1.__compiledFilesThreshold.get(moduleInfo.modulePath)?.getCompilerOptions() || {};
-            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.moduleThree?.get(moduleInfo.modulePath);
+            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.__moduleThree?.get(moduleInfo.modulePath);
             accessPropertyes.push(typescript_1.factory.createStringLiteral(asyncModuleCompilerOptions.__Module_Window_Name), typescript_1.factory.createNumericLiteral(asyncModuleThreeModuleInfo.moduleIndex));
         }
         else {

@@ -22,13 +22,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getoutFilePath = exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
+exports.getScriptTagInfos = exports.getoutFilePath = exports.resolveKixModule = exports.filePathToUrl = exports.createCancellationToken = exports.getModuleWindowName = exports.getModuleFiles = exports.getImportModuleName = exports.parseJsonFile = exports.fixLibFileLocationInCompilerOptions = exports.createHost = exports.FilesThree = exports.getColumnName = exports.deepAssign = void 0;
 const typescript_1 = require("typescript");
 const fs_1 = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
 const tsserverlibrary_1 = __importDefault(require("typescript/lib/tsserverlibrary"));
 const createCssSourceFile_1 = __importDefault(require("./createCssSourceFile"));
 const resolve_1 = __importDefault(require("resolve"));
+const App_1 = require("../init/App");
 const deepAssign = (target, ...sources) => {
     for (let source of sources) {
         for (let key in source) {
@@ -168,3 +169,26 @@ const getoutFilePath = (filePath) => {
     return filePath.replace(/\.tsx?$/, new Date().getTime() + ".js");
 };
 exports.getoutFilePath = getoutFilePath;
+const getScriptTagInfos = (document, window) => {
+    const { __compilerOptions, __Host, __RunDirName } = App_1.App;
+    const compilerOptions = (0, exports.fixLibFileLocationInCompilerOptions)(__compilerOptions, __Host);
+    const htmlFiles = new Set();
+    return {
+        scriptTagInfos: Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
+            scriptElement.removeAttribute("lang");
+            const ulrMeta = new window.URL(scriptElement.src, 'http://e'), filePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))), outFile = (0, exports.filePathToUrl)((0, exports.getoutFilePath)(path_1.default.relative(__RunDirName, filePath)));
+            if (htmlFiles.has(filePath)) {
+                scriptElement.remove();
+                return;
+            }
+            htmlFiles.add(filePath);
+            scriptElement.setAttribute("src", outFile);
+            return {
+                filePath,
+                compilerOptions: { ...compilerOptions, outFile }
+            };
+        }),
+        indexHtmlMainFilePaths: [...htmlFiles]
+    };
+};
+exports.getScriptTagInfos = getScriptTagInfos;

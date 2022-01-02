@@ -8,9 +8,10 @@ import fs from "fs"
 import consola from "consola"
 import chokidar from "chokidar"
 import { JSDOM } from "jsdom"
-import { CompileFile } from "./Compiler/CompileFile"
-import { filePathToUrl, fixLibFileLocationInCompilerOptions, getoutFilePath } from "../helpers/utils"
+import { filePathToUrl, fixLibFileLocationInCompilerOptions, getoutFilePath, getScriptTagInfos } from "../helpers/utils"
 import { __compiledFilesThreshold } from "./Compiler/CompileFile"
+import { App } from "./App"
+import { initLocalFilesCompiler } from "./Compiler/localFiles"
 
 
 export const ReadIndexHTML = (App) => {
@@ -44,30 +45,13 @@ export const ReadIndexHTML = (App) => {
                 document.body.firstElementChild
             )
 
-            const htmFiles = new Set();
-
-            const compilerOptions = fixLibFileLocationInCompilerOptions(__compilerOptions, __Host)
-            const scriptTagInfos = Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
-                scriptElement.removeAttribute("lang");
-                const ulrMeta = new window.URL(scriptElement.src, 'http://e'),
-                    filePath = normalizeSlashes(path.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))),
-                    outFile = getoutFilePath(path.relative(__RunDirName, filePath));
-                if (htmFiles.has(filePath)) {
-                    scriptElement.remove()
-                    return;
-                }
-                htmFiles.add(filePath);
-                scriptElement.setAttribute("src", filePathToUrl(path.relative(App.__RunDirName, outFile)));
-
-                return {
-                    filePath,
-                    compilerOptions: { ...compilerOptions, outFile }
-                }
-            });
-            
+            const { IndexHtmlMainFilePaths, scriptTagInfos } = getScriptTagInfos(document, window)
 
             for (const { filePath, compilerOptions } of scriptTagInfos) {
-                CompileFile(filePath, [...htmFiles], compilerOptions)
+                initLocalFilesCompiler(filePath, {
+                    ...compilerOptions,
+                    __IndexHtmlMainFilePaths: IndexHtmlMainFilePaths
+                })
             }
 
             const INDEX_HTML_STRING = "<!DOCTYPE html> \n" + document.documentElement.outerHTML

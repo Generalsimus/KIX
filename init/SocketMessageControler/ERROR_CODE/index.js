@@ -8,6 +8,8 @@ export const ERROR_CODE = (errorData, socketClientSender) => {
     const mapFile = __requestsThreshold.get(errorData.path + ".map")
     let ifBreak = false
     if (mapFile) {
+        // console.log("🚀 --> file: index.js --> line 12 --> mapFile", errorData.path)
+        // console.log("🚀 --> file: index.js --> line 12 --> mapFile", mapFile)
         const sourceMapObject = JSON.parse(mapFile)
         const decodedMappingsVlq = decode(sourceMapObject.mappings)
         for (const lineGeneratedCodeIndexs in decodedMappingsVlq) {

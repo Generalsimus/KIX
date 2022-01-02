@@ -51,6 +51,12 @@ export const sendFileDiagnostics = (connectedWs, socketClientSender) => {
 
 
 export const getProgramDiagnostics = (program) => {
+
+
+    const compilerOptions = program.getCompilerOptions()
+    if (compilerOptions.__isNodeModuleBuilding) return []
+
+    
     // console.log("🚀 --> file: utils.js --> line 22 --> getProgramDiagnostics --> program", program)
     // const diagnostics = []; 
     // for (const sourceFile of program.getSourceFiles()) {

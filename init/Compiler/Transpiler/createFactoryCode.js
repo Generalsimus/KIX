@@ -12,7 +12,7 @@ import {
 import {
     App
 } from "../../App";
-import { CompileFile, __compiledFilesThreshold } from "../CompileFile";
+import { CompileFile, Compiler, __compiledFilesThreshold } from "../CompileFile";
 import { topLevelVisitor } from "./amdBodyVisitor";
 import {
     codePolyfillPath,
@@ -368,27 +368,32 @@ export const generateFactory = {
         /*
         sadas[2a] = (url)=>mod.ss(url,()=>location)
         */
+        //    return
         if (!moduleInfo.isMainAsyncModule) {
             return
         }
         let accessPropertyes = [
             "u",
         ]
+        const outFile = getoutFilePath(path.relative(App.__RunDirName, moduleInfo.modulePath))
         if (moduleInfo.isAsyncModule) {
-            console.log("AAAAAAAAAAAAAAAAAAAA: ", moduleInfo.modulePath)
-            if (!__compiledFilesThreshold.has(moduleInfo.modulePath)) {
-                CompileFile(moduleInfo.modulePath, [], {
+
+            if (!__compiledFilesThreshold.has(moduleInfo.modulePath) && !compilerOptions.__mainFilesPaths.includes(moduleInfo.modulePath)) {
+                // console.log("🚀 --> file: createFactoryCode.js --> line 381 --> CREATE_Async_Module_SourceFile_IF_NEEDED --> compilerOptions", compilerOptions)
+                Compiler([moduleInfo.modulePath], {
                     ...compilerOptions,
-                    outFile: getoutFilePath(path.relative(App.__RunDirName, moduleInfo.modulePath))
                 }, {
-                    resetModuleFiles: compilerOptions.resetModuleFiles,
-                    resetNodeModuleFilesFunc: compilerOptions.resetNodeModuleFilesFunc,
+                    __host: undefined,
+                    __moduleThree: compilerOptions.__getLocalModuleThree(moduleInfo.modulePath),
+                    // __resetModuleFiles: compilerOptions.__resetModuleFiles,
+                    // resetNodeModuleFilesFunc: compilerOptions.resetNodeModuleFilesFunc,
                 })
             }
 
             const asyncModuleCompilerOptions = __compiledFilesThreshold.get(moduleInfo.modulePath)?.getCompilerOptions() || {}
-            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.moduleThree?.get(moduleInfo.modulePath)
+            const asyncModuleThreeModuleInfo = asyncModuleCompilerOptions?.__moduleThree?.get(moduleInfo.modulePath)
 
+            // console.log(moduleInfo.modulePath, __compiledFilesThreshold.keys(), asyncModuleCompilerOptions?.__moduleThree?.keys())
 
             accessPropertyes.push(
                 factory.createStringLiteral(asyncModuleCompilerOptions.__Module_Window_Name),

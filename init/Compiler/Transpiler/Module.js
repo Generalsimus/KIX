@@ -66,13 +66,17 @@ getModule()?resolve(getModule()):kix(document.head, {
         // return NODE 
 
         const compilerOptions = CTX.getCompilerOptions()
-        const moduleInfo = compilerOptions.moduleThree.get(NODE.originalFileName)
+        const moduleInfo = compilerOptions.__moduleThree.get(NODE.originalFileName)
+        // console.log(compilerOptions.__moduleThree, NODE.originalFileName, compilerOptions.__moduleThree.keys())
+        // console.log( NODE.originalFileName, compilerOptions.__moduleThree.keys())
+        // console.log("🚀 --> file: Module.js --> line 70 --> compilerOptions.__moduleThree", compilerOptions.__moduleThree)
+
         CTX.ModuleColection = moduleInfo.moduleColection;
 
 
 
         const isNodeModuleOrNodeCompiler = moduleInfo.isNodeModule && !compilerOptions.__isNodeModuleBuilding;
-        // console.log("🚀 --> file: Module.js --> line 70 --> NODE.originalFileName", NODE.originalFileName, !!CTX.Module_GET_POLYFIL, compilerOptions.visitedSourceFilesMap.has(NODE.originalFileName))
+        // console.log("🚀 --> file: Module.js --> line 70 --> NODE.originalFileName", NODE.originalFileName, !!CTX.Module_GET_POLYFIL, compilerOptions.__visitedSourceFilesMap.has(NODE.originalFileName))
         if (isNodeModuleOrNodeCompiler || (moduleInfo.isAsyncModule)) {
             NODE = ts.updateSourceFileNode(NODE, [])
             NODE.externalModuleIndicator = undefined
@@ -85,7 +89,7 @@ getModule()?resolve(getModule()):kix(document.head, {
 
 
 
-        const visitedSourceFile = compilerOptions.visitedSourceFilesMap.get(NODE.originalFileName)
+        const visitedSourceFile = compilerOptions.__visitedSourceFilesMap.get(NODE.originalFileName)
 
         if (visitedSourceFile) {
             CTX.Module_GET_POLYFIL = (CTX.Module_GET_POLYFIL || visitedSourceFile.Module_GET_POLYFIL)
@@ -132,7 +136,7 @@ getModule()?resolve(getModule()):kix(document.head, {
 
         NODE = visitEachChild(NODE, visitor, CTX)
 
-        compilerOptions.visitedSourceFilesMap.set(NODE.originalFileName, NODE)
+        compilerOptions.__visitedSourceFilesMap.set(NODE.originalFileName, NODE)
 
 
         return NODE
