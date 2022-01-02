@@ -13,7 +13,7 @@ export const initLocalFilesCompiler = (mainFilePath, compilerOptions) => {
         __Import_Module_Name = getImportModuleName(),
         __Module_Window_Name = getModuleWindowName(),
         requestPath = filePathToUrl(compilerOptions.outFile);
-        // mapRequestPath = requestPath + ".map";
+    // mapRequestPath = requestPath + ".map";
     // mainFilePathmoduleIndex = startModulesIndex++,
     // executeCode = `${__Module_Window_Name}[${mainFilePathmoduleIndex}];`;
 
@@ -41,14 +41,13 @@ export const initLocalFilesCompiler = (mainFilePath, compilerOptions) => {
         /* priorityCompilerOptions */     {
             __writeFile: (requestPath, content, exeCuteCode, originalCompilerOptions) => {
                 if (requestPath === originalCompilerOptions.outFile) {
-
-                    const Module_Text = `(function(${__Import_Module_Name}){${content}\n${exeCuteCode}\n })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${requestPath + ".map"}`
-
-                    App.__requestsThreshold.set(requestPath, Module_Text)
-                } else {
-                    App.__requestsThreshold.set(requestPath, content)
+                    content = `(function(${__Import_Module_Name}){${content}\n${exeCuteCode}\n })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${requestPath + ".map"}`
                 }
+                //     App.__requestsThreshold.set(filePathToUrl(requestPath), Module_Text)
+                // } else {
+                // }
 
+                App.__requestsThreshold.set(filePathToUrl(requestPath), content)
 
                 if (!resetImportedNodeModules) return
                 const Modules = new Set([codeControlerPath, codePolyfillPath])

@@ -176,13 +176,13 @@ const getScriptTagInfos = (document, window) => {
     return {
         scriptTagInfos: Array.prototype.map.call(document.querySelectorAll('script[lang="kix"]'), (scriptElement, index) => {
             scriptElement.removeAttribute("lang");
-            const ulrMeta = new window.URL(scriptElement.src, 'http://e'), filePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))), outFile = (0, exports.filePathToUrl)((0, exports.getoutFilePath)(path_1.default.relative(__RunDirName, filePath)));
+            const ulrMeta = new window.URL(scriptElement.src, 'http://e'), filePath = (0, typescript_1.normalizeSlashes)(path_1.default.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))), outFile = (0, exports.getoutFilePath)(path_1.default.relative(__RunDirName, filePath));
             if (htmlFiles.has(filePath)) {
                 scriptElement.remove();
                 return;
             }
             htmlFiles.add(filePath);
-            scriptElement.setAttribute("src", outFile);
+            scriptElement.setAttribute("src", (0, exports.filePathToUrl)(outFile));
             return {
                 filePath,
                 compilerOptions: { ...compilerOptions, outFile }

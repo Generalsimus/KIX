@@ -115,10 +115,13 @@ export const nodeModuleResolver = (modulePath, fileDirectory) => {
 
 
 export const watchModuleFileChange = (NODE, moduleInfo, { __visitedSourceFilesMap, __emitProgram, __isNodeModuleBuilding, cancellationToken: { requesteCancell } }) => {
-    if (!(
-        (!moduleInfo.fileWatcher && App.__Dev_Mode && !__isNodeModuleBuilding) &&
-        (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))
-    )) { return }
+    // if (!(
+    //     (!moduleInfo.fileWatcher && App.__Dev_Mode && !__isNodeModuleBuilding) &&
+    //     (!moduleInfo.isAsyncModule || (moduleInfo.isAsyncModule && !moduleInfo.isEs6Module))
+    // )) { return }
+    if (moduleInfo.fileWatcher || __isNodeModuleBuilding || moduleInfo.isAsyncModule) {
+        return
+    }
 
     moduleInfo.fileWatcher = chokidar.watch(NODE.originalFileName).on('change', (event, path) => {
 
@@ -126,7 +129,6 @@ export const watchModuleFileChange = (NODE, moduleInfo, { __visitedSourceFilesMa
 
         App.__Host.deleteFileinThree(NODE.path)
         __visitedSourceFilesMap.delete(NODE.originalFileName)
-        // __emitProgram 
         requesteCancell()
         __emitProgram()
         App.server.socketClientSender("RESTART_SERVER", {})
@@ -261,13 +263,14 @@ export const geModuleLocationMeta = (moduleInfo, compilerOptions) => {
 
 
 
-export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
+export const useLocalFileHostModuleRegistrator = (compilerOptions) => {
     let incrementModuleIndex = startModulesIndex;
+
     // const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/,
     // const isCssRegex = /\.(((c|le|sa|sc)ss)|styl)$/,
     const __moduleThree = compilerOptions.__moduleThree;
-    const currentDirectory = oldhost.getCurrentDirectory(),
-        getCanonicalFileName = createGetCanonicalFileName(oldhost.useCaseSensitiveFileNames()),
+    const currentDirectory = App.__Host.getCurrentDirectory(),
+        getCanonicalFileName = createGetCanonicalFileName(App.__Host.useCaseSensitiveFileNames()),
         moduleResolutionCache = createModuleResolutionCache(currentDirectory, getCanonicalFileName),
         Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
             // console.log("🚀 --> file: utils.js --> line 255 --> useLocalFileHostModuleRegistrator --> redirectedReference", redirectedReference)
@@ -275,6 +278,7 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
 
             // console.log("🚀 --> file: utils.js --> line 321 --> useLocalFileHostModuleRegistrator --> moduleName", moduleName)
             // console.log("🚀 --> file: utils.js --> line 272 --> useLocalFileHostModuleRegistrator --> moduleName", moduleName, resolvedModule?.resolvedFileName)
+            // console.log("🚀 --> fil oduleRegistrator --> resolvedModule", moduleName, Object.keys(resolvedModule||{}))
             if (resolvedModule) {
                 return resolvedModule.resolvedModule
             }
@@ -284,6 +288,7 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
                 nodeModuleResolver(moduleName, path.dirname(containingFile))
             );
 
+            // console.log("🚀 --> file:  duleNames|| --> moduleName", moduleName, !!resolvedModule)
             // console.log("🚀 --> file: utils.js --> line 263 --> useLocalFileHostModuleRegistrator --> resolvedModule", resolvedModule)
             // console.log("🚀 --> file: utils.js --> line 263 --> useLocalFileHostModuleRegistrator --> resolvedModule", resolvedModule)
 
@@ -306,9 +311,9 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
                 __Module_Window_Name: compilerOptions.__Module_Window_Name,
                 // isAsyncModule, 
                 moduleColection: {},
-                resolvedModule,
+                // resolvedModule,
             };
-
+            moduleInfo.resolvedModule = resolvedModule;
             // moduleInfo.isEs6Module = true;
             moduleInfo.isMainAsyncModule = moduleInfo.isMainAsyncModule || !!isMainAsyncModule;
             moduleInfo.isAsyncModule = (
@@ -339,9 +344,9 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
         }
     // console.log("🚀 --> file: utils.js --> line 348 --> useModuleFileHostModuleRegistrator --> moduleThree", moduleThree)
     const newHost = {
-        ...oldhost,
+        ...App.__Host,
         resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
-            console.log(sourceFile.fileName)
+            // console.log(sourceFile.fileName)
             // console.log("🚀 --> file: utils.js --> line 422 --> loadWithLocalWithSourceFileCache --> __moduleThree", __moduleThree)
             // console.log("🚀 --> file: utils.js --> line 422 --> loadWithLocalWithSourceFileCache --> containingFile", containingFile)
             return loadWithLocalWithSourceFileCache(
@@ -362,7 +367,7 @@ export const useLocalFileHostModuleRegistrator = (oldhost, compilerOptions) => {
 
 
 
-export const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => {
+export const useModuleFileHostModuleRegistrator = (compilerOptions) => {
     let incrementModuleIndex = startModulesIndex;
     const __moduleThree = compilerOptions.__moduleThree;
     const Module_loader = (moduleName, containingFile, containinModuleInfo, redirectedReference, isMainAsyncModule) => {
@@ -411,7 +416,7 @@ export const useModuleFileHostModuleRegistrator = (oldhost, compilerOptions) => 
         return resolvedModule
     }
     return {
-        ...oldhost,
+        ...App.__Host,
         resolveModuleNames(moduleNames, containingFile, _reusedNames, redirectedReference, compilerOptions, sourceFile) {
             // console.log("🚀 --> file: utils.js --> line 416 --> resolveModuleNames --> containingFile", containingFile)
 
@@ -432,11 +437,10 @@ const loadWithLocalWithSourceFileCache = (imports, containingFile, containinModu
 
     return containinModuleInfo.resolvedModuleNames || (containinModuleInfo.resolvedModuleNames = (imports || []).flatMap(({ text, parent }) => {
 
-        // console.log("🚀 --> file: utils.js --> line 433 --> returncontaininModuleInfo.resolvedModuleNames|| --> text", text)
         const resolved = loader(text, containingFile, containinModuleInfo, redirectedReference, parent?.expression?.kind === SyntaxKind.ImportKeyword);
 
 
-        // console.log("🚀 --> file:  duleNames|| --> text", text, resolved)
+
         return resolved ? [resolved] : []
     }))
 
@@ -456,7 +460,7 @@ export const configCompilerOptions = (compilerOptions) => {
     let exeCuteCode = "";
     if (compilerOptions.__isNodeModuleBuilding) {
         compilerOptions.__moduleThree = new Map([...nodeModuleThree])
-        compilerOptions.__Host = compilerOptions.__Host || useModuleFileHostModuleRegistrator(App.__Host, compilerOptions)
+        compilerOptions.__Host = compilerOptions.__Host || useModuleFileHostModuleRegistrator(compilerOptions)
         exeCuteCode += `\n${compilerOptions.__Node_Module_Window_Name}[${codeControlerIndex}];`
 
         // __executeCode = App.__Dev_Mode ? `${__Module_Window_Name}[${codeControlerIndex}]` : "",
@@ -478,9 +482,14 @@ export const configCompilerOptions = (compilerOptions) => {
         ])
 
 
-        compilerOptions.__Host = compilerOptions.__Host || useLocalFileHostModuleRegistrator(App.__Host, compilerOptions)
+        compilerOptions.__Host = compilerOptions.__Host || useLocalFileHostModuleRegistrator(compilerOptions)
     }
 
 
-    compilerOptions.writeFile = (requestPath, content) => compilerOptions.__writeFile(requestPath, content, exeCuteCode, compilerOptions)
+    compilerOptions.writeFile = (requestPath, content) => {
+        // console.log("🚀 --> file: utils.js --> line 486 --> configCompilerOptions --> requestPath", requestPath,filePathToUrl(requestPath))
+
+        // filePathToUrl(requestPath)
+        compilerOptions.__writeFile(requestPath, content, exeCuteCode, compilerOptions)
+    }
 } 

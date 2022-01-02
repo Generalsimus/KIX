@@ -21,12 +21,9 @@ const initModuleFileCompiler = (moduleFiles, compilerOptions) => {
     (0, CompileFile_1.Compiler)(moduleFiles, compilerOptions, {
         __writeFile: (requestPath, content, exeCuteCode, originalCompilerOptions) => {
             if (requestPath === originalCompilerOptions.outFile) {
-                const Module_Text = `(function(${compilerOptions.__Import_Module_Name}){${content}\n${exeCuteCode}\n})((window.${__Module_Window_Name}={}))`;
-                App_1.App.__requestsThreshold.set(requestPath, Module_Text);
+                content = `(function(${compilerOptions.__Import_Module_Name}){${content}\n${exeCuteCode}\n})((window.${__Module_Window_Name}={}))`;
             }
-            else {
-                App_1.App.__requestsThreshold.set(requestPath, content);
-            }
+            App_1.App.__requestsThreshold.set(requestPath, content);
         }
     });
 };

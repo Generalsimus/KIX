@@ -34,11 +34,10 @@ export const initModuleFileCompiler = (moduleFiles, compilerOptions) => {
             __writeFile: (requestPath, content, exeCuteCode, originalCompilerOptions) => {
                 if (requestPath === originalCompilerOptions.outFile) {
 
-                    const Module_Text = `(function(${compilerOptions.__Import_Module_Name}){${content}\n${exeCuteCode}\n})((window.${__Module_Window_Name}={}))`
-                    App.__requestsThreshold.set(requestPath, Module_Text)
-                } else {
-                    App.__requestsThreshold.set(requestPath, content)
+                    content = `(function(${compilerOptions.__Import_Module_Name}){${content}\n${exeCuteCode}\n})((window.${__Module_Window_Name}={}))`
                 }
+                
+                App.__requestsThreshold.set(requestPath, content)
             }
         },
     )

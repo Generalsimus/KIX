@@ -29,12 +29,9 @@ const initLocalFilesCompiler = (mainFilePath, compilerOptions) => {
     (0, CompileFile_1.Compiler)([mainFilePath], compilerOptions, {
         __writeFile: (requestPath, content, exeCuteCode, originalCompilerOptions) => {
             if (requestPath === originalCompilerOptions.outFile) {
-                const Module_Text = `(function(${__Import_Module_Name}){${content}\n${exeCuteCode}\n })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${requestPath + ".map"}`;
-                App_1.App.__requestsThreshold.set(requestPath, Module_Text);
+                content = `(function(${__Import_Module_Name}){${content}\n${exeCuteCode}\n })(window.${__Module_Window_Name}={})\n//# sourceMappingURL=${requestPath + ".map"}`;
             }
-            else {
-                App_1.App.__requestsThreshold.set(requestPath, content);
-            }
+            App_1.App.__requestsThreshold.set((0, utils_2.filePathToUrl)(requestPath), content);
             if (!resetImportedNodeModules)
                 return;
             const Modules = new Set([utils_1.codeControlerPath, utils_1.codePolyfillPath]);

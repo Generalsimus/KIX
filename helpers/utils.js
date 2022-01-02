@@ -253,13 +253,13 @@ export const getScriptTagInfos = (document, window) => {
             scriptElement.removeAttribute("lang");
             const ulrMeta = new window.URL(scriptElement.src, 'http://e'),
                 filePath = normalizeSlashes(path.join(__RunDirName, decodeURIComponent(ulrMeta.pathname))),
-                outFile = filePathToUrl(getoutFilePath(path.relative(__RunDirName, filePath)));
+                outFile = getoutFilePath(path.relative(__RunDirName, filePath));
             if (htmlFiles.has(filePath)) {
                 scriptElement.remove()
                 return;
             }
             htmlFiles.add(filePath);
-            scriptElement.setAttribute("src", outFile);
+            scriptElement.setAttribute("src", filePathToUrl(outFile));
 
             return {
                 filePath,
