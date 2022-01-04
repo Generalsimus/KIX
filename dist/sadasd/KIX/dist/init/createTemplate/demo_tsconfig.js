@@ -1,0 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDemoTsConfigObject = void 0;
+const typescript_1 = require("typescript");
+const App_1 = require("../App");
+const getDemoTsConfigObject = () => {
+    const { outDir, rootDir, baseUrl, jsx, watch, forceConsistentCasingInFileNames, suppressOutputPathCheck, resolveJsonModule, allowSyntheticDefaultImports, allowJs, sourceMap, lib, module, checkJs, moduleResolution } = App_1.App.__compilerOptions;
+    return {
+        compilerOptions: {
+            module: typescript_1.ModuleKind.AMD[module],
+            "moduleResolution": "Node",
+            outDir,
+            rootDir,
+            baseUrl,
+            "jsx": "preserve",
+            watch,
+            forceConsistentCasingInFileNames,
+            resolveJsonModule,
+            allowSyntheticDefaultImports,
+            allowJs,
+            checkJs: !!checkJs,
+            sourceMap,
+            lib,
+            "noImplicitAny": true,
+        }
+    };
+};
+exports.getDemoTsConfigObject = getDemoTsConfigObject;
