@@ -2,7 +2,7 @@ import { App } from "..";
 import { JSDOM } from "jsdom";
 import fs from "fs";
 import { readKixModules } from "./readKixModules";
-import { creaePrgram } from "./createProgram";
+import { createProgram } from "../createProgram";
 
 export const readJsDomHtml = (indexHTMLPath: string) => {
   App.requestsThreshold.clear();
@@ -27,5 +27,5 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
 
   const kixModules = readKixModules(window);
 
-  return creaePrgram(kixModules);
+  return createProgram(kixModules);
 };

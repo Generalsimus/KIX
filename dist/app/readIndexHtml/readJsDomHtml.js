@@ -8,7 +8,7 @@ const __1 = require("..");
 const jsdom_1 = require("jsdom");
 const fs_1 = __importDefault(require("fs"));
 const readKixModules_1 = require("./readKixModules");
-const createProgram_1 = require("./createProgram");
+const createProgram_1 = require("../createProgram");
 const readJsDomHtml = (indexHTMLPath) => {
     __1.App.requestsThreshold.clear();
     const htmlDom = new jsdom_1.JSDOM(fs_1.default.readFileSync(indexHTMLPath, "utf8")), window = htmlDom.window, document = window.document;
@@ -20,6 +20,6 @@ const readJsDomHtml = (indexHTMLPath) => {
         __1.App.requestsThreshold.set(indexHTMLUrlPath, indexHtmlPageString);
     }
     const kixModules = (0, readKixModules_1.readKixModules)(window);
-    return (0, createProgram_1.creaePrgram)(kixModules);
+    return (0, createProgram_1.createProgram)(kixModules);
 };
 exports.readJsDomHtml = readJsDomHtml;

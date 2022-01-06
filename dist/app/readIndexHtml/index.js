@@ -10,13 +10,14 @@ const typescript_1 = __importDefault(require("typescript"));
 const readJsDomHtml_1 = require("./readJsDomHtml");
 const index_1 = require("../index");
 const readIndexHtml = () => {
+    var _a;
     const indexHTMLPath = path_1.default.resolve("./index.html");
     if (!fs_1.default.existsSync(indexHTMLPath)) {
         throw console.error(`Couldn't find ${indexHTMLPath} file.`);
     }
     let program = (0, readJsDomHtml_1.readJsDomHtml)(indexHTMLPath);
     if (index_1.App.devMode) {
-        typescript_1.default.sys.watchFile(indexHTMLPath, () => {
+        (((_a = typescript_1.default.sys) === null || _a === void 0 ? void 0 : _a.watchFile) || fs_1.default.watch)(indexHTMLPath, () => {
             program.close();
             program = (0, readJsDomHtml_1.readJsDomHtml)(indexHTMLPath);
         });

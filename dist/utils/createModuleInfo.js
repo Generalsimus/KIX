@@ -6,7 +6,7 @@ const createModuleInfo = (modulePath) => {
     return {
         modulePath,
         moduleIndex: globalModuleIndex++,
-        moduleColection: {},
+        moduleCollection: {},
         isNodeModule: /[/\\]node_modules[/\\]/.test(modulePath),
     };
 };

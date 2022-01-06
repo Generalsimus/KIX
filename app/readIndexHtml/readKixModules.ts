@@ -1,27 +1,27 @@
-import ts from "typescript";
+
 import { App } from "../";
 import path from "path";
-import { resetModuleThree } from "./resetModuleThree";
 import { DOMWindow } from "jsdom";
-import { formatDiagnosticsHost } from "../../utils/reportDiagnostic";
-
+import { formatDiagnosticsHost } from "../createProgram/reportDiagnostic";
+import ts from "typescript"
 export const readKixModules = (window: DOMWindow): string[] => {
   const document = window.document,
     programFiles = new Set<string>();
   document
-    .querySelectorAll('script[lang="kix"]')
-    .forEach((scriptElement: HTMLScriptElement) => {
+    .querySelectorAll('script')
+    .forEach((scriptElement) => {
+      if (scriptElement.getAttribute("lang")?.trim() !== "kix") return
+
       scriptElement.removeAttribute("lang");
 
       const urlInfo = new window.URL(scriptElement.src, "http://e");
-
+      console.log((ts as any)["normalizeSlashes"](path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))), path.normalize(path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))))
       programFiles.add(
-        ts["normalizeSlashes"](
-          path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))
-        )
+        // ts["normalizeSlashes"](
+        path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))
+        // )
       );
     });
-
-  resetModuleThree(programFiles);
+  App.moduleThree.clear();
   return [...programFiles];
 };

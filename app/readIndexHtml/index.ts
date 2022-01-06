@@ -1,12 +1,10 @@
 import fs from "fs";
 import path from "path";
 import ts from "typescript";
-// import chokidar from "chokidar";
 import { readJsDomHtml } from "./readJsDomHtml";
 import { App } from "../index";
 
 export const readIndexHtml = () => {
-  //   const indexHTMLRequesPaths = App.indexHTMLRequesPaths;
   const indexHTMLPath = path.resolve("./index.html");
 
   if (!fs.existsSync(indexHTMLPath)) {
@@ -16,9 +14,9 @@ export const readIndexHtml = () => {
   let program = readJsDomHtml(indexHTMLPath);
 
   if (App.devMode) {
-    ts.sys.watchFile(indexHTMLPath, () => {
+    (ts.sys?.watchFile || fs.watch)(indexHTMLPath, () => {
       program.close();
       program = readJsDomHtml(indexHTMLPath);
-    });
+    })
   }
 };
