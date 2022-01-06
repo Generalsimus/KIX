@@ -2,7 +2,7 @@
   "name": "kix",
   "version": "3.0.4-beta.37",
   "main": "./main/index.js",
-  "author": "GENERALSIMUS",
+  "author": "soso tsertsvadze",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Generalsimus/KIX.git"
