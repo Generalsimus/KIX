@@ -1,6 +1,6 @@
 import consola from "consola";
 import { App } from "../app"
-import { createAppTemplate } from "../createAppTemplate";
+import { createAppTemplate } from "../appTemplate";
 import { readIndexHtml } from "../app/readIndexHtml";
 import { createServer } from "../server";
 
