@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readKixModules = void 0;
 const __1 = require("../");
 const path_1 = __importDefault(require("path"));
-const typescript_1 = __importDefault(require("typescript"));
+const posix_1 = __importDefault(require("path/posix"));
 const readKixModules = (window) => {
     const document = window.document, programFiles = new Set();
     document
@@ -17,8 +17,7 @@ const readKixModules = (window) => {
             return;
         scriptElement.removeAttribute("lang");
         const urlInfo = new window.URL(scriptElement.src, "http://e");
-        console.log(typescript_1.default["normalizeSlashes"](path_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname))), path_1.default.normalize(path_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname))));
-        programFiles.add(path_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname)));
+        programFiles.add(posix_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname)).split(path_1.default.sep).join("/"));
     });
     __1.App.moduleThree.clear();
     return [...programFiles];

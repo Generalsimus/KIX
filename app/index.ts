@@ -3,7 +3,7 @@ import { readIndexHtml } from "./readIndexHtml";
 import { ModuleInfoType } from "../utils/createModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
-import yargs, { ArgumentsCamelCase } from "yargs";
+import { ArgumentsCamelCase } from "yargs";
 
 const runDirName = path.resolve("./");
 export const App = {

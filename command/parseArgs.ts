@@ -1,15 +1,7 @@
-import ts from "typescript";
-import path from "path";
-import fs from "fs";
-import yargs, { ArgumentsCamelCase, Argv } from "yargs"
-import {
-    hideBin
-} from "yargs/helpers"
+import yargs, { ArgumentsCamelCase } from "yargs"
 import { App } from "../app";
-import { readIndexHtml } from "../app/readIndexHtml";
 import { readTsConfigFile } from "../utils/readTsConfigFile";
 import packageJson from "../package.json"
-import { types } from "sass";
 
 
 export const parseArgs = (): Promise<ArgumentsCamelCase> => {

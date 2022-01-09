@@ -18,8 +18,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
     } else if (stat.isDirectory()) {
         try {
             fs.mkdirSync(to);
-        } catch (e) { }
-        console.log("🚀 --> file: copyFolderSync.ts --> line 25 --> fs.readdirSync --> fs.readdirSync(from)", fs.readdirSync(from));
+        } catch (e) { } 
         fs.readdirSync(from).forEach((element) => {
             copyFolderSync(path.join(from, element), path.join(to, element), ignorePaths);
         })

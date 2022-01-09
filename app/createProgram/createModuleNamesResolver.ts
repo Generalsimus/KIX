@@ -27,10 +27,12 @@ export const createModuleNamesResolver = (
     compilerOptions: ts.CompilerOptions,
     containingSourceFile?: ts.SourceFile
   ) => {
-    console.log(
-      "🚀 --> file: createModuleNamesResolver.ts --> line 30 --> containingFile",
-      containingFile
-    );
+
+    console.log(containingFile)
+    // console.log(
+    //   "🚀 --> file: createModuleNamesResolver.ts --> line 30 --> containingFile",
+    //   containingFile
+    // );
     return loadWithLocalWithCache(
       moduleNames,
       (moduleName: string) =>

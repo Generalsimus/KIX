@@ -1,9 +1,16 @@
 import fs from "fs";
-import path from "path"; 
+import path from "path";
+import { App } from "../..";
 import { createCssString } from "./createCssString";
 
+
+
+export const newSourceFilesPathSet = new Set<string>();
+
 export const readFile = (fileName: string, charset: string): string => {
-  // console.log("🚀 --> file: index.ts --> line 7 --> readFile --> fileName", fileName);
+  // App.moduleThree.get()
+  newSourceFilesPathSet.add(fileName)
+
   let codeScript = fs.readFileSync(fileName, "utf8");
 
   switch (path.extname(fileName)) {

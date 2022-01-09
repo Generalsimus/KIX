@@ -4,6 +4,7 @@ import path from "path";
 import { DOMWindow } from "jsdom";
 import { formatDiagnosticsHost } from "../createProgram/reportDiagnostic";
 import ts from "typescript"
+import pathPosix from "path/posix";
 export const readKixModules = (window: DOMWindow): string[] => {
   const document = window.document,
     programFiles = new Set<string>();
@@ -15,11 +16,10 @@ export const readKixModules = (window: DOMWindow): string[] => {
       scriptElement.removeAttribute("lang");
 
       const urlInfo = new window.URL(scriptElement.src, "http://e");
-      console.log((ts as any)["normalizeSlashes"](path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))), path.normalize(path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))))
+      
+      
       programFiles.add(
-        // ts["normalizeSlashes"](
-        path.join(App.runDirName, decodeURIComponent(urlInfo.pathname))
-        // )
+        pathPosix.join(App.runDirName, decodeURIComponent(urlInfo.pathname)).split(path.sep).join("/")
       );
     });
   App.moduleThree.clear();

@@ -8,6 +8,7 @@ const createModuleInfo = (modulePath) => {
         moduleIndex: globalModuleIndex++,
         moduleCollection: {},
         isNodeModule: /[/\\]node_modules[/\\]/.test(modulePath),
+        writers: {}
     };
 };
 exports.createModuleInfo = createModuleInfo;
