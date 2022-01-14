@@ -3,9 +3,9 @@ import prompts from "prompts"
 import { chooseTemplate } from "./chooseTemplate" 
 import { getProjectName } from "./getProjectName"
 import fs from 'fs';
-import { copyFolderSync } from "../utils/copyFolderSync"
+import { copyFolderSync } from "../../utils/copyFolderSync"
 import { createConfigFiles } from "./createConfigFiles"
-import { App } from "../app"
+import { App } from ".."
 export const createAppTemplate = async () => {
     const projectName = await getProjectName()
     const templatePath = await chooseTemplate()

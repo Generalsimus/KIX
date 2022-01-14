@@ -1,5 +1,5 @@
 import prompts from "prompts"
-import { App } from "../app"
+import { App } from ".."
 
 
 

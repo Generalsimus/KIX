@@ -15,11 +15,11 @@ const readJsDomHtml = (indexHTMLPath) => {
     document.body[document.body.firstElementChild ? "insertBefore" : "appendChild"](Object.assign(document.createElement("script"), {
         src: __1.App.nodeModulesUrlPath,
     }), document.body.firstElementChild);
+    const kixModules = (0, readKixModules_1.readKixModules)(window);
     const indexHtmlPageString = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
     for (const indexHTMLUrlPath of __1.App.indexHTMLUrlPaths) {
-        __1.App.requestsThreshold.set(indexHTMLUrlPath, indexHtmlPageString);
+        __1.App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
     }
-    const kixModules = (0, readKixModules_1.readKixModules)(window);
     return (0, createProgram_1.createProgram)(kixModules);
 };
 exports.readJsDomHtml = readJsDomHtml;

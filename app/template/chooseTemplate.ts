@@ -2,7 +2,7 @@ import path from "path"
 import prompts from "prompts"
 import fs from "fs"
 import { spawn } from "child_process"
-import { App } from "../app"
+import { App } from ".."
 
 export const chooseTemplate = (): Promise<string> => {
     return prompts([{
@@ -10,8 +10,8 @@ export const chooseTemplate = (): Promise<string> => {
         name: 'value',
         message: 'Choose a template',
         choices: [
-            { title: 'Javascript Template ', value: path.join(App.realModuleDirName, "./appTemplate/demoTemplates/JS") },
-            { title: 'Typescript Template ', value: path.join(App.realModuleDirName, "./appTemplate/demoTemplates/TS") }
+            { title: 'Javascript Template ', value: path.join(App.realModuleDirName, "./app/template/demoTemplates/JS") },
+            { title: 'Typescript Template ', value: path.join(App.realModuleDirName, "./app/template/demoTemplates/TS") }
         ],
 
     }]).then(function ({ value: valueTemplatePath }) {

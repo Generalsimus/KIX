@@ -2,16 +2,25 @@ import express from "express"
 import WebSocket from "ws"
 import http from "http"
 import open from "open"
+import mimeTypes from "mime-types"
 import { App } from "../app"
+import { saveLog } from "../utils/loger"
 
 export const createServer = () => {
     const expressApp = express();
     const server = http.createServer(expressApp);
     const WebSocketServer = new WebSocket.Server({ server, path: "/WebSocket" });
-
+    // type sss = express.RequestHandler
     expressApp.use(function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const customResponse = App.requestsThreshold.get(req.path)
+        // console.log("🚀 --> file: index.ts --> line 16 --> customResponse", customResponse);
+        if (customResponse) {
+            res.header("content-type", mimeTypes.lookup(req.path) || "text/html");
+            customResponse(req, res, next);
+        } else {
 
-        next()
+            next()
+        }
     })
     // app.use(function (req, res, next) {
     //     res.header("Cache-Control", "no-cache");
@@ -36,17 +45,15 @@ export const createServer = () => {
     expressApp.use("./", express.static(App.runDirName));
 
     const listener = server.listen(App.port, function () {
-        // expressApp.get
-
         const httpUrl = `http://${`localhost:${App.port}`}`;
 
+        saveLog({
+            "\nYou can now view in the browser: ": "white",
+            [httpUrl]: "blue",
+            "\nTo create a production build, use": "white",
+            "npm build": "blue",
+        })
         open(httpUrl);
     });
-    // saveLog({
-    //     "\nYou can now view in the browser: ": "white",
-    //     [http_url]: "blue",
-    //     // "green",socketClientSender
-    //     "\nTo create a production build, use": "white",
-    //     "npm build": "blue",
-    // })
+
 }

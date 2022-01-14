@@ -25,6 +25,8 @@ export const getWriterProgram = (program: ts.SemanticDiagnosticsBuilderProgram) 
             const writerObject = (this.rootWritersCache[rootFileName] = (this.rootWritersCache[rootFileName] || getRootWriter(rootFileName, WriterProgram)))
             // console.log(this)
             const moduleInfo = App.moduleThree.get(rootFileName)
+            console.log("🚀 --> file: getWriterProgram.ts --> line 28 --> writeRootFile -->  App.moduleThree", App.moduleThree.keys());
+            console.log("🚀 --> file: getWriterProgram.ts --> line 28 --> writeRootFile --> rootFileName", rootFileName);
             if (!moduleInfo) {
                 throw new Error(`moduleInfo not found for ${rootFileName}`)
             }

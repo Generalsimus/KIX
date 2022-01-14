@@ -19,13 +19,14 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
     document.body.firstElementChild
   );
 
+  const kixModules = readKixModules(window);
+
   const indexHtmlPageString =
     "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
   for (const indexHTMLUrlPath of App.indexHTMLUrlPaths) {
-    App.requestsThreshold.set(indexHTMLUrlPath, indexHtmlPageString);
+    App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
   }
 
-  const kixModules = readKixModules(window);
 
   return createProgram(kixModules);
 };

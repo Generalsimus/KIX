@@ -15,6 +15,8 @@ exports.App = {
     outDir: "./dist/",
     indexHTMLUrlPaths: ["/", "/index.html"],
     nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
+    importModulesAccessKey: `__KIX__IMPORT__MODULE__ACCESS_KEY__${new Date().getTime()}__`,
+    windowModuleLocationName: "_KIX" + new Date().getTime(),
     requestsThreshold: new Map(),
     moduleThree: new Map(),
     kixModulePath: (0, resolveKixModule_1.resolveKixModule)(runDirName),

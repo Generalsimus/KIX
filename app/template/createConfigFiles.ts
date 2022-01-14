@@ -2,7 +2,7 @@ import path from "path"
 import fs from "fs"
 import { getConfigJson } from "./getConfigJson"
 import { spawn } from 'child_process'
-import { clareLog } from "../utils/loger"
+import { clareLog } from "../../utils/loger"
 
 export const createConfigFiles = (projectName: string, projectPath: string) => {
     const configJson = getConfigJson(projectName)

@@ -28,7 +28,7 @@ export const createModuleNamesResolver = (
     containingSourceFile?: ts.SourceFile
   ) => {
 
-    console.log(containingFile)
+    // console.log(containingFile)
     // console.log(
     //   "🚀 --> file: createModuleNamesResolver.ts --> line 30 --> containingFile",
     //   containingFile
@@ -86,6 +86,10 @@ export const createModuleNamesResolver = (
     const childModule = moduleThree.get(modulePath);
     const moduleInfo = childModule || createModuleInfo(modulePath);
 
+
+    if (!childModule) {
+      App.moduleThree.set(modulePath, moduleInfo);
+    }
     containModuleInfo.moduleCollection[moduleName] = moduleInfo;
 
     return resolvedModule;

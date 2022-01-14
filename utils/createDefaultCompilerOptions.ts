@@ -12,6 +12,7 @@ export const createDefaultCompilerOptions = (rootNames: string[]) => {
         allowJs: true,
         checkJs: false,
         jsx: ts.JsxEmit.Preserve,
+        module: ts.ModuleKind.ESNext,
         // paths: {
         //   kix: [path.join(path.dirname(App.kixModulePath), "../")], // This mapping is relative to "baseUrl"
         // },

@@ -1,12 +1,18 @@
 import ts from "typescript"
+import { App } from "../";
+import { getTransformer } from "../../transform";
+import { fileNameToUrlPath } from "../../utils/fileNameToUrlPath";
 
-
+const transformer = getTransformer()
 export const getRootWriter = (rootFileName: string, WriterProgram: ts.Program) => {
     // const sources = {}
-    return {
+    // customResponse
+    // const requestPath = fileNameToUrlPath(rootFileName)
+    const writerObject = {
         text: '',
         rootFileName,
-        outPutFileName: '',
+        requestPath: fileNameToUrlPath(rootFileName),
+        // outPutFileName: '',
         sourceMap: {
             version: 3,
             sources: [],
@@ -20,12 +26,24 @@ export const getRootWriter = (rootFileName: string, WriterProgram: ts.Program) =
             WriterProgram.emit(sourceFile, (fileName: string, content: string) => {
                 if (fileName.endsWith(".js")) {
                     this.text += content;
+                    console.log("🚀 --> BRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+                    console.log("🚀 --> file: this.text\n", this.text);
                 } else if (fileName.endsWith(".map")) {
                     const map = JSON.parse(content)
                     // sources[fileName] = map
                 }
-                console.log(fileName, content)
-            })
+                // console.log(fileName, content)
+            },
+                undefined,
+                undefined,
+                transformer
+            )
         }
-    };
+    }
+
+
+
+    App.requestsThreshold.set(writerObject.requestPath, (_, res) => res.end(writerObject.text));
+
+    return writerObject
 }
