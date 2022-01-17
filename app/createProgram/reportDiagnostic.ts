@@ -1,22 +1,13 @@
 import ts from "typescript";
 import { App } from "..";
+import { getCanonicalFileName } from "./getCanonicalFileName";
+import { getCurrentDirectory } from "./getCurrentDirectory";
 
-const fileNameLowerCaseRegExp = /[^\u0130\u0131\u00DFa-z0-9\\/:\-_\. ]+/g,
-  toLowerCase = (fileName: string) => fileName.toLowerCase(),
-  system = ts.sys,
-  createGetCanonicalFileName = () => {
-    return ts.sys.useCaseSensitiveFileNames
-      ? (fileName: string): string => fileName
-      : (fileName: string): string => {
-          return fileNameLowerCaseRegExp.test(fileName)
-            ? fileName.replace(fileNameLowerCaseRegExp, toLowerCase)
-            : fileName;
-        };
-  };
+
 export const formatDiagnosticsHost = {
-  getCurrentDirectory: () => App.runDirName,
+  getCurrentDirectory,
   getNewLine: () => ts.sys.newLine,
-  getCanonicalFileName: createGetCanonicalFileName(),
+  getCanonicalFileName,
 };
 
 export const reportDiagnostic = (diagnostic: ts.Diagnostic) => {

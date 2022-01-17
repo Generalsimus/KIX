@@ -6,7 +6,9 @@ import { formatDiagnosticsHost } from "../createProgram/reportDiagnostic";
 import ts from "typescript"
 import pathPosix from "path/posix";
 import { fileNameToUrlPath } from "../../utils/fileNameToUrlPath";
+import { createModuleInfo } from "../../utils/createModuleInfo";
 export const readKixModules = (window: DOMWindow): string[] => {
+  App.moduleThree.clear();
   const document = window.document,
     programFiles = new Set<string>();
   document
@@ -24,10 +26,11 @@ export const readKixModules = (window: DOMWindow): string[] => {
 
       scriptElement.setAttribute("src", fileNameToUrlPath(filePathName))
 
+      App.moduleThree.set(filePathName, createModuleInfo(filePathName))
+      
       programFiles.add(
         filePathName
       );
     });
-  App.moduleThree.clear();
   return [...programFiles];
 };

@@ -20,6 +20,6 @@ const readJsDomHtml = (indexHTMLPath) => {
     for (const indexHTMLUrlPath of __1.App.indexHTMLUrlPaths) {
         __1.App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
     }
-    return (0, createProgram_1.createProgram)(kixModules);
+    return new createProgram_1.createProgramHost(kixModules);
 };
 exports.readJsDomHtml = readJsDomHtml;

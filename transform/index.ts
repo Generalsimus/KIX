@@ -24,6 +24,7 @@ export const getTransformer = () => {
                 //     return ts.forEachChild(node, visitor,);
                 // }
                 const visitor = (node: ts.Node): ts.Node => {
+                console.log("🚀 --> file: index.ts --> line 27 --> getTransformer --> SyntaxKind", ts.SyntaxKind[node.kind]);
 
                     return ((transforms as any)[node.kind] || visitEachChild)(node, visitor, context)
                 }

@@ -18,6 +18,8 @@ export const getWriterProgram = (program: ts.SemanticDiagnosticsBuilderProgram) 
         noEmit: false,
     })
 
+
+    // printer./
     return {
         program,
         rootWritersCache: {} as Record<string, RootWriterCacheType>,

@@ -1,8 +1,8 @@
 import ts from "typescript";
 import { App } from "../../app";
 import { factoryCode } from "../factoryCode";
-import { elementAccessExpression } from "../factoryCode/ElementAccessExpression";
-import { variableStatement } from "../factoryCode/VariableStatement";
+import { elementAccessExpression } from "../factoryCode/elementAccessExpression";
+import { variableStatement } from "../factoryCode/variableStatement";
 const factory = ts.factory;
 
 export const ImportDeclaration = (node, visitor, context) => {
@@ -32,7 +32,32 @@ export const ImportDeclaration = (node, visitor, context) => {
             // import d, { x, y } from "mod";
             // import d, * as n from "mod"; 
             try {
+                const moduleVisitor = (childNode) => {
+                    switch (childNode.kind) {
+                        case ts.SyntaxKind.NamespaceImport:
+                            return variablesNameValueNodes.push([
+                                factory.cloneNode(childNode.name),
+                                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex])
+                            ]);
+                        case ts.SyntaxKind.NamedImports:
+                            for (const importElement of childNode.elements) {
+                                variablesNameValueNodes.push([
+                                    factory.cloneNode(importElement.name),
+                                    elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, (importElement.propertyName || importElement.name).escapedText])
+                                ]);
+                            }
+                            return
+                        case ts.SyntaxKind.Identifier:
+                            variablesNameValueNodes.push([
+                                factory.cloneNode(childNode),
+                                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, "default"])
+                            ]);
+                            return;
+                    }
+                    return ts.visitEachChild(childNode, moduleVisitor, context)
+                }
                 moduleVisitor(node.importClause)
+
             } catch { }
 
         }
@@ -51,27 +76,3 @@ export const ImportDeclaration = (node, visitor, context) => {
 
 
 
-const moduleVisitor = (childNode) => {
-    switch (childNode.kind) {
-        case ts.SyntaxKind.NamespaceImport:
-            return variablesNameValueNodes.push([
-                factory.cloneNode(childNode.name),
-                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex])
-            ]);
-        case ts.SyntaxKind.NamedImports:
-            for (const importElement of childNode.elements) {
-                variablesNameValueNodes.push([
-                    factory.cloneNode(importElement.name),
-                    elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, (importElement.propertyName || importElement.name).escapedText])
-                ]);
-            }
-            return
-        case ts.SyntaxKind.Identifier:
-            variablesNameValueNodes.push([
-                factory.cloneNode(childNode),
-                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, "default"])
-            ]);
-            return;
-    }
-    return ts.visitEachChild(childNode, moduleVisitor, context)
-}
