@@ -2,21 +2,23 @@ import path from "path";
 import ts, { getDefaultLibFileName, transform } from "typescript";
 import fs from "fs";
 import { App } from "..";
-import { reportDiagnostic } from "./reportDiagnostic";
-import { createModuleNamesResolver } from "./createModuleNamesResolver";
+import { reportDiagnostics } from "./reportDiagnostics";
+// import { createModuleNamesResolver } from "./createModuleNamesResolver";
 import { readFile } from "./readFile";
 import { getTsconfigFilePath } from "../../utils/getTsconfigFile";
 import { createDefaultCompilerOptions } from "../../utils/createDefaultCompilerOptions";
 import { getSourceFile } from "./getSourceFile";
-import { createCompiler } from "../compiler";
-import chokidar from "chokidar";
+import chokidar, { FSWatcher } from "chokidar";
 import { getCurrentDirectory } from "./getCurrentDirectory";
 import { getCanonicalFileName } from "./getCanonicalFileName";
 import { resolveModuleNames } from "./resolveModuleNames";
 import { getTransformer } from "../../transform";
 import { parseJsonFile } from "../../utils/parseJson";
-import { parseConfigFile } from "./parseConfigFile";
-const sss = ts.createCompilerHost({}, true)
+import { createConfigFileParser } from "./createConfigFileParser";
+import { diagnose } from "./diagnose";
+import { watchFiles } from "./watchFiles";
+import { Server } from "../../server";
+// const sss = ts.createCompilerHost({}, true)
 
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
 
@@ -34,19 +36,21 @@ export class createProgramHost {
   oldProgram: ts.Program | undefined;
   defaultLibFileName: string;
   defaultLibLocation: string;
-  configFileParsingDiagnostics: ts.Diagnostic[] | undefined
+  configFileParsingDiagnostics = new Set<ts.Diagnostic>()
+  configFileParser: ReturnType<typeof createConfigFileParser>
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}) {
-    // console.log("🚀 --> file: index.ts --> line 38 --> createProgramHost --> constructor --> tsConfigs", tsConfigs.compilerOptions);
     this.rootNames = rootNames;
     this.options = options;
     this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
     this.defaultLibFileName = path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options));
-    parseConfigFile(this);
+    this.configFileParser = createConfigFileParser(this)
     this.emit();
-    // var parseConfigFileHost = ts.parseConfigHostFromCompilerHostLike(this, this);
-    // console.log(ts.getParsedCommandLineOfConfigFile(configPath, {}, parseConfigFileHost))
+    this.diagnose()
+    this.watchFiles()
   }
-  watcher = chokidar.watch('.')
+  watcher = new FSWatcher({ ignoreInitial: true });
+  configWatcher = new FSWatcher({ ignoreInitial: true });
+  server = new Server(this)
   transformer = getTransformer()
   getSourceFile = getSourceFile
   readFile = readFile
@@ -58,12 +62,15 @@ export class createProgramHost {
   getCanonicalFileName = getCanonicalFileName
   useCaseSensitiveFileNames = () => ts.sys.useCaseSensitiveFileNames
   resolveModuleNames = resolveModuleNames
+  diagnose = diagnose
+  reportDiagnostics = reportDiagnostics
+  watchFiles = watchFiles
   writeFile = (filename: string, content: string) => {
     console.log('writeFile', filename)
   }
-  emit() {
+  emit(sourceFile?: ts.SourceFile) {
     return this.createProgram().emit(
-      undefined,
+      sourceFile,
       undefined,
       undefined,
       undefined,
@@ -76,61 +83,61 @@ export class createProgramHost {
       options: this.options,
       oldProgram: this.oldProgram,
       host: this,
-      configFileParsingDiagnostics: this.configFileParsingDiagnostics
     })
   }
   close() {
     this.watcher.close()
+    this.configWatcher.close()
   }
 }
 
-export const createProgram = (rootFilesPath: string[]) => {
-  const configPath = getTsconfigFilePath();
+// export const createProgram = (rootFilesPath: string[]) => {
+//   const configPath = getTsconfigFilePath();
 
   // createCompilerHostFromProgramHost
-  const host = ts.createWatchCompilerHost(
-    // undefined,
-    configPath,
-    createDefaultCompilerOptions(rootFilesPath),
-    ts.sys,
-    (
-      rootNames: readonly string[] | undefined,
-      options: ts.CompilerOptions | undefined,
-      host?: ts.CompilerHost,
-      oldProgram?: ts.SemanticDiagnosticsBuilderProgram,
-      configFileParsingDiagnostics?: readonly ts.Diagnostic[],
-      projectReferences?: readonly ts.ProjectReference[]
-    ): ts.SemanticDiagnosticsBuilderProgram => {
-      const program = ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
-      // program.
-      // program.get
-      // if (host && host.getSourceFile !== getSourceFile) {
-      //   // host.getCustomTransformers = (): any => { }
-      //   // host.getCustomTransformers
-      //   // console.log(host && host.getSourceFile !== getSourceFile)
-      //   // host.emit 
-      //   // program.
-      //   // program.emit = (...w): any => {
-      //   //   console.log(w)
-      //   // };
-      //   host.getSourceFile = createGetSourceFile(host, options);
-      // }
-      return program
-      // return ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
+//   const host = ts.createWatchCompilerHost(
+//     // undefined,
+//     configPath,
+//     createDefaultCompilerOptions(rootFilesPath),
+//     ts.sys,
+//     (
+//       rootNames: readonly string[] | undefined,
+//       options: ts.CompilerOptions | undefined,
+//       host?: ts.CompilerHost,
+//       oldProgram?: ts.SemanticDiagnosticsBuilderProgram,
+//       configFileParsingDiagnostics?: readonly ts.Diagnostic[],
+//       projectReferences?: readonly ts.ProjectReference[]
+//     ): ts.SemanticDiagnosticsBuilderProgram => {
+//       const program = ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
+//       // program.
+//       // program.get
+//       // if (host && host.getSourceFile !== getSourceFile) {
+//       //   // host.getCustomTransformers = (): any => { }
+//       //   // host.getCustomTransformers
+//       //   // console.log(host && host.getSourceFile !== getSourceFile)
+//       //   // host.emit
+//       //   // program.
+//       //   // program.emit = (...w): any => {
+//       //   //   console.log(w)
+//       //   // };
+//       //   host.getSourceFile = createGetSourceFile(host, options);
+//       // }
+//       return program
+//       // return ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
 
-    },
-    reportDiagnostic,
-    () => { },
-  );
+//     },
+//     reportDiagnostic,
+//     () => { },
+//   );
 
-  // ts.getParsedCommandLineOfConfigFile(configFileName, optionsToExtendForConfigFile, parseConfigFileHost, extendedConfigCache || (extendedConfigCache = new ts.Map()), watchOptionsToExtend, extraFileExtensions)
-  // host.resolveModuleNames = createModuleNamesResolver(host);
-  // host.readFile = readFile;
+//   // ts.getParsedCommandLineOfConfigFile(configFileName, optionsToExtendForConfigFile, parseConfigFileHost, extendedConfigCache || (extendedConfigCache = new ts.Map()), watchOptionsToExtend, extraFileExtensions)
+//   // host.resolveModuleNames = createModuleNamesResolver(host);
+//   // host.readFile = readFile;
 
-  const watchProgram = ts.createWatchProgram(host)
-  // const program = watchProgram.getProgram() 
-  // createCompiler(program, rootFilesPath)
+//   const watchProgram = ts.createWatchProgram(host)
+//   // const program = watchProgram.getProgram()
+//   // createCompiler(program, rootFilesPath)
 
 
-  return watchProgram;
-};
+//   return watchProgram;
+// };

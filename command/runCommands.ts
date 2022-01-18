@@ -2,7 +2,6 @@ import consola from "consola";
 import { App } from "../app"
 import { createAppTemplate } from "../app/template";
 import { readIndexHtml } from "../app/readIndexHtml";
-import { createServer } from "../server";
 
 export const runCommands = () => {
     if (!App.parsedArgs) {
@@ -13,7 +12,7 @@ export const runCommands = () => {
             createAppTemplate().catch(consola.error);
             break;
         case "start":
-            createServer()
+            App.devMode = true;
         case "build":
             readIndexHtml();
             break;

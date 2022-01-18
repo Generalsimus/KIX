@@ -10,10 +10,11 @@ export const formatDiagnosticsHost = {
   getCanonicalFileName,
 };
 
-export const reportDiagnostic = (diagnostic: ts.Diagnostic) => {
-  ts.sys.write(
+export const reportDiagnostics = (diagnostics: readonly ts.Diagnostic[]) => {
+   
+  ts.sys.write("\x1Bc"+
     ts.formatDiagnosticsWithColorAndContext(
-      [diagnostic],
+      diagnostics,
       formatDiagnosticsHost
     ) + ts.sys.newLine
   );

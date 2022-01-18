@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createModuleInfo = void 0;
+exports.getModuleInfo = void 0;
+const app_1 = require("../app");
 let globalModuleIndex = 1;
-const createModuleInfo = (modulePath) => {
-    return {
+const getModuleInfo = (modulePath) => {
+    return app_1.App.moduleThree.get(modulePath) || {
         modulePath,
         moduleIndex: globalModuleIndex++,
         moduleCollection: {},
@@ -11,4 +12,4 @@ const createModuleInfo = (modulePath) => {
         writers: {}
     };
 };
-exports.createModuleInfo = createModuleInfo;
+exports.getModuleInfo = getModuleInfo;

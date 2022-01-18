@@ -1,5 +1,5 @@
 import ts, { visitEachChild } from "typescript";
-import { ModuleInfoType } from "../utils/createModuleInfo";
+import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { moduleTransformer } from "./module";
 

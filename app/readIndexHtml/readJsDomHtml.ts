@@ -2,7 +2,8 @@ import { App } from "..";
 import { JSDOM } from "jsdom";
 import fs from "fs";
 import { readKixModules } from "./readKixModules";
-import { createProgram, createProgramHost } from "../createProgram";
+import { createProgramHost } from "../createProgram";
+import ts from "typescript";
 
 export const readJsDomHtml = (indexHTMLPath: string) => {
   App.requestsThreshold.clear();
@@ -27,6 +28,7 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
     App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
   }
 
-  return new createProgramHost(kixModules)
-  // return createProgram(kixModules);
+  return new createProgramHost(kixModules, {
+    module: ts.ModuleKind.CommonJS,
+  })
 };

@@ -20,7 +20,7 @@ exports.App = {
     requestsThreshold: new Map(),
     moduleThree: new Map(),
     kixModulePath: (0, resolveKixModule_1.resolveKixModule)(runDirName),
-    devMode: true,
+    devMode: false,
     parsedArgs: undefined,
     start() {
         (0, command_1.readCommandsAndRun)();

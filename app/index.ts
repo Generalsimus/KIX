@@ -1,7 +1,7 @@
 import path from "path";
 import express from "express"
 import { readIndexHtml } from "./readIndexHtml";
-import { ModuleInfoType } from "../utils/createModuleInfo";
+import { ModuleInfoType } from "../utils/getModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
@@ -11,6 +11,7 @@ export const App = {
   runDirName,
   realModuleDirName: path.resolve(__dirname, "../../"),
   port: 2222,
+  // initServer: false,
   outDir: "./dist/",
   indexHTMLUrlPaths: ["/", "/index.html"],
   nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
@@ -21,7 +22,7 @@ export const App = {
 
   moduleThree: new Map<string, ModuleInfoType>(),
   kixModulePath: resolveKixModule(runDirName),
-  devMode: true,
+  devMode: false,
   // ReturnType<typeof yargs>
   parsedArgs: undefined as (ArgumentsCamelCase | undefined),
   start() {

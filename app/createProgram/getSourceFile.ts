@@ -1,8 +1,7 @@
 import fs from "fs"
 import ts from "typescript"
 import { createProgramHost } from "."
-import { App } from ".."
-import { createCompiler } from "../compiler"
+import { App } from ".." 
 import { newSourceFilesPathSet } from "./readFile"
 
 export function getSourceFile(this: createProgramHost, fileName: string, languageVersion: ts.ScriptTarget, onError?: ((message: string) => void) | undefined, shouldCreateNewSourceFile?: boolean | undefined): ts.SourceFile {

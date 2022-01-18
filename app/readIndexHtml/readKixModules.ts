@@ -2,11 +2,11 @@
 import { App } from "../";
 import path from "path";
 import { DOMWindow } from "jsdom";
-import { formatDiagnosticsHost } from "../createProgram/reportDiagnostic";
+import { formatDiagnosticsHost } from "../createProgram/reportDiagnostics";
 import ts from "typescript"
 import pathPosix from "path/posix";
 import { fileNameToUrlPath } from "../../utils/fileNameToUrlPath";
-import { createModuleInfo } from "../../utils/createModuleInfo";
+// import { createModuleInfo } from "../../utils/createModuleInfo";
 export const readKixModules = (window: DOMWindow): string[] => {
   App.moduleThree.clear();
   const document = window.document,
@@ -26,7 +26,7 @@ export const readKixModules = (window: DOMWindow): string[] => {
 
       scriptElement.setAttribute("src", fileNameToUrlPath(filePathName))
 
-      App.moduleThree.set(filePathName, createModuleInfo(filePathName))
+      // App.moduleThree.set(filePathName, createModuleInfo(filePathName))
       
       programFiles.add(
         filePathName

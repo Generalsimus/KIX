@@ -1,5 +1,7 @@
 import ts from "typescript";
-import { RootWriterCacheType } from "../app/compiler/getWriterProgram";
+import { App } from "../app";
+import { isPathNodeModule } from "./isPathNodeModule";
+import chokidar from "chokidar";
 
 export type ModuleInfoType = {
   modulePath: string;
@@ -8,18 +10,19 @@ export type ModuleInfoType = {
   resolvedModuleNames?: (ts.ResolvedModule | undefined)[]
   resolvedModule?: ts.ResolvedModule;
   isNodeModule: boolean;
-  writers: Record<string, RootWriterCacheType>,
+  // writers: Record<string, RootWriterCacheType>,
+  watcher?: chokidar.FSWatcher
   // RootWriterCacheType
 };
 
 let globalModuleIndex = 1;
-export const createModuleInfo = (modulePath: string): ModuleInfoType => {
-  return {
+export const getModuleInfo = (modulePath: string): ModuleInfoType => {
+  return App.moduleThree.get(modulePath) || {
     modulePath,
     moduleIndex: globalModuleIndex++,
     moduleCollection: {},
     // isNodeModule: ts.pathContainsNodeModules(modulePath),
-    isNodeModule: /[/\\]node_modules[/\\]/.test(modulePath),
-    writers: {}
+    isNodeModule: isPathNodeModule(modulePath),
+    // writers: {}
   };
 };

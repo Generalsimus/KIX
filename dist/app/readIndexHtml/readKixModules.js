@@ -8,7 +8,6 @@ const __1 = require("../");
 const path_1 = __importDefault(require("path"));
 const posix_1 = __importDefault(require("path/posix"));
 const fileNameToUrlPath_1 = require("../../utils/fileNameToUrlPath");
-const createModuleInfo_1 = require("../../utils/createModuleInfo");
 const readKixModules = (window) => {
     __1.App.moduleThree.clear();
     const document = window.document, programFiles = new Set();
@@ -22,7 +21,6 @@ const readKixModules = (window) => {
         const urlInfo = new window.URL(scriptElement.src, "http://e");
         const filePathName = posix_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname)).split(path_1.default.sep).join("/");
         scriptElement.setAttribute("src", (0, fileNameToUrlPath_1.fileNameToUrlPath)(filePathName));
-        __1.App.moduleThree.set(filePathName, (0, createModuleInfo_1.createModuleInfo)(filePathName));
         programFiles.add(filePathName);
     });
     return [...programFiles];
