@@ -11,7 +11,7 @@ const factory = ts.factory;
 export const exportVisitor = (node) => {
     // const push = (node) => statements.push(factory.createExpressionStatement(node))
     // const returnValue = [node]
-    console.log("🚀 --> file: exportVisitor.js --> line 14 --> exportVisitor --> node.kind", ts.SyntaxKind[node.kind]);
+    // console.log("🚀 --> file: exportVisitor.js --> line 14 --> exportVisitor --> node.kind", ts.SyntaxKind[node.kind]);
     switch (node.kind) {
         case ts.SyntaxKind.FunctionDeclaration:
         case ts.SyntaxKind.ClassDeclaration:
@@ -26,8 +26,8 @@ export const exportVisitor = (node) => {
             if (ifHaveExportModifier(node)) {
                 for (const variableDeclaration of node.declarationList.declarations) {
                     // getVariableDeclarationNames(variableDeclaration.name)
-                    console.log("🚀 --> --> getVariableDeclarationNames(variableDeclaration.name)", getVariableDeclarationNames(variableDeclaration));
-                    console.log("🚀 --> file: exportVisitor.js --> line 27 --> exportVisitor --> variableDeclaration", ts.SyntaxKind[variableDeclaration.kind]);
+                    // console.log("🚀 --> --> getVariableDeclarationNames(variableDeclaration.name)", getVariableDeclarationNames(variableDeclaration));
+                    // console.log("🚀 --> file: exportVisitor.js --> line 27 --> exportVisitor --> variableDeclaration", ts.SyntaxKind[variableDeclaration.kind]);
                     // return [node, factory.createExpressionStatement(nodeToken([
                     //     elementAccessExpression(["export", "default"]),
                     //     factory.cloneNode(variableDeclaration.name)

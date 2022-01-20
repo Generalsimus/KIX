@@ -42,19 +42,10 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
     moduleInfo.resolvedModule = resolvedModule;
+    moduleInfo.rootWriters[containingFileModuleInfo.modulePath] = containingFileModuleInfo.rootWriters
+
     host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    host.watcher.add(moduleInfo.modulePath)
-    // if (!moduleInfo.watcher) {
-    //     useWatcher(moduleInfo, host);
-    //     // moduleInfo.watcher = host.watcher.on(moduleInfo.modulePath, (path: string) => {
-    //     //     console.log(path)
-    //     // });
-    // }
+
 
     containingFileModuleInfo.moduleCollection[moduleName] = moduleInfo;
 
@@ -65,6 +56,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 export function resolveModuleNames(this: createProgramHost, moduleNames: string[], containingFile: string, reusedNames: string[] | undefined, redirectedReference: ts.ResolvedProjectReference | undefined, options: ts.CompilerOptions, containingSourceFile?: ts.SourceFile): (ts.ResolvedModule | undefined)[] {
 
     const containingFileModuleInfo = getModuleInfo(containingFile)
+
     return containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {
         return resolveName(moduleName, containingFileModuleInfo, this)
     }))

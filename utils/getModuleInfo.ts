@@ -2,7 +2,12 @@ import ts from "typescript";
 import { App } from "../app";
 import { isPathNodeModule } from "./isPathNodeModule";
 import chokidar from "chokidar";
+import { rootWriter } from "../app/rootWriter";
+import { string } from "yargs";
 
+export type rootWritersType = {
+  [key: string]: rootWritersType | rootWriter;
+}
 export type ModuleInfoType = {
   modulePath: string;
   moduleIndex: number;
@@ -11,18 +16,28 @@ export type ModuleInfoType = {
   resolvedModule?: ts.ResolvedModule;
   isNodeModule: boolean;
   // writers: Record<string, RootWriterCacheType>,
-  watcher?: chokidar.FSWatcher
+  // rootWriter?: rootWriter
+  rootWriters: rootWritersType
   // RootWriterCacheType
 };
 
 let globalModuleIndex = 1;
 export const getModuleInfo = (modulePath: string): ModuleInfoType => {
-  return App.moduleThree.get(modulePath) || {
-    modulePath,
-    moduleIndex: globalModuleIndex++,
-    moduleCollection: {},
-    // isNodeModule: ts.pathContainsNodeModules(modulePath),
-    isNodeModule: isPathNodeModule(modulePath),
-    // writers: {}
-  };
+  let moduleInfo = App.moduleThree.get(modulePath)
+
+
+  if (!moduleInfo) {
+    App.moduleThree.set(modulePath, (moduleInfo = {
+      modulePath,
+      moduleIndex: globalModuleIndex++,
+      moduleCollection: {},
+      // isNodeModule: ts.pathContainsNodeModules(modulePath),
+      isNodeModule: isPathNodeModule(modulePath),
+      rootWriters: {}
+      // writers: {}
+    }))
+  }
+
+  // App.moduleThree
+  return moduleInfo;
 };

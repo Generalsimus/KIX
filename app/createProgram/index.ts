@@ -6,7 +6,7 @@ import { reportDiagnostics } from "./reportDiagnostics";
 // import { createModuleNamesResolver } from "./createModuleNamesResolver";
 import { readFile } from "./readFile";
 import { getTsconfigFilePath } from "../../utils/getTsconfigFile";
-import { createDefaultCompilerOptions } from "../../utils/createDefaultCompilerOptions";
+// import { createDefaultCompilerOptions } from "../../utils/createDefaultCompilerOptions";
 import { getSourceFile } from "./getSourceFile";
 import chokidar, { FSWatcher } from "chokidar";
 import { getCurrentDirectory } from "./getCurrentDirectory";
@@ -14,14 +14,18 @@ import { getCanonicalFileName } from "./getCanonicalFileName";
 import { resolveModuleNames } from "./resolveModuleNames";
 import { getTransformer } from "../../transform";
 import { parseJsonFile } from "../../utils/parseJson";
-import { createConfigFileParser } from "./createConfigFileParser";
+import { useConfigFileParser } from "./useConfigFileParser";
 import { diagnose } from "./diagnose";
 import { watchFiles } from "./watchFiles";
 import { Server } from "../../server";
-// const sss = ts.createCompilerHost({}, true)
-
+import { useRootFileWriter } from "./useRootFileWriter";
+import { writeFile } from "./writeFile";
+import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
+import { CacheController } from "./cacheController";
+const sss = ts.createCompilerHost({}, true)
+// const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
-
+// ts.createCompilerDiagnostic
 
 // ts.getParsedCommandLineOfConfigFile
 // const configPath = getTsconfigFilePath();
@@ -37,21 +41,32 @@ export class createProgramHost {
   defaultLibFileName: string;
   defaultLibLocation: string;
   configFileParsingDiagnostics = new Set<ts.Diagnostic>()
-  configFileParser: ReturnType<typeof createConfigFileParser>
-  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}) {
+  configFileParser: ReturnType<typeof useConfigFileParser>
+  reportDiagnoseTime: string = ""
+  watch: boolean
+  cacheController: CacheController
+  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false) {
     this.rootNames = rootNames;
     this.options = options;
+    this.watch = watch
     this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
     this.defaultLibFileName = path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options));
-    this.configFileParser = createConfigFileParser(this)
+    this.configFileParser = useConfigFileParser(this)
+    this.cacheController = new CacheController(this, {
+      getSourceFile: 0,
+    })
+
+    useRootFileWriter(this)
     this.emit();
     this.diagnose()
     this.watchFiles()
+    this.watch && this.getReportDiagnoseTime();
   }
   watcher = new FSWatcher({ ignoreInitial: true });
   configWatcher = new FSWatcher({ ignoreInitial: true });
   server = new Server(this)
   transformer = getTransformer()
+  getReportDiagnoseTime = getReportDiagnoseTime
   getSourceFile = getSourceFile
   readFile = readFile
   getCurrentDirectory = getCurrentDirectory
@@ -65,9 +80,7 @@ export class createProgramHost {
   diagnose = diagnose
   reportDiagnostics = reportDiagnostics
   watchFiles = watchFiles
-  writeFile = (filename: string, content: string) => {
-    console.log('writeFile', filename)
-  }
+  writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
     return this.createProgram().emit(
       sourceFile,
@@ -88,6 +101,7 @@ export class createProgramHost {
   close() {
     this.watcher.close()
     this.configWatcher.close()
+    this.server.close()
   }
 }
 

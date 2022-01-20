@@ -8,17 +8,21 @@ import { saveLog } from "../utils/loger"
 import { createProgramHost } from "../app/createProgram"
 
 export class Server {
-    webSocketServer: WebSocket.Server | undefined
+    webSocketServer: WebSocket.Server
+    server: http.Server
+    expressApp: express.Express
     constructor(host: createProgramHost) {
-        if (!App.devMode) return
-        const expressApp = express();
-        const server = http.createServer(expressApp);
-        this.webSocketServer = new WebSocket.Server({ server, path: "/WebSocket" });
-        expressApp.use(this.middleware);
+        this.expressApp = express();
+        this.server = http.createServer(this.expressApp);
+        this.webSocketServer = new WebSocket.Server({ server: this.server, path: "/WebSocket" });
+        this.expressApp.use(this.middleware);
+        this.listen()
     }
     middleware(req: express.Request, res: express.Response, next: express.NextFunction) {
         const customResponse = App.requestsThreshold.get(req.path)
-        // console.log("🚀 --> file: index.ts --> line 16 --> customResponse", customResponse);
+
+        console.log("🚀 --> file: index.ts --> line 23 --> Server --> middleware --> App.requestsThreshold", App.requestsThreshold.keys(), req.path);
+
         if (customResponse) {
             res.header("content-type", mimeTypes.lookup(req.path) || "text/html");
             customResponse(req, res, next);
@@ -30,6 +34,14 @@ export class Server {
     send() {
 
     }
+    listen() {
+        this.server.listen(App.port, () => {
+            open(`http://localhost:${App.port}`);
+        });
+    }
+    close() {
+        this.server.close()
+    }
 }
 // export const Server = () => {
 //     const expressApp = express();
@@ -38,7 +50,6 @@ export class Server {
 //     // type sss = express.RequestHandler
 //     expressApp.use(function (req: express.Request, res: express.Response, next: express.NextFunction) {
 //         const customResponse = App.requestsThreshold.get(req.path)
-//         // console.log("🚀 --> file: index.ts --> line 16 --> customResponse", customResponse);
 //         if (customResponse) {
 //             res.header("content-type", mimeTypes.lookup(req.path) || "text/html");
 //             customResponse(req, res, next);

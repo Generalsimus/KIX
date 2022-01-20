@@ -6,7 +6,7 @@ import { App } from "..";
 import ts from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
 
-export const createConfigFileParser = (programHost: createProgramHost) => {
+export const useConfigFileParser = (programHost: createProgramHost) => {
     const defaultOptions = { ...programHost.options };
     let diagnostics: ts.Diagnostic[] = []
     const configFileName = ts.findConfigFile(

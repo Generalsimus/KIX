@@ -1,21 +1,17 @@
 import ts from "typescript";
 import { App } from "..";
-import { getCanonicalFileName } from "./getCanonicalFileName";
-import { getCurrentDirectory } from "./getCurrentDirectory";
+import { createProgramHost } from "./";
 
 
-export const formatDiagnosticsHost = {
-  getCurrentDirectory,
-  getNewLine: () => ts.sys.newLine,
-  getCanonicalFileName,
-};
+export function reportDiagnostics(this: createProgramHost, diagnostics: readonly ts.Diagnostic[]) {
 
-export const reportDiagnostics = (diagnostics: readonly ts.Diagnostic[]) => {
-   
-  ts.sys.write("\x1Bc"+
+  ts.sys.write(
     ts.formatDiagnosticsWithColorAndContext(
       diagnostics,
-      formatDiagnosticsHost
+      this
     ) + ts.sys.newLine
   );
-};
+  if (this.watch) {
+    ts.sys.write(`${this.reportDiagnoseTime} Found ${diagnostics.length} errors. Watching for file changes.`)
+  }
+}; 

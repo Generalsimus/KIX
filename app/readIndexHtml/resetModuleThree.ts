@@ -1,5 +1,5 @@
 import { App } from "../index";
-// import { createModuleInfo } from "../../utils/createModuleInfo";
+// import { createModulgetOutputFileNameeInfo } from "../../utils/createModuleInfo";
 
 export const resetModuleThree = (newModules: Set<string>) => {
   App.moduleThree.clear();

@@ -27,8 +27,20 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
   for (const indexHTMLUrlPath of App.indexHTMLUrlPaths) {
     App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
   }
-
+  // module: ModuleKind.AMD,
+  // checkJs: false,
+  // allowJs: true,
+  // allowSyntheticDefaultImports: true,
+  // resolveJsonModule: true,
+  // moduleResolution: ModuleResolutionKind.NodeJs,
+  // suppressOutputPathCheck: true,
+  // forceConsistentCasingInFileNames: true,
+  // watch: true,
+  // jsx: "preserve",
+  // __Node_Module_Window_Name: getModuleWindowName(),
+  // "noImplicitAny": true,
   return new createProgramHost(kixModules, {
     module: ts.ModuleKind.CommonJS,
-  })
+    // emitDeclarationOnly: false,
+  }, true);
 };

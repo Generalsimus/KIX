@@ -11,7 +11,7 @@ export const createCssString = (
   const styleString = String(result);
   if (App.devMode) {
     let sourceMappingURL =
-      filePathToUrl(path.relative(App.runDirName, fileName)) + ".map";
+      filePathToUrl(fileName) + ".map";
     return `import kix from "kix";
       const s = kix(document.head,{style:""});
       export default kix(s,${"`" + String(styleString) + "`"});

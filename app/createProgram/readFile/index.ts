@@ -8,7 +8,7 @@ import { createCssString } from "./createCssString";
 export const newSourceFilesPathSet = new Set<string>();
 
 export const readFile = (fileName: string): string => {
-  console.log("🚀 --> file: index.ts --> line 11 --> readFile --> fileName", fileName);
+  // console.log("🚀 --> file: index.ts --> line 11 --> readFile --> fileName", fileName);
   // App.moduleThree.get()
   // if (!fs.existsSync(fileName)) { return }
   newSourceFilesPathSet.add(fileName)
