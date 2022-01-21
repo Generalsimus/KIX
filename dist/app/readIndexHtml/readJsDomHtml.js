@@ -23,6 +23,8 @@ const readJsDomHtml = (indexHTMLPath) => {
     }
     return new createProgram_1.createProgramHost(kixModules, {
         module: typescript_1.default.ModuleKind.CommonJS,
-    }, true);
+    }, true, [
+        __1.App.kixModulePath
+    ]);
 };
 exports.readJsDomHtml = readJsDomHtml;

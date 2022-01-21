@@ -1,66 +1,93 @@
 import ts from "typescript";
-import { getVariableDeclarationNames } from "../../utils/getVariableDeclarationNames.js";
+import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames.js";
 import {
     elementAccessExpression
 } from "../factoryCode/elementAccessExpression";
 import {
     nodeToken
 } from "../factoryCode/nodeToken";
+import { getVariableDeclarationNode } from "../utils/getVariableDeclarationNode.js";
 const factory = ts.factory;
 
 export const exportVisitor = (node) => {
-    // const push = (node) => statements.push(factory.createExpressionStatement(node))
-    // const returnValue = [node]
+    // Aggregating modules დროებით არ მშაობსსსსსსსსსსსსსსსსსსსსსსსსსსსსსსს
     // console.log("🚀 --> file: exportVisitor.js --> line 14 --> exportVisitor --> node.kind", ts.SyntaxKind[node.kind]);
+    const returnValue = [node];
     switch (node.kind) {
         case ts.SyntaxKind.FunctionDeclaration:
         case ts.SyntaxKind.ClassDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.ClassExpression:
+
             if (ifHaveExportModifier(node)) {
-                return [node, factory.createExpressionStatement(nodeToken([
-                    elementAccessExpression(["export", "default"]),
-                    factory.cloneNode(node.name)
-                ]))];
+                if (node.name) {
+                    /*
+                    export default class className { ... }
+                    export default function functionName() { ... }
+                    */
+                    returnValue.push(factory.createExpressionStatement(nodeToken([
+                        elementAccessExpression(["export", "default"]),
+                        factory.cloneNode(node.name)
+                    ])))
+                } else {
+                    /*
+                    export default class { ... }
+                    export default function () { ... }
+                    */
+                    const declareNAme = factory.getDeclarationName(node)
+                    const newNode = factory.cloneNode(node);
+                    newNode.name = factory.cloneNode(declareNAme);
+                    return [newNode, factory.createExpressionStatement(nodeToken([
+                        elementAccessExpression(["export", "default"]),
+                        declareNAme
+                    ]))]
+                }
             }
-            return [node]
+            return returnValue
         case ts.SyntaxKind.VariableStatement:
             if (ifHaveExportModifier(node)) {
                 for (const variableDeclaration of node.declarationList.declarations) {
                     // getVariableDeclarationNames(variableDeclaration.name)
-                    // console.log("🚀 --> --> getVariableDeclarationNames(variableDeclaration.name)", getVariableDeclarationNames(variableDeclaration));
-                    // console.log("🚀 --> file: exportVisitor.js --> line 27 --> exportVisitor --> variableDeclaration", ts.SyntaxKind[variableDeclaration.kind]);
-                    // return [node, factory.createExpressionStatement(nodeToken([
-                    //     elementAccessExpression(["export", "default"]),
-                    //     factory.cloneNode(variableDeclaration.name)
-                    // ]))];
+
+                    const declarationNamesObject = getVariableDeclarationNames(variableDeclaration)
+                    for (const variableDefinition in declarationNamesObject) {
+                        returnValue.push(
+                            factory.createExpressionStatement(nodeToken([
+                                elementAccessExpression(["export", variableDefinition]),
+                                factory.createIdentifier(variableDefinition)
+                            ]))
+                        )
+                    }
                 }
             }
-        // console.log("🚀 --> file: exportVisitor.js --> line 30 --> exportVisitor --> node", node.declarationList.declarations);
+            return returnValue
+        case ts.SyntaxKind.ExportAssignment:
+            // delete node.parent
+            returnValue.push(factory.createExpressionStatement(nodeToken([
+                elementAccessExpression(["export", "default"]),
+                factory.cloneNode(node.expression)
+            ])))
+
+            return returnValue
+        case ts.SyntaxKind.ExportDeclaration:
+            for (const exportDeclarations of node.exportClause.elements) {
+                const declarationNamesObject = getVariableDeclarationNames(exportDeclarations)
+                for (const declarationName in declarationNamesObject) {
+                    returnValue.push(
+                        factory.createExpressionStatement(nodeToken([
+                            elementAccessExpression(["export", declarationName]),
+                            factory.cloneNode(getVariableDeclarationNode(declarationNamesObject[declarationName]))
+                        ]))
+                    )
+
+                }
+            }
+            return returnValue
         default:
-            return [node]
+            return returnValue
     }
-    // factory.createEmptyStatement()
-    // console.log("🚀 -->  ortVisitor --> expression", ts.SyntaxKind[node.kind]);
-    // if (node.kind !== ts.SyntaxKind.ExpressionStatement) {
-    //     return returnValue
-    // }
-    // const {
-    //     expression
-    // } = node
-    // switch (expression.kind) {
-    //     case ts.SyntaxKind.ClassDeclaration:
-    //         for (const { kind } of (expression.modifiers || [])) {
-    //             if (kind === ts.SyntaxKind.ExportKeyword) {
-    //                 returnValue.push(nodeToken([
-    //                     elementAccessExpression(["export", "default"]),
-    //                     expression.name
-    //                 ]))
-    //                 break;
-    //             }
-    //         }
-    //         break;
-    //     default:
-    //         return returnValue
-    // }
+
+
 }
 const ifHaveExportModifier = (node) => {
     for (const { kind } of (node.modifiers || [])) {

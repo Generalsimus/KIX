@@ -10,6 +10,6 @@ export const resolveKixModule = (fileDirectory: string) => {
     });
   } catch {
     const location = path.join(__dirname, "../../main/index.js");
-    return fs.existsSync(location) && location;
+    return location
   }
 };

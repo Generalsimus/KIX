@@ -20,7 +20,7 @@ export class CacheController {
             const currentCache = this.cache[propertyName] = new Map<string, any>();
             const ArgumentsIndex = this.options[propertyName];
             (this.host as any)[propertyName] = (...args: any[]) => {
-
+                // console.log(currentCache.keys())
                 return currentCache.get(args[ArgumentsIndex]) || (currentCache.set(args[ArgumentsIndex], (args = propertyValue(...args))), args)
             }
         }

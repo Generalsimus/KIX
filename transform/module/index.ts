@@ -15,6 +15,8 @@ export const moduleTransformer = {
     // [ts.SyntaxKind.ExportAssignment]: ExportAssignment,
     [ts.SyntaxKind.ExportKeyword]: () => { },
     [ts.SyntaxKind.DefaultKeyword]: () => { },
+    [ts.SyntaxKind.ExportDeclaration]: () => { },
+    
     [ts.SyntaxKind.SourceFile]: (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
         // return node;
         const moduleInfo = App.moduleThree.get(node.fileName)
@@ -50,8 +52,8 @@ export const moduleTransformer = {
         // factory.createExpressionStatement(
         const returnNode = context.factory.updateSourceFile(node, statements)
         // (returnNode as any)["externalModuleIndicator"] = undefined;
-        return returnNode
-        // return ts.visitEachChild(returnNode, visitor, context);
+        // return returnNode
+        return ts.visitEachChild(returnNode, visitor, context);
     },
 
 }  

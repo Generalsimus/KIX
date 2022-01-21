@@ -42,5 +42,9 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
   return new createProgramHost(kixModules, {
     module: ts.ModuleKind.CommonJS,
     // emitDeclarationOnly: false,
-  }, true);
+  },
+    true,
+    [
+      App.kixModulePath
+    ]);
 };

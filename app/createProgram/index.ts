@@ -22,6 +22,8 @@ import { useRootFileWriter } from "./useRootFileWriter";
 import { writeFile } from "./writeFile";
 import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
 import { CacheController } from "./cacheController";
+import { buildModules } from "./buildModules";
+import { rootWriter } from "../rootWriter";
 const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
@@ -36,6 +38,7 @@ const sss = ts.createCompilerHost({}, true)
 
 export class createProgramHost {
   rootNames: string[];
+  moduleRootNamesSet: Set<string>;
   options: ts.CompilerOptions;
   oldProgram: ts.Program | undefined;
   defaultLibFileName: string;
@@ -45,8 +48,9 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   cacheController: CacheController
-  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false) {
+  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
     this.rootNames = rootNames;
+    this.moduleRootNamesSet = new Set<string>(defaultModuleRootNames);
     this.options = options;
     this.watch = watch
     this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
@@ -57,15 +61,19 @@ export class createProgramHost {
     })
 
     useRootFileWriter(this)
+    this.createProgram()
     this.emit();
     this.diagnose()
+    this.buildModules(this.moduleRootNamesSet.size, true)
     this.watchFiles()
     this.watch && this.getReportDiagnoseTime();
   }
   watcher = new FSWatcher({ ignoreInitial: true });
   configWatcher = new FSWatcher({ ignoreInitial: true });
   server = new Server(this)
+  moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath))
   transformer = getTransformer()
+  buildModules = buildModules
   getReportDiagnoseTime = getReportDiagnoseTime
   getSourceFile = getSourceFile
   readFile = readFile
@@ -82,7 +90,7 @@ export class createProgramHost {
   watchFiles = watchFiles
   writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
-    return this.createProgram().emit(
+    return this.oldProgram?.emit(
       sourceFile,
       undefined,
       undefined,
@@ -90,9 +98,10 @@ export class createProgramHost {
       this.transformer,
     );
   }
-  createProgram() {
+  createProgram(rootNames = this.rootNames) {
+
     return this.oldProgram = ts.createProgram({
-      rootNames: this.rootNames,
+      rootNames: rootNames,
       options: this.options,
       oldProgram: this.oldProgram,
       host: this,

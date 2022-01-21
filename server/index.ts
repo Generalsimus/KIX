@@ -21,7 +21,7 @@ export class Server {
     middleware(req: express.Request, res: express.Response, next: express.NextFunction) {
         const customResponse = App.requestsThreshold.get(req.path)
 
-        console.log("🚀 --> file: index.ts --> line 23 --> Server --> middleware --> App.requestsThreshold", App.requestsThreshold.keys(), req.path);
+        // console.log("🚀 --> file: index.ts --> line 23 --> Server --> middleware --> App.requestsThreshold", App.requestsThreshold.keys(), req.path);
 
         if (customResponse) {
             res.header("content-type", mimeTypes.lookup(req.path) || "text/html");

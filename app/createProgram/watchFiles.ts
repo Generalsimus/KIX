@@ -1,6 +1,6 @@
 import { createProgramHost } from ".";
 import { ModuleInfoType } from "../../utils/getModuleInfo";
-
+import { normalizeSlashes } from "../../utils/normaliz";
 
 export function watchFiles(this: createProgramHost) {
     if (!this.watch) return;
@@ -9,16 +9,13 @@ export function watchFiles(this: createProgramHost) {
     this.configWatcher.on("all", this.configFileParser.onConfigFileChange)
     // "add" | "addDir" | "change" | "unlink" | "unlinkDir"
     this.watcher.on("all", (eventName: string, path: string) => {
-        console.log("🚀 --> file: watchFiles.ts --> line 7 --> this.watcher.on --> path", eventName, path);
-        // this.cacheController.Cache
-        console.log("🚀 --> file: watchFiles.ts --> line 14 --> this.watcher.on --> this.cacheController.Cache", Object.values(this.cacheController.cache));
-        // this.oldProgram?.getFilesByNameMap()
-        // this.getSourceFile(path)
-        // this.oldProgram?.getSourceFileByPath(path as any)
-        console.log("🚀 --> file: watchFiles.ts --> line 15 --> this.watcher.on --> this.oldProgram?.getSourceFileByPath(path as any)", this.oldProgram?.getSourceFileByPath(path as any));
-        // this.recreateProgram();
+        path = normalizeSlashes(path)
+        this.cacheController.removeCachedName(path)
+
+        const modulesCount = this.moduleRootNamesSet.size
         this.getReportDiagnoseTime()
-        this.emit();
+        this.emit(this.createProgram().getSourceFileByPath(this.getCanonicalFileName(path) as any));
         this.diagnose()
+        this.buildModules(this.moduleRootNamesSet.size - modulesCount)
     })
 }

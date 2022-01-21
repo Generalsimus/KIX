@@ -42,7 +42,14 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
     moduleInfo.resolvedModule = resolvedModule;
-    moduleInfo.rootWriters[containingFileModuleInfo.modulePath] = containingFileModuleInfo.rootWriters
+
+    console.log("🚀 --> file: resolveModuleNames.ts --> line 47 --> resolveName --> moduleInfo", moduleInfo.modulePath,(moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath))));
+    if ((moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath)))) {
+        host.moduleRootNamesSet.add(moduleInfo.modulePath)
+    } else {
+
+        moduleInfo.rootWriters[containingFileModuleInfo.modulePath] = containingFileModuleInfo.rootWriters
+    }
 
     host.watcher.add(moduleInfo.modulePath)
 

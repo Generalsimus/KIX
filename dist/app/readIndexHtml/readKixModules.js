@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readKixModules = void 0;
 const __1 = require("../");
-const path_1 = __importDefault(require("path"));
 const posix_1 = __importDefault(require("path/posix"));
 const fileNameToUrlPath_1 = require("../../utils/fileNameToUrlPath");
 const getOutputFileName_1 = require("../../utils/getOutputFileName");
+const normaliz_1 = require("../../utils/normaliz");
 const readKixModules = (window) => {
     __1.App.moduleThree.clear();
     const document = window.document, programFiles = new Set();
@@ -20,7 +20,7 @@ const readKixModules = (window) => {
             return;
         scriptElement.removeAttribute("lang");
         const urlInfo = new window.URL(scriptElement.src, "http://e");
-        const filePathName = posix_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname)).split(path_1.default.sep).join("/");
+        const filePathName = (0, normaliz_1.normalizeSlashes)(posix_1.default.join(__1.App.runDirName, decodeURIComponent(urlInfo.pathname)));
         scriptElement.setAttribute("src", (0, fileNameToUrlPath_1.fileNameToUrlPath)((0, getOutputFileName_1.getOutputFileName)(filePathName)));
         programFiles.add(filePathName);
     });

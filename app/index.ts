@@ -5,6 +5,7 @@ import { ModuleInfoType } from "../utils/getModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
+import { rootWriter } from "./rootWriter";
 
 const runDirName = path.resolve("./");
 export const App = {
