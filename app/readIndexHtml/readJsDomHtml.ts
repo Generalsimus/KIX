@@ -4,6 +4,7 @@ import fs from "fs";
 import { readKixModules } from "./readKixModules";
 import { createProgramHost } from "../createProgram";
 import ts from "typescript";
+import { normalizeSlashes } from "../../utils/normaliz";
 
 export const readJsDomHtml = (indexHTMLPath: string) => {
   App.requestsThreshold.clear();
@@ -39,12 +40,18 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
   // jsx: "preserve",
   // __Node_Module_Window_Name: getModuleWindowName(),
   // "noImplicitAny": true,
-  return new createProgramHost(kixModules, {
+  return new createProgramHost([...kixModules], {
     module: ts.ModuleKind.CommonJS,
-    // emitDeclarationOnly: false,
+    incremental: true,
+    /*
+    @suppressOutputPathCheck: true,
+    ეს საჭიროა იმის გამო რო უკვე არსებული ფაილიც დაბილდოს 
+    მაგალითი:თუ ფაილი უკვე არსებობს ჩვეულებრივ შემთხვევაში მის დაბილდვაზე უარს იტყვის ts ი
+    */
+    suppressOutputPathCheck: true,
   },
     true,
     [
-      App.kixModulePath
+      normalizeSlashes(App.kixModulePath)
     ]);
 };

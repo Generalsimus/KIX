@@ -7,7 +7,9 @@ import ts from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
 
 export const useConfigFileParser = (programHost: createProgramHost) => {
-    const defaultOptions = { ...programHost.options };
+    const requiredOptions = {
+        ...programHost.options
+    };
     let diagnostics: ts.Diagnostic[] = []
     const configFileName = ts.findConfigFile(
         App.runDirName,
@@ -33,7 +35,7 @@ export const useConfigFileParser = (programHost: createProgramHost) => {
         diagnostics.push(...compilerOptions.errors)
 
         if (compilerOptions.options) {
-            programHost.options = deepAssign(defaultOptions, compilerOptions.options);
+            programHost.options = deepAssign(compilerOptions.options, requiredOptions);
         }
         return programHost
     }

@@ -90,6 +90,7 @@ export class createProgramHost {
   watchFiles = watchFiles
   writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
+    console.log("emit")
     return this.oldProgram?.emit(
       sourceFile,
       undefined,
@@ -98,12 +99,12 @@ export class createProgramHost {
       this.transformer,
     );
   }
-  createProgram(rootNames = this.rootNames) {
+  createProgram(rootNames = this.rootNames, oldProgram = this.oldProgram) {
 
     return this.oldProgram = ts.createProgram({
-      rootNames: rootNames,
+      rootNames,
       options: this.options,
-      oldProgram: this.oldProgram,
+      oldProgram,
       host: this,
     })
   }
@@ -114,53 +115,33 @@ export class createProgramHost {
   }
 }
 
-// export const createProgram = (rootFilesPath: string[]) => {
+
+
+// const runnnn = (rootNames: string[]) => {
+
+//   // export const createProgram = (rootFilesPath: string[]) => {
 //   const configPath = getTsconfigFilePath();
 
-  // createCompilerHostFromProgramHost
+//   // createCompilerHostFromProgramHost
 //   const host = ts.createWatchCompilerHost(
 //     // undefined,
 //     configPath,
-//     createDefaultCompilerOptions(rootFilesPath),
+//     { rootNames },
 //     ts.sys,
-//     (
-//       rootNames: readonly string[] | undefined,
-//       options: ts.CompilerOptions | undefined,
-//       host?: ts.CompilerHost,
-//       oldProgram?: ts.SemanticDiagnosticsBuilderProgram,
-//       configFileParsingDiagnostics?: readonly ts.Diagnostic[],
-//       projectReferences?: readonly ts.ProjectReference[]
-//     ): ts.SemanticDiagnosticsBuilderProgram => {
-//       const program = ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
-//       // program.
-//       // program.get
-//       // if (host && host.getSourceFile !== getSourceFile) {
-//       //   // host.getCustomTransformers = (): any => { }
-//       //   // host.getCustomTransformers
-//       //   // console.log(host && host.getSourceFile !== getSourceFile)
-//       //   // host.emit
-//       //   // program.
-//       //   // program.emit = (...w): any => {
-//       //   //   console.log(w)
-//       //   // };
-//       //   host.getSourceFile = createGetSourceFile(host, options);
-//       // }
-//       return program
-//       // return ts.createSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram, configFileParsingDiagnostics, projectReferences);
-
-//     },
-//     reportDiagnostic,
-//     () => { },
+//     ts.createSemanticDiagnosticsBuilderProgram,
+//     // reportDiagnostic,
+//     // () => { },
 //   );
 
-//   // ts.getParsedCommandLineOfConfigFile(configFileName, optionsToExtendForConfigFile, parseConfigFileHost, extendedConfigCache || (extendedConfigCache = new ts.Map()), watchOptionsToExtend, extraFileExtensions)
-//   // host.resolveModuleNames = createModuleNamesResolver(host);
-//   // host.readFile = readFile;
+//   //   // ts.getParsedCommandLineOfConfigFile(configFileName, optionsToExtendForConfigFile, parseConfigFileHost, extendedConfigCache || (extendedConfigCache = new ts.Map()), watchOptionsToExtend, extraFileExtensions)
+//   //   // host.resolveModuleNames = createModuleNamesResolver(host);
+//   //   // host.readFile = readFile;
 
 //   const watchProgram = ts.createWatchProgram(host)
-//   // const program = watchProgram.getProgram()
-//   // createCompiler(program, rootFilesPath)
+//   //   // const program = watchProgram.getProgram()
+//   //   // createCompiler(program, rootFilesPath)
 
 
-//   return watchProgram;
-// };
+//   //   return watchProgram;
+//   // };
+// }

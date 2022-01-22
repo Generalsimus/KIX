@@ -43,7 +43,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 
     moduleInfo.resolvedModule = resolvedModule;
 
-    console.log("🚀 --> file: resolveModuleNames.ts --> line 47 --> resolveName --> moduleInfo", moduleInfo.modulePath,(moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath))));
+    console.log("🚀 --> file: resolveModuleNames.ts --> line 47 --> resolveName --> moduleInfo", moduleInfo.modulePath, (moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath))));
     if ((moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath)))) {
         host.moduleRootNamesSet.add(moduleInfo.modulePath)
     } else {
@@ -61,10 +61,13 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 
 
 export function resolveModuleNames(this: createProgramHost, moduleNames: string[], containingFile: string, reusedNames: string[] | undefined, redirectedReference: ts.ResolvedProjectReference | undefined, options: ts.CompilerOptions, containingSourceFile?: ts.SourceFile): (ts.ResolvedModule | undefined)[] {
+console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> containingFile", containingFile);
+console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> moduleNames", moduleNames);
 
     const containingFileModuleInfo = getModuleInfo(containingFile)
-
-    return containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {
+    const resolvedModuleNames = containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {
         return resolveName(moduleName, containingFileModuleInfo, this)
     }))
+    console.log("🚀 --> file: resolveModuleNames.ts --> line 71 --> resolveModuleNames --> resolvedModuleNames", resolvedModuleNames);
+    return resolvedModuleNames
 }
