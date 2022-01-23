@@ -1,7 +1,4 @@
 import { createProgramHost } from ".";
-import { getTsconfigFilePath } from "../../utils/getTsconfigFile";
-import { parseJsonFile } from "../../utils/parseJson";
-import fs from "fs"
 import { App } from "..";
 import ts from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
