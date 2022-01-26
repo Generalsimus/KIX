@@ -1,6 +1,6 @@
 import path from "path";
 import express from "express"
-import { readIndexHtml } from "./readIndexHtml";
+import { readIndexHtml } from "./createProgram/readIndexHtml";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
@@ -19,13 +19,16 @@ export const App = {
   importModulesAccessKey: `__KIX__IMPORT__MODULE__ACCESS_KEY__${new Date().getTime()}__`,
   windowModuleLocationName: "_KIX" + new Date().getTime(),
   requestsThreshold: new Map<string, express.RequestHandler>(),
-  // requestsThreshold: new Map<string, string>(),
-
   moduleThree: new Map<string, ModuleInfoType>(),
   kixModulePath: resolveKixModule(runDirName),
   devMode: false,
-  // ReturnType<typeof yargs>
   parsedArgs: undefined as (ArgumentsCamelCase | undefined),
+  resetRequestsThreshold() {
+    const moduleMiddleware = this.requestsThreshold.get(this.nodeModulesUrlPath);
+    if (!moduleMiddleware) throw new Error(`moduleMiddleware not found`);
+    this.requestsThreshold.clear();
+    this.requestsThreshold.set(this.nodeModulesUrlPath, moduleMiddleware);
+  },
   start() {
     readCommandsAndRun()
   },

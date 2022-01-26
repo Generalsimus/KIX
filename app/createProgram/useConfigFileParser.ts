@@ -2,41 +2,32 @@ import { createProgramHost } from ".";
 import { App } from "..";
 import ts from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
+import { readTsConfigFile } from "../../utils/readTsConfigFile";
 
 export const useConfigFileParser = (programHost: createProgramHost) => {
     const requiredOptions = {
         ...programHost.options
     };
     let diagnostics: ts.Diagnostic[] = []
-    const configFileName = ts.findConfigFile(
-        App.runDirName,
-        ts.sys.fileExists,
-        "tsconfig.json"
-    );
-    if (!configFileName) {
-        throw console.error(new Error(`Could not find tsconfig.json at ${configFileName}`));
-    }
+
     const onConfigFileChange = () => {
         diagnostics.forEach(diagnostic => programHost.configFileParsingDiagnostics.delete(diagnostic));
         diagnostics = [];
 
+        const configFile = readTsConfigFile()
+        const { options, errors } = configFile
 
-        const configFile = ts.readConfigFile(configFileName, ts.sys.readFile);
-        configFile.error && diagnostics.push(configFile.error)
 
-        const compilerOptions = ts.parseJsonConfigFileContent(
-            configFile.config,
-            ts.sys,
-            "./"
-        );
-        diagnostics.push(...compilerOptions.errors)
-
-        if (compilerOptions.options) {
-            programHost.options = deepAssign(compilerOptions.options, requiredOptions);
-        }
-        return programHost
+        diagnostics.push(...errors)
+        programHost.options = deepAssign(options, requiredOptions);
+        return configFile
     }
-    onConfigFileChange()
-    return { onConfigFileChange, configFileName }
+    const { configFileName } = onConfigFileChange()
+
+    programHost.watcher.createWatcher({
+        event: "all",
+        filePath: configFileName,
+        callBack: onConfigFileChange
+    })
 }
 

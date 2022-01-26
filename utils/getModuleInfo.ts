@@ -22,7 +22,7 @@ export type ModuleInfoType = {
 };
 
 let globalModuleIndex = 1;
-export const getModuleInfo = (modulePath: string): ModuleInfoType => {
+export const getModuleInfo = (modulePath: string, defaultOption: Partial<ModuleInfoType> = {}): ModuleInfoType => {
   let moduleInfo = App.moduleThree.get(modulePath)
 
 
@@ -31,10 +31,9 @@ export const getModuleInfo = (modulePath: string): ModuleInfoType => {
       modulePath,
       moduleIndex: globalModuleIndex++,
       moduleCollection: {},
-      // isNodeModule: ts.pathContainsNodeModules(modulePath),
       isNodeModule: isPathNodeModule(modulePath),
-      rootWriters: {}
-      // writers: {}
+      rootWriters: {},
+      ...defaultOption
     }))
   }
 

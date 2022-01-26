@@ -1,22 +1,17 @@
 import path from "path";
-import ts, { getDefaultLibFileName, transform } from "typescript";
+import ts from "typescript";
 import fs from "fs";
 import { App } from "..";
 import { reportDiagnostics } from "./reportDiagnostics";
-// import { createModuleNamesResolver } from "./createModuleNamesResolver";
 import { readFile } from "./readFile";
-import { getTsconfigFilePath } from "../../utils/getTsconfigFile";
-// import { createDefaultCompilerOptions } from "../../utils/createDefaultCompilerOptions";
 import { getSourceFile } from "./getSourceFile";
-import chokidar, { FSWatcher } from "chokidar";
 import { getCurrentDirectory } from "./getCurrentDirectory";
 import { getCanonicalFileName } from "./getCanonicalFileName";
 import { resolveModuleNames } from "./resolveModuleNames";
 import { getTransformer } from "../../transform";
-import { parseJsonFile } from "../../utils/parseJson";
 import { useConfigFileParser } from "./useConfigFileParser";
 import { diagnose } from "./diagnose";
-import { watchFiles } from "./watchFiles";
+import { getLocalFileWatcher } from "./getLocalFileWatcher";
 import { Server } from "../../server";
 import { useRootFileWriter } from "./useRootFileWriter";
 import { writeFile } from "./writeFile";
@@ -24,7 +19,10 @@ import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
 import { CacheController } from "./cacheController";
 import { buildModules } from "./buildModules";
 import { rootWriter } from "../rootWriter";
-const sss = ts.createCompilerHost({}, true)
+import { readIndexHtml } from "./readIndexHtml";
+import { FileWatcher } from "./fileWatcher";
+import { fixRootNames } from "./fixRootNames";
+// const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
 // ts.createCompilerDiagnostic
@@ -37,25 +35,25 @@ const sss = ts.createCompilerHost({}, true)
 // ParsedCommandLine
 
 export class createProgramHost {
-  rootNames: string[];
+  rootNames: string[] = [];
   moduleRootNamesSet: Set<string>;
   options: ts.CompilerOptions;
   oldProgram: ts.Program | undefined;
   defaultLibFileName: string;
   defaultLibLocation: string;
   configFileParsingDiagnostics = new Set<ts.Diagnostic>()
-  configFileParser: ReturnType<typeof useConfigFileParser>
   reportDiagnoseTime: string = ""
   watch: boolean
   cacheController: CacheController
-  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
-    this.rootNames = rootNames;
-    this.moduleRootNamesSet = new Set<string>(defaultModuleRootNames);
+  localFileWatcher: ReturnType<typeof getLocalFileWatcher>
+  constructor(options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
+    this.readIndexHtml()
+    this.moduleRootNamesSet = new Set<string>(fixRootNames(defaultModuleRootNames, { isNodeModule: true }));
     this.options = options;
     this.watch = watch
     this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
     this.defaultLibFileName = path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options));
-    this.configFileParser = useConfigFileParser(this)
+    useConfigFileParser(this)
     this.cacheController = new CacheController(this, {
       getSourceFile: 0,
     })
@@ -64,14 +62,14 @@ export class createProgramHost {
     this.createProgram()
     this.emit();
     this.diagnose()
-    this.buildModules(this.moduleRootNamesSet.size, true)
-    this.watchFiles()
-    this.watch && this.getReportDiagnoseTime();
+    this.buildModules(1)
+    this.getReportDiagnoseTime();
+    this.localFileWatcher = getLocalFileWatcher(this)
   }
-  watcher = new FSWatcher({ ignoreInitial: true });
-  configWatcher = new FSWatcher({ ignoreInitial: true });
+  watcher = new FileWatcher();
   server = new Server(this)
   moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath))
+  readIndexHtml = readIndexHtml
   transformer = getTransformer()
   buildModules = buildModules
   getReportDiagnoseTime = getReportDiagnoseTime
@@ -87,7 +85,6 @@ export class createProgramHost {
   resolveModuleNames = resolveModuleNames
   diagnose = diagnose
   reportDiagnostics = reportDiagnostics
-  watchFiles = watchFiles
   writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
     console.log("emit")
@@ -110,7 +107,6 @@ export class createProgramHost {
   }
   close() {
     this.watcher.close()
-    this.configWatcher.close()
     this.server.close()
   }
 }

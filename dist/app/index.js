@@ -22,6 +22,13 @@ exports.App = {
     kixModulePath: (0, resolveKixModule_1.resolveKixModule)(runDirName),
     devMode: false,
     parsedArgs: undefined,
+    resetRequestsThreshold() {
+        const moduleMiddleware = this.requestsThreshold.get(this.nodeModulesUrlPath);
+        if (!moduleMiddleware)
+            throw new Error(`moduleMiddleware not found`);
+        this.requestsThreshold.clear();
+        this.requestsThreshold.set(this.nodeModulesUrlPath, moduleMiddleware);
+    },
     start() {
         (0, command_1.readCommandsAndRun)();
     },

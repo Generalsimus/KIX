@@ -19,7 +19,7 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
             const moduleInfo: ModuleInfoType | undefined = App.moduleThree.get(sourceFile.fileName);
             console.log(App.moduleThree.keys(), sourceFile.fileName)
             if (!moduleInfo) continue;
-            console.log("🚀 --> file: writeFile.ts --> line 22 --> writeFile --> moduleInfo", moduleInfo);
+            // console.log("🚀 --> file: writeFile.ts --> line 22 --> writeFile --> moduleInfo", moduleInfo);
             if (moduleInfo.isNodeModule) {
                 this.moduleRootWriter.writeJsCode(content);
                 continue;

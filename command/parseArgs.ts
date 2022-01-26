@@ -5,7 +5,7 @@ import packageJson from "../package.json"
 
 
 export const parseArgs = (): Promise<ArgumentsCamelCase> => {
-    const configFile = readTsConfigFile()
+    const configFile = readTsConfigFile().options
     const outDir = configFile.outDir || App.outDir
 
 

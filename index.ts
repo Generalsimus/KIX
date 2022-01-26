@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { App } from "./app";
+  
 App.start()
 // import path from "path";
 // import ts from "typescript";

@@ -1,13 +1,13 @@
-import { App } from "..";
+ 
 import { JSDOM } from "jsdom";
 import fs from "fs";
-import { readKixModules } from "./readKixModules";
-import { createProgramHost } from "../createProgram";
+import { readKixModules } from "./readKixModules"; 
 import ts from "typescript";
-import { normalizeSlashes } from "../../utils/normaliz";
+import { normalizeSlashes } from "../../../utils/normalizeSlashes";
+import { App } from "../..";
 
 export const readJsDomHtml = (indexHTMLPath: string) => {
-  App.requestsThreshold.clear();
+
   const htmlDom = new JSDOM(fs.readFileSync(indexHTMLPath, "utf8")),
     window = htmlDom.window,
     document = window.document;
@@ -20,7 +20,7 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
     }),
     document.body.firstElementChild
   );
-
+  // normalizeSlashes(
   const kixModules = readKixModules(window);
 
   const indexHtmlPageString =
@@ -40,18 +40,5 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
   // jsx: "preserve",
   // __Node_Module_Window_Name: getModuleWindowName(),
   // "noImplicitAny": true,
-  return new createProgramHost([...kixModules], {
-    module: ts.ModuleKind.CommonJS,
-    incremental: true,
-    /*
-    @suppressOutputPathCheck: true,
-    ეს საჭიროა იმის გამო რო უკვე არსებული ფაილიც დაბილდოს 
-    მაგალითი:თუ ფაილი უკვე არსებობს ჩვეულებრივ შემთხვევაში მის დაბილდვაზე უარს იტყვის ts ი
-    */
-    suppressOutputPathCheck: true,
-  },
-    true,
-    [
-      normalizeSlashes(App.kixModulePath)
-    ]);
+  return kixModules
 };
