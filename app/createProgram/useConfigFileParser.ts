@@ -4,14 +4,14 @@ import ts from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
 import { readTsConfigFile } from "../../utils/readTsConfigFile";
 
-export const useConfigFileParser = (programHost: createProgramHost) => {
+export const useConfigFileParser = (host: createProgramHost) => {
     const requiredOptions = {
-        ...programHost.options
+        ...host.options
     };
     let diagnostics: ts.Diagnostic[] = []
 
     const onConfigFileChange = () => {
-        diagnostics.forEach(diagnostic => programHost.configFileParsingDiagnostics.delete(diagnostic));
+        diagnostics.forEach(diagnostic => host.configFileParsingDiagnostics.delete(diagnostic));
         diagnostics = [];
 
         const configFile = readTsConfigFile()
@@ -19,12 +19,13 @@ export const useConfigFileParser = (programHost: createProgramHost) => {
 
 
         diagnostics.push(...errors)
-        programHost.options = deepAssign(options, requiredOptions);
+        host.options = deepAssign(options, requiredOptions);
+        // console.log("🚀 --> file: useConfigFileParser.ts --> line 23 --> onConfigFileChange --> host.options", host.options);
         return configFile
     }
     const { configFileName } = onConfigFileChange()
 
-    programHost.watcher.createWatcher({
+    host.watcher.createWatcher({
         event: "all",
         filePath: configFileName,
         callBack: onConfigFileChange

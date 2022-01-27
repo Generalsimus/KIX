@@ -9,7 +9,7 @@ export class FileWatcher {
     createWatcher({ event = 'all', filePath, callBack, }: AddWatcherType) {
         const watcher = new FSWatcher({ ignoreInitial: true })
         filePath && watcher.add(filePath)
-        callBack && event && watcher.on(event, callBack)
+        callBack && watcher.on(event, callBack)
         this.watchersList.push(watcher)
         return watcher
     }

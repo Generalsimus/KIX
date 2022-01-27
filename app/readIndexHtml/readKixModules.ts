@@ -3,10 +3,10 @@ import path from "path";
 import { DOMWindow } from "jsdom";
 import ts from "typescript"
 import pathPosix from "path/posix";
-import { fileNameToUrlPath } from "../../../utils/fileNameToUrlPath";
-import { getOutputFileName } from "../../../utils/getOutputFileName";
-import { normalizeSlashes } from "../../../utils/normalizeSlashes";
-import { App } from "../..";
+import { fileNameToUrlPath } from "../../utils/fileNameToUrlPath";
+import { getOutputFileName } from "../../utils/getOutputFileName";
+import { normalizeSlashes } from "../../utils/normalizeSlashes";
+import { App } from "..";
 // import { createModuleInfo } from "../../utils/createModuleInfo";
 export const readKixModules = (window: DOMWindow): string[] => {
 

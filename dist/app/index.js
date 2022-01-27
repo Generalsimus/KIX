@@ -15,20 +15,13 @@ exports.App = {
     outDir: "./dist/",
     indexHTMLUrlPaths: ["/", "/index.html"],
     nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
-    importModulesAccessKey: `__KIX__IMPORT__MODULE__ACCESS_KEY__${new Date().getTime()}__`,
+    uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
     windowModuleLocationName: "_KIX" + new Date().getTime(),
     requestsThreshold: new Map(),
     moduleThree: new Map(),
     kixModulePath: (0, resolveKixModule_1.resolveKixModule)(runDirName),
     devMode: false,
     parsedArgs: undefined,
-    resetRequestsThreshold() {
-        const moduleMiddleware = this.requestsThreshold.get(this.nodeModulesUrlPath);
-        if (!moduleMiddleware)
-            throw new Error(`moduleMiddleware not found`);
-        this.requestsThreshold.clear();
-        this.requestsThreshold.set(this.nodeModulesUrlPath, moduleMiddleware);
-    },
     start() {
         (0, command_1.readCommandsAndRun)();
     },

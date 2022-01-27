@@ -28,12 +28,9 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 writer.writeJsCode(content);
             });
 
-            // console.log("🚀 --> file: writeFile.ts --> line 40 --> rootWritersLoop --> writer", writer.writeJsCode(content));
         }
     }
-    // if (this.options.outDir) {
-    //     fileName = path.join(App.runDirName, fileName);
-    // }
+
 }
 
 
@@ -41,9 +38,11 @@ const useRootWriterLoop = (rootWriters: ModuleInfoType["rootWriters"], writeCall
 
     for (const mainFileName in rootWriters) {
         const writer = rootWriters[mainFileName];
+        if(rootWriters === writer) continue;
         if (writer instanceof rootWriter) {
             writeCallback(writer);
         } else {
+            console.log("🚀 --> file: writeFile.ts --> line 45 --> useRootWriterLoop --> writer", writer);
             useRootWriterLoop(writer, writeCallback);
         }
     }

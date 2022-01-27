@@ -7,6 +7,7 @@ import {
     nodeToken
 } from "../factoryCode/nodeToken";
 import { getVariableDeclarationNode } from "../utils/getVariableDeclarationNode.js";
+import { App } from "../../app/index.js";
 const factory = ts.factory;
 
 export const exportVisitor = (node) => {
@@ -26,7 +27,7 @@ export const exportVisitor = (node) => {
                     export default function functionName() { ... }
                     */
                     returnValue.push(factory.createExpressionStatement(nodeToken([
-                        elementAccessExpression(["export", "default"]),
+                        elementAccessExpression([App.uniqAccessKey + "exports", "default"]),
                         factory.cloneNode(node.name)
                     ])))
                 } else {
@@ -38,7 +39,7 @@ export const exportVisitor = (node) => {
                     const newNode = factory.cloneNode(node);
                     newNode.name = factory.cloneNode(declareNAme);
                     return [newNode, factory.createExpressionStatement(nodeToken([
-                        elementAccessExpression(["export", "default"]),
+                        elementAccessExpression([App.uniqAccessKey + "exports", "default"]),
                         declareNAme
                     ]))]
                 }
@@ -53,7 +54,7 @@ export const exportVisitor = (node) => {
                     for (const variableDefinition in declarationNamesObject) {
                         returnValue.push(
                             factory.createExpressionStatement(nodeToken([
-                                elementAccessExpression(["export", variableDefinition]),
+                                elementAccessExpression([App.uniqAccessKey + "exports", variableDefinition]),
                                 factory.createIdentifier(variableDefinition)
                             ]))
                         )
@@ -64,7 +65,7 @@ export const exportVisitor = (node) => {
         case ts.SyntaxKind.ExportAssignment:
             // delete node.parent
             returnValue.push(factory.createExpressionStatement(nodeToken([
-                elementAccessExpression(["export", "default"]),
+                elementAccessExpression([App.uniqAccessKey + "exports", "default"]),
                 factory.cloneNode(node.expression)
             ])))
 
@@ -75,7 +76,7 @@ export const exportVisitor = (node) => {
                 for (const declarationName in declarationNamesObject) {
                     returnValue.push(
                         factory.createExpressionStatement(nodeToken([
-                            elementAccessExpression(["export", declarationName]),
+                            elementAccessExpression([App.uniqAccessKey + "exports", declarationName]),
                             factory.cloneNode(getVariableDeclarationNode(declarationNamesObject[declarationName]))
                         ]))
                     )

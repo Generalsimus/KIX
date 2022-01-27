@@ -13,15 +13,15 @@ import { useConfigFileParser } from "./useConfigFileParser";
 import { diagnose } from "./diagnose";
 import { getLocalFileWatcher } from "./getLocalFileWatcher";
 import { Server } from "../../server";
-import { useRootFileWriter } from "./useRootFileWriter";
 import { writeFile } from "./writeFile";
 import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
 import { CacheController } from "./cacheController";
 import { buildModules } from "./buildModules";
 import { rootWriter } from "../rootWriter";
-import { readIndexHtml } from "./readIndexHtml";
 import { FileWatcher } from "./fileWatcher";
 import { fixRootNames } from "./fixRootNames";
+import { useRootFileWriter } from "./useRootFileWriter";
+const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
@@ -35,7 +35,7 @@ import { fixRootNames } from "./fixRootNames";
 // ParsedCommandLine
 
 export class createProgramHost {
-  rootNames: string[] = [];
+  rootNames: string[];
   moduleRootNamesSet: Set<string>;
   options: ts.CompilerOptions;
   oldProgram: ts.Program | undefined;
@@ -45,10 +45,12 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   cacheController: CacheController
-  localFileWatcher: ReturnType<typeof getLocalFileWatcher>
-  constructor(options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
-    this.readIndexHtml()
-    this.moduleRootNamesSet = new Set<string>(fixRootNames(defaultModuleRootNames, { isNodeModule: true }));
+  // localFileWatcher: ReturnType<typeof getLocalFileWatcher>
+  constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
+    
+
+    useRootFileWriter(this.rootNames = fixRootNames(this, rootNames))
+    this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     this.options = options;
     this.watch = watch
     this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
@@ -58,18 +60,16 @@ export class createProgramHost {
       getSourceFile: 0,
     })
 
-    useRootFileWriter(this)
     this.createProgram()
     this.emit();
     this.diagnose()
-    this.buildModules(1)
+    this.buildModules(defaultModuleRootNames.length)
     this.getReportDiagnoseTime();
-    this.localFileWatcher = getLocalFileWatcher(this)
   }
   watcher = new FileWatcher();
+  localFileWatcher = getLocalFileWatcher(this)
   server = new Server(this)
   moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath))
-  readIndexHtml = readIndexHtml
   transformer = getTransformer()
   buildModules = buildModules
   getReportDiagnoseTime = getReportDiagnoseTime
@@ -87,7 +87,7 @@ export class createProgramHost {
   reportDiagnostics = reportDiagnostics
   writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
-    console.log("emit")
+
     return this.oldProgram?.emit(
       sourceFile,
       undefined,
@@ -97,7 +97,6 @@ export class createProgramHost {
     );
   }
   createProgram(rootNames = this.rootNames, oldProgram = this.oldProgram) {
-
     return this.oldProgram = ts.createProgram({
       rootNames,
       options: this.options,

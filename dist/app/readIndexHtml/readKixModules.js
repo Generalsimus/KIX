@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readKixModules = void 0;
-const __1 = require("..");
 const posix_1 = __importDefault(require("path/posix"));
 const fileNameToUrlPath_1 = require("../../utils/fileNameToUrlPath");
 const getOutputFileName_1 = require("../../utils/getOutputFileName");
+const __1 = require("..");
 const readKixModules = (window) => {
     const document = window.document, programFiles = new Set();
     document
