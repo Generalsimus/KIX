@@ -5,7 +5,7 @@ import { App } from ".."
 import { newSourceFilesPathSet } from "./readFile"
 
 export function getSourceFile(this: createProgramHost, fileName: string, languageVersion: ts.ScriptTarget, onError?: ((message: string) => void) | undefined, shouldCreateNewSourceFile?: boolean | undefined): ts.SourceFile {
-    console.log("🚀 --> file: getSourceFile.ts --> line 8 --> getSourceFile --> fileName", fileName);
+    // console.log("🚀 --> file: getSourceFile.ts --> line 8 --> getSourceFile --> fileName", fileName);
     var text;
     try {
 

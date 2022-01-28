@@ -17,14 +17,14 @@ export const ImportDeclaration = (node, visitor, context) => {
     // CREATE_Const_Variable
     if (!node.importClause) {
         // import "mod";   
-        return elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex])
+        return elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
     } else {
         const variablesNameValueNodes = []
         if (namespaceDeclaration && !ts.isDefaultImport(node)) {
             // import * as n from "mod";
             variablesNameValueNodes.push([
                 factory.cloneNode(namespaceDeclaration.name),
-                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex])
+                elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
             ])
         } else {
             // import d from "mod";
@@ -37,20 +37,20 @@ export const ImportDeclaration = (node, visitor, context) => {
                         case ts.SyntaxKind.NamespaceImport:
                             return variablesNameValueNodes.push([
                                 factory.cloneNode(childNode.name),
-                                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex])
+                                elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
                             ]);
                         case ts.SyntaxKind.NamedImports:
                             for (const importElement of childNode.elements) {
                                 variablesNameValueNodes.push([
                                     factory.cloneNode(importElement.name),
-                                    elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, (importElement.propertyName || importElement.name).escapedText])
+                                    elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex, (importElement.propertyName || importElement.name).escapedText])
                                 ]);
                             }
                             return
                         case ts.SyntaxKind.Identifier:
                             variablesNameValueNodes.push([
                                 factory.cloneNode(childNode),
-                                elementAccessExpression([App.windowModuleLocationName, importedModuleInfo.moduleIndex, "default"])
+                                elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex, "default"])
                             ]);
                             return;
                     }

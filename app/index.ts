@@ -1,13 +1,12 @@
 import path from "path";
 import express from "express"
-import { readIndexHtml } from "./readIndexHtml";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
-import { rootWriter } from "./rootWriter";
 
 const runDirName = path.resolve("./");
+// const kixModulePath = resolveKixModule(runDirName);
 export const App = {
   runDirName,
   realModuleDirName: path.resolve(__dirname, "../../"),

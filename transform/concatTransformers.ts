@@ -20,21 +20,8 @@ export const concatTransformers = (transformers: TransformersObjectType[], trans
         }
 
     }
-    // console.log("🚀 --> file: concatTransformers.ts --> line 25 --> concatTransformers --> transform", transform);
+    
     return transform as TransformersObjectType
 }
 
-
-// const concatBeforOrAfterTransformers = (BeforeOrAfter, transfromers = {}) => {
-//     for (const transformersObject of BeforeOrAfter) {
-//         for (const transfromersKey in transformersObject)
-//             if (transfromersKey in transfromers) {
-//                 const transfromer = transfromers[transfromersKey]
-//                 const newtransfromer = transformersObject[transfromersKey]
-//                 transfromers[transfromersKey] = (node, ...args) => newtransfromer(transfromer(node, ...args), ...args)
-//             } else {
-//                 transfromers[transfromersKey] = transformersObject[transfromersKey]
-//             }
-//     }
-//     return transfromers
-// }
+ 

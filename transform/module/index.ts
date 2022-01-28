@@ -8,6 +8,7 @@ import { ExportAssignment } from "./ExportAssignment";
 import { ExportKeyword } from "./ExportKeyword";
 import { exportVisitor } from "./exportVisitor";
 import { arrowFunction } from "../factoryCode/arrowFunction";
+import { moduleBody } from "../factoryCode/moduleBody";
 
 
 export const moduleTransformer = {
@@ -16,13 +17,17 @@ export const moduleTransformer = {
     [ts.SyntaxKind.ExportKeyword]: () => { },
     [ts.SyntaxKind.DefaultKeyword]: () => { },
     [ts.SyntaxKind.ExportDeclaration]: () => { },
-    
+
     [ts.SyntaxKind.SourceFile]: (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
         // return node;
         const moduleInfo = App.moduleThree.get(node.fileName)
+
+        if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
+
         if (moduleInfo) {
             context.currentModuleInfo = moduleInfo
         }
+        // return node
         // context.moduleInfo = moduleInfo
         // console.log("🚀 --> file: module.ts --> line 23 --> moduleInfo", moduleInfo);
         // console.log("🚀 --> file: module.ts --> line 23 --> node.fileName", node.fileName);
@@ -40,17 +45,23 @@ export const moduleTransformer = {
         // returnNode.statements = [] as ts.Node[]
         // ts.Statement[]
         // ts.VariableDeclarationList
-        const statements: ts.Statement[] = [factory.createExpressionStatement(arrowFunction(
-            [
-                "EXPORT_MODULE_NAME",
-            ],
+        const statements: ts.Statement[] = [moduleBody(
+            moduleInfo,
             node.statements.flatMap((stateNode) => exportVisitor(stateNode))
-            // .flatMap((stateNode) => [stateNode, factory.createEmptyStatement()])
-        ))]
+        )]
+        // [factory.createExpressionStatement(arrowFunction(
+        //     [
+        //         "EXPORT_MODULE_NAME",
+        //     ],
+
+        //     node.statements.flatMap((stateNode) => exportVisitor(stateNode))
+        //     // .flatMap((stateNode) => [stateNode, factory.createEmptyStatement()])
+        // ))]
         //  
         // ts.VariableStatement
         // factory.createExpressionStatement(
-        const returnNode = context.factory.updateSourceFile(node, statements)
+        const returnNode = context.factory.updateSourceFile(node, statements, true)
+
         // (returnNode as any)["externalModuleIndicator"] = undefined;
         // return returnNode
         return ts.visitEachChild(returnNode, visitor, context);

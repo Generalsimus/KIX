@@ -64,12 +64,10 @@ export const exportVisitor = (node) => {
             return returnValue
         case ts.SyntaxKind.ExportAssignment:
             // delete node.parent
-            returnValue.push(factory.createExpressionStatement(nodeToken([
+            return [factory.createExpressionStatement(nodeToken([
                 elementAccessExpression([App.uniqAccessKey + "exports", "default"]),
                 factory.cloneNode(node.expression)
-            ])))
-
-            return returnValue
+            ]))]
         case ts.SyntaxKind.ExportDeclaration:
             for (const exportDeclarations of node.exportClause.elements) {
                 const declarationNamesObject = getVariableDeclarationNames(exportDeclarations)

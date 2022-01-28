@@ -18,9 +18,11 @@ export function readIndexHtml() {
     const hostProgram = new createProgramHost(
       rootNames,
       {
-        module: ts.ModuleKind.CommonJS,
+        module: ts.ModuleKind.ESNext,
         incremental: true,
         allowJs: true,
+        removeComments: true,
+        // moduleResolution:ts.ModuleResolutionKind.NodeJs,
         /*
         @suppressOutputPathCheck: true,
         ეს საჭიროა იმის გამო რო უკვე არსებული ფაილიც დაბილდოს 
@@ -29,7 +31,9 @@ export function readIndexHtml() {
         suppressOutputPathCheck: true,
       },
       App.devMode,
-      [App.kixModulePath]
+      [
+        App.kixModulePath
+      ]
     )
     hostProgram.watcher.createWatcher({
       filePath: indexHTMLPath,

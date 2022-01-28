@@ -8,7 +8,7 @@ export function buildModules(this: createProgramHost, lastElementsBuildSize: num
 
     if (moduleRootName.length) {
         console.log("🚀 --> file: buildModules.ts --> line 5 --> buildModules --> lastElementsBuildSize", lastElementsBuildSize);
-        console.log("EMITMODULEEEEEEEEEEEESSSSSSSSSSS")
+        // console.log("EMITMODULEEEEEEEEEEEESSSSSSSSSSS")
         this.createProgram(fixRootNames(this, moduleRootName, { isNodeModule: true }))
         this.emit()
     }

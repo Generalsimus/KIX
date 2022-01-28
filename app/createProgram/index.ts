@@ -21,7 +21,8 @@ import { rootWriter } from "../rootWriter";
 import { FileWatcher } from "./fileWatcher";
 import { fixRootNames } from "./fixRootNames";
 import { useRootFileWriter } from "./useRootFileWriter";
-const ss = ts.isArrayTypeNode
+import { normalizeSlashes } from "../../utils/normalizeSlashes";
+// const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
 // console.log("getDefaultLibLocation", ts.getDefaultLibFileName()); 
@@ -45,17 +46,17 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   cacheController: CacheController
-  // localFileWatcher: ReturnType<typeof getLocalFileWatcher>
+  moduleRootWriter: rootWriter
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
-    
 
-    useRootFileWriter(this.rootNames = fixRootNames(this, rootNames))
-    this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     this.options = options;
-    this.watch = watch
-    this.defaultLibLocation = path.dirname(ts.sys.getExecutingFilePath());
-    this.defaultLibFileName = path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options));
     useConfigFileParser(this)
+    this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
+    this.watch = watch
+    this.defaultLibLocation = normalizeSlashes(path.dirname(ts.sys.getExecutingFilePath()));
+    this.defaultLibFileName = normalizeSlashes(path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options)));
+    useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
+    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this)
     this.cacheController = new CacheController(this, {
       getSourceFile: 0,
     })
@@ -69,7 +70,6 @@ export class createProgramHost {
   watcher = new FileWatcher();
   localFileWatcher = getLocalFileWatcher(this)
   server = new Server(this)
-  moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath))
   transformer = getTransformer()
   buildModules = buildModules
   getReportDiagnoseTime = getReportDiagnoseTime
