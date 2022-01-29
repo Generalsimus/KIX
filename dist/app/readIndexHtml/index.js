@@ -23,6 +23,8 @@ function readIndexHtml() {
             incremental: true,
             allowJs: true,
             removeComments: true,
+            jsx: typescript_1.default.JsxEmit.Preserve,
+            esModuleInterop: false,
             suppressOutputPathCheck: true,
         }, index_1.App.devMode, [
             index_1.App.kixModulePath

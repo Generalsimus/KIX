@@ -1,8 +1,8 @@
 import ts from "typescript"
 import { TransformersObjectType } from "./index"
 
-export const concatTransformers = (transformers: TransformersObjectType[], transform = {}): TransformersObjectType => {
-
+export const concatTransformers = (...transformers: Partial<TransformersObjectType>[]): TransformersObjectType => {
+    const transform = {}
 
     for (const transformersObject of transformers) {
         for (const SyntaxKindKey in transformersObject) {
@@ -20,8 +20,7 @@ export const concatTransformers = (transformers: TransformersObjectType[], trans
         }
 
     }
-    
+
     return transform as TransformersObjectType
 }
 
- 

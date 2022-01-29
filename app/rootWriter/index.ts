@@ -27,6 +27,9 @@ export class rootWriter {
         //    console.log( App.moduleThree.get(App.moduleControllerPath))
         //     console.log("🚀 --> file: index.ts --> line 26 --> rootWriter --> writeJsCode --> moduleControllerModuleInfo", this.moduleControllerModuleInfo);
         this.code += content.replace(this.sourceMapCommentRegExp, "");
+
+
+        console.log({ content })
     }
     writeSourceMap(fileName: string, content: string) {
         // writeSourceMap

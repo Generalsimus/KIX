@@ -60,8 +60,8 @@ export const moduleTransformer = {
         //  
         // ts.VariableStatement
         // factory.createExpressionStatement(
-        const returnNode = context.factory.updateSourceFile(node, statements, true)
-
+        const returnNode = context.factory.updateSourceFile(node, statements, false)
+        // returnNode.
         // (returnNode as any)["externalModuleIndicator"] = undefined;
         // return returnNode
         return ts.visitEachChild(returnNode, visitor, context);

@@ -22,6 +22,8 @@ export function readIndexHtml() {
         incremental: true,
         allowJs: true,
         removeComments: true,
+        jsx: ts.JsxEmit.Preserve,
+        esModuleInterop: false,
         // moduleResolution:ts.ModuleResolutionKind.NodeJs,
         /*
         @suppressOutputPathCheck: true,

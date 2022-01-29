@@ -39,6 +39,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
         resolveModule(moduleName, containingFileModuleInfo.modulePath))
     if (!resolvedModule) return;
 
+    // resolvedModule && (resolvedModule.isExternalLibraryImport = false)
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
     moduleInfo.resolvedModule = resolvedModule;
@@ -61,8 +62,8 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 
 
 export function resolveModuleNames(this: createProgramHost, moduleNames: string[], containingFile: string, reusedNames: string[] | undefined, redirectedReference: ts.ResolvedProjectReference | undefined, options: ts.CompilerOptions, containingSourceFile?: ts.SourceFile): (ts.ResolvedModule | undefined)[] {
-// console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> containingFile", containingFile);
-// console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> moduleNames", moduleNames);
+    // console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> containingFile", containingFile);
+    // console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> moduleNames", moduleNames);
 
     const containingFileModuleInfo = getModuleInfo(containingFile)
     const resolvedModuleNames = containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {

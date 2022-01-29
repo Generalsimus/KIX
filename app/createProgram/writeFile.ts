@@ -9,10 +9,10 @@ let inctermetner = 0
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
     console.log("🚀 --> file: writeFile.ts --> line 10 --> writeFile --> fileName", fileName, sourceFiles?.length)
 
-    const extName = path.extname(fileName);
+    // const extName = path.extname(fileName);
 
     if (!sourceFiles) return;
-    if (extName === ".js") {
+    if (/\.jsx?$/.test(fileName)) {
         for (const sourceFile of sourceFiles) {
             const moduleInfo: ModuleInfoType | undefined = App.moduleThree.get(sourceFile.fileName);
 
@@ -39,7 +39,7 @@ const useRootWriterLoop = (rootWriters: ModuleInfoType["rootWriters"], writeCall
         if (writer instanceof rootWriter) {
             writeCallback(writer);
         } else {
-            console.log("🚀 --> file: writeFile.ts --> line 45 --> useRootWriterLoop --> writer", writer);
+            // console.log("🚀 --> file: writeFile.ts --> line 45 --> useRootWriterLoop --> writer", writer);
             useRootWriterLoop(writer, writeCallback);
         }
     }
