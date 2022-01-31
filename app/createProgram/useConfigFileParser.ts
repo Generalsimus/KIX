@@ -1,6 +1,6 @@
 import { createProgramHost } from ".";
 import { App } from "..";
-import ts from "typescript";
+import ts, { getDefaultLibFileName } from "typescript";
 import { deepAssign } from "../../utils/deepAssign";
 import { readTsConfigFile } from "../../utils/readTsConfigFile";
 
@@ -19,8 +19,13 @@ export const useConfigFileParser = (host: createProgramHost) => {
 
 
         diagnostics.push(...errors)
-        host.options = deepAssign(options, requiredOptions);
-        // console.log("🚀 --> file: useConfigFileParser.ts --> line 23 --> onConfigFileChange --> host.options", host.options);
+        const compilerOptions = deepAssign({}, options, requiredOptions)
+        if (!options.lib && requiredOptions.lib) {
+            compilerOptions.lib = [...requiredOptions.lib, getDefaultLibFileName(compilerOptions)]
+        }
+
+        host.options = compilerOptions;
+        
         return configFile
     }
     const { configFileName } = onConfigFileChange()

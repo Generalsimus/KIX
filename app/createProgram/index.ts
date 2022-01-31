@@ -22,6 +22,7 @@ import { FileWatcher } from "./fileWatcher";
 import { fixRootNames } from "./fixRootNames";
 import { useRootFileWriter } from "./useRootFileWriter";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
+import { getDefaultLibFileName } from "./getDefaultLibFileName";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -51,10 +52,11 @@ export class createProgramHost {
 
     this.options = options;
     useConfigFileParser(this)
-    this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
-    this.watch = watch
     this.defaultLibLocation = normalizeSlashes(path.dirname(ts.sys.getExecutingFilePath()));
-    this.defaultLibFileName = normalizeSlashes(path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options)));
+    this.defaultLibFileName = getDefaultLibFileName(this.defaultLibLocation, this.options);
+    // normalizeSlashes(path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options)));
+    this.watch = watch
+    this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this)
     this.cacheController = new CacheController(this, {

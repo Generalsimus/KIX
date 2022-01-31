@@ -2,16 +2,16 @@ import ts from "typescript";
 import { parameterDeclaration } from "./parameterDeclaration";
 
 
-const factory = ts.factory;
 
-export const arrowFunction = (params: (string | ts.BindingName)[] = [], statements: ts.Statement[] = []) => {
+export const arrowFunction = (params: (string | ts.BindingName)[] = [], statements: ts.Statement[] = [], returnNode?: ts.Expression) => {
+    const factory = ts.factory;
     return factory.createArrowFunction(
         undefined,
         undefined,
         parameterDeclaration(params),
         undefined,
         factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        factory.createBlock(
+        returnNode ? factory.createParenthesizedExpression(returnNode) : factory.createBlock(
             statements,
             true
         )

@@ -24,6 +24,10 @@ export function readIndexHtml() {
         removeComments: true,
         jsx: ts.JsxEmit.Preserve,
         esModuleInterop: false,
+        lib: [
+          App.kixModuleTypePath
+        ],
+
         // moduleResolution:ts.ModuleResolutionKind.NodeJs,
         /*
         @suppressOutputPathCheck: true,

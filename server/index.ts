@@ -36,7 +36,7 @@ export class Server {
     }
     listen() {
         this.server.listen(App.port, () => {
-            open(`http://localhost:${App.port}`);
+            // open(`http://localhost:${App.port}`);
         });
     }
     close() {

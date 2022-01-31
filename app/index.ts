@@ -6,7 +6,7 @@ import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
 
 const runDirName = path.resolve("./");
-// const kixModulePath = resolveKixModule(runDirName);
+const kixModulePath = resolveKixModule(runDirName);
 export const App = {
   runDirName,
   realModuleDirName: path.resolve(__dirname, "../../"),
@@ -19,7 +19,8 @@ export const App = {
   windowModuleLocationName: "_KIX" + new Date().getTime(),
   requestsThreshold: new Map<string, express.RequestHandler>(),
   moduleThree: new Map<string, ModuleInfoType>(),
-  kixModulePath: resolveKixModule(runDirName),
+  kixModulePath,
+  kixModuleTypePath: kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts",
   devMode: false,
   parsedArgs: undefined as (ArgumentsCamelCase | undefined),
   start() {

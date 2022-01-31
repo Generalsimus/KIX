@@ -1,21 +1,24 @@
-import ts, { isStringLiteralLike } from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "..";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { stringLiteral } from "../factoryCode/stringLiteral";
+import { useJsxPropRegistration } from "./utils";
 
 
-// (visitor, CTX, tagName, attributes, children)
+
 export const jsxToObject = (
     visitor: ts.Visitor,
     context: CustomContextType,
     tagName: ts.JsxTagNameExpression,
     attributes: ts.JsxAttributes,
-    children: ts.NodeArray<ts.JsxChild>) => {
+    children: ts.NodeArray<ts.JsxChild>
+) => {
     const newChildren = children.reduce((newChildren: ts.Expression[], child, index) => {
-        const currentChild = safeInitializer(child)
+        let currentChild = safeInitializer(child)
         if (!currentChild) {
             return newChildren
         }
+
         if (ts.SyntaxKind.JsxText === currentChild.kind) {
             if (index === 0 || index === (children.length - 1)) {
                 const jsxText = currentChild.getText().trim()
@@ -25,11 +28,13 @@ export const jsxToObject = (
             }
             newChildren.push(stringLiteral(currentChild.getText()))
         } else {
-            newChildren.push(currentChild)
+            
+            newChildren.push(useJsxPropRegistration(currentChild, visitor, context))
         }
 
         return newChildren
     }, [])
+
     const objectNodeProperties: createObjectArgsType = [
         [
             tagName.getText(), context.factory.createArrayLiteralExpression(
@@ -64,11 +69,12 @@ export const jsxToObject = (
                 } else {
                     attributeValue = attributeValueNode
                 }
-                objectNodeProperties.push([attributeName, attributeValue])
+                
+                objectNodeProperties.push([attributeName, useJsxPropRegistration(attributeValue, visitor, context)])
             }
         }
     }
-    if (eventObjectNodeProperties.length > 0) {
+    if (eventObjectNodeProperties.length) {
         objectNodeProperties.push(["e", createObject(eventObjectNodeProperties)])
     }
 

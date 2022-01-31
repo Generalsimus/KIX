@@ -25,6 +25,9 @@ function readIndexHtml() {
             removeComments: true,
             jsx: typescript_1.default.JsxEmit.Preserve,
             esModuleInterop: false,
+            lib: [
+                index_1.App.kixModuleTypePath
+            ],
             suppressOutputPathCheck: true,
         }, index_1.App.devMode, [
             index_1.App.kixModulePath

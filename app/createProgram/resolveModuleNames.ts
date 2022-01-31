@@ -40,6 +40,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     if (!resolvedModule) return;
 
     // resolvedModule && (resolvedModule.isExternalLibraryImport = false)
+    // ts.isExternalModuleIndicator
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
     moduleInfo.resolvedModule = resolvedModule;

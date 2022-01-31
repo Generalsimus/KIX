@@ -1,18 +1,19 @@
 import ts, { visitEachChild } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
-import { moduleTransformer } from "./module";
+import { moduleTransformerBefore, moduleTransformerAfter } from "./module";
 import { jsxTransformers } from "./jsx"
 
-export type TransformersObjectType = typeof moduleTransformer & typeof jsxTransformers;
+export type TransformersObjectType = typeof moduleTransformerBefore & typeof jsxTransformers & typeof moduleTransformerAfter;
 
 export type CustomContextType = ts.TransformationContext & {
     currentModuleInfo: ModuleInfoType
+    getJSXPropRegistrationIdentifier?: () => ts.Identifier
 }
 
 export const getTransformer = () => {
-    const transformsBefore = concatTransformers(jsxTransformers, moduleTransformer)
-    const transformsAfter = concatTransformers()
+    const transformsBefore = concatTransformers(jsxTransformers, moduleTransformerBefore)
+    const transformsAfter = concatTransformers(moduleTransformerAfter)
 
     const getVisitor = (transforms: TransformersObjectType) => (context: ts.TransformationContext) => {
 
