@@ -20,7 +20,7 @@ export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor,
 
 export const PropertyAccessExpressionOrElementAccessExpression = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression, visitor: ts.Visitor, context: CustomContextType) => {
     if (context.getJSXPropRegistrationIdentifier) {
-
+        context.getJSXRegistrationDeclarationIdentifier();
         return visitor(callFunction(context.getJSXPropRegistrationIdentifier(), getExpressionNames(node)))
     }
     return ts.visitEachChild(node, visitor, context)
