@@ -22,6 +22,8 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 continue;
             }
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
+
+                console.log({ content })
                 writer.writeJsCode(content);
             });
 

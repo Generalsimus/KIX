@@ -25,6 +25,4 @@ export const jsxTransformers = {
 
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
-    [ts.SyntaxKind.ArrowFunction]: safeVisitorForJSXRegisters,
-    [ts.SyntaxKind.FunctionDeclaration]: safeVisitorForJSXRegisters,
 }

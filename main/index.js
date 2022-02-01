@@ -1,78 +1,79 @@
-// "use strict"
+"use strict"
 
 
-// // type typeAsType = <T = unknown>() => ;
+// type typeAsType = <T = unknown>() => ;
 
 
-// // "[object Array]"
+// "[object Array]"
 
 
-// const type = (arg) => Object.prototype.toString.call(arg)
+const type = (arg) => Object.prototype.toString.call(arg)
 
-// const abstractNodes = {
+const abstractNodes = {
 
-// }
-// const abstractAttributes = {
-//     setAttr(attribute, value) {
-//         this.setAttribute(attribute, value);
-//     }
-// }
-// Object.assign(Node.prototype, AttributeMethods);
+}
+const abstractAttributes = {
+    setAttr(attribute, value) {
+        this.setAttribute(attribute, value);
+    }
+}
+Object.assign(Node.prototype, abstractAttributes);
 
-// function createApp(createElementName) {
-
-
-//     function createElement(objectNode, elementNode) {
-//         for (var objectNodeProperty in objectNode) {
-//             if (elementNode) {
-//                 elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
-//             } else {
-//                 if (abstractNodes[objectNodeProperty]) {
-//                     return abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement)
-//                 }
-//                 Kix((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
-//             }
-//         }
-//     }
+function createApp(createElementName) {
 
 
-
-//     return function kix(parent, child) {
-//         switch (type(child)) {
-//             case "[object Array]":
-//                 return child.map((childNode) => Kix(parent, childNode));
-//             case "[object Function]":
-//                 return Kix(parent, child());
-//             case "[object Object]":
-//                 node = createElement(child);
-//                 break;
-//             case "[object Promise]":
-//                 node.then(function (result) {
-//                     node.Replace(result);
-//                 });
-//             case "[object Undefined]":
-//             case "[object Null]":
-//             case "[object Boolean]":
-//                 node = ""
-//             case "[object Number]":
-//             case "[object String]":
-//             case "[object Date]":
-//             case "[object RegExp]":
-//             case "[object BigInt]":
-//             case "[object Symbol]":
-//             case "[object Error]":
-//             case "[object Date]":
-//                 const textNode = document.createTextNode(String(node));
-//                 textNode._kixNode = node;
-//                 node = textNode;
-//         }
+    function createElement(objectNode, elementNode) {
+        for (var objectNodeProperty in objectNode) {
+            if (elementNode) {
+                elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
+            } else {
+                if (abstractNodes[objectNodeProperty]) {
+                    return abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement)
+                }
+                kix((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
+            }
+        }
+    }
+    const registrator = () => { }
 
 
-//         return parent && parent.appendChild(node), node;
-//     }
-// }
+    return function kix(parent, child) {
+        switch (type(child)) {
+            case "[object Array]":
+                return child.map((childNode) => kix(parent, childNode));
+            case "[object Function]":
+                return kix(parent, child(registrator));
+            case "[object Object]":
+                child = createElement(child);
+                break;
+            case "[object Promise]":
+                child.then(function (result) {
+                    child.Replace(result);
+                });
+            case "[object Undefined]":
+            case "[object Null]":
+            case "[object Boolean]":
+                child = ""
+            case "[object Number]":
+            case "[object String]":
+            case "[object Date]":
+            case "[object RegExp]":
+            case "[object BigInt]":
+            case "[object Symbol]":
+            case "[object Error]":
+            case "[object Date]":
+                const textNode = document.createTextNode(String(child));
+                textNode._kixNode = child;
+                child = textNode;
+        }
 
 
-// const createSvgNode = createNodeApp(createSvgElement);
-// export const kix = createNodeApp(document.createElementName.bind(document));
-// export default kix;
+        return parent && parent.appendChild(child), child;
+    }
+    // return kix;
+}
+
+
+const createSvgNode = createApp((nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName));
+export const kix = createApp(document.createElement.bind(document));
+export default kix;

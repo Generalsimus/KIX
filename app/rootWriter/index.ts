@@ -29,7 +29,6 @@ export class rootWriter {
         this.code += content.replace(this.sourceMapCommentRegExp, "");
 
 
-        console.log({ content })
     }
     writeSourceMap(fileName: string, content: string) {
         // writeSourceMap

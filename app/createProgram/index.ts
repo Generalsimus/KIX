@@ -35,7 +35,7 @@ import { getDefaultLibFileName } from "./getDefaultLibFileName";
 //   return fs.existsSync(fileName) ? parseConfigFileTextToJson(fileName, readFileSync(fileName, "utf8")).config : {}
 // }
 // ParsedCommandLine
-
+export const unicssssss = ts.factory.createUniqueName("unicssssss");
 export class createProgramHost {
   rootNames: string[];
   moduleRootNamesSet: Set<string>;

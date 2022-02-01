@@ -5,11 +5,13 @@ import { getModuleInfo, ModuleInfoType } from "../../utils/getModuleInfo";
 import resolve from "resolve";
 import { isPathNodeModule } from "../../utils/isPathNodeModule";
 import path from "path";
+import { normalizeSlashes } from "../../utils/normalizeSlashes";
 // var resolve = require('resolve/async'); // or, require('resolve')
 // resolve('tap', { basedir: __dirname }, function (err, res) {
 //     if (err) console.error(err);
 //     else console.log(res);
 // });
+
 const resolveModule = (moduleName: string, containingFile: string): ts.ResolvedModuleFull | undefined => {
     try {
         const resolvedFileName = resolve.sync(moduleName, {
@@ -22,8 +24,19 @@ const resolveModule = (moduleName: string, containingFile: string): ts.ResolvedM
             extension: ts.Extension.Js
         }
     } catch (e) {
+        const defaultModulePaths: Record<string, string> = {
+            kix: App.kixModulePath
+        }
+        const defaultResolvedFileName = defaultModulePaths[moduleName]
 
-        return undefined;
+        if (defaultResolvedFileName) {
+            return {
+                resolvedFileName: normalizeSlashes(defaultResolvedFileName),
+                isExternalLibraryImport: false,
+                extension: ts.Extension.Js
+            }
+        }
+        // return defaultModulePaths[moduleName]
     }
 }
 
@@ -42,6 +55,9 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     // resolvedModule && (resolvedModule.isExternalLibraryImport = false)
     // ts.isExternalModuleIndicator
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
+
+
+    // console.log("🚀 --> file: resolveModuleNames.ts --> line 53 --> resolveName --> resolvedModule", resolvedModule);
 
     moduleInfo.resolvedModule = resolvedModule;
 
