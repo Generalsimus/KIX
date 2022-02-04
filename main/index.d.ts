@@ -1,10 +1,11 @@
-/// <reference lib="DOM" />
+declare global {
+  declare module "kix" {
+    // function  ()=>any;
+    type kix = (parent: Element, child: any) => any;
 
-declare module "kix" {
-  const kix: any;
-  export default kix;
+    export default kix;
+  }
 }
-
 declare namespace JSX {
   interface IntrinsicElements {
     [elemName: string]: any;
