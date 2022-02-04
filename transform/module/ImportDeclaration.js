@@ -6,7 +6,7 @@ import { variableStatement } from "../factoryCode/variableStatement";
 const factory = ts.factory;
 
 export const ImportDeclaration = (node, visitor, context) => {
-    console.log("🚀 --> file: ImportDeclaration.js --> line 9 --> ImportDeclaration --> context", context);
+    // console.log("🚀 --> file: ImportDeclaration.js --> line 9 --> ImportDeclaration --> context", context);
     // console.log("🚀 --> file: module.ts --> line 13 --> node", node);
 
     const importedModuleInfo = context.currentModuleInfo.moduleCollection[node.moduleSpecifier.text];

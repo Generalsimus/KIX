@@ -18,18 +18,20 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     const statements: ts.Statement[] = [
         moduleBody(
             moduleInfo,
-            node.statements.flatMap((stateNode) => exportVisitor(stateNode))
+            node.statements.flatMap((stateNode) => {
+                return exportVisitor(stateNode).flatMap((childNode) => {
+                    childNode = visitor(childNode)
+                    return childNode ? [childNode] : []
+                })
+            })
         )
     ]
+
+
     catchNewState(statements)
 
-    const returnNode = context.factory.updateSourceFile(node, statements)
 
-
-
-
-
-    return ts.visitEachChild(returnNode, visitor, context)
+    return context.factory.updateSourceFile(node, statements)
 }
 
 export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {

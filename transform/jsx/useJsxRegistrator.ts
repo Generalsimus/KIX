@@ -1,5 +1,7 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
+import { App } from "../../app";
+import { elementAccessExpression } from "../factoryCode/elementAccessExpression";
 import { variableStatement } from "../factoryCode/variableStatement";
 
 export const useJsxRegistration = (context: CustomContextType) => {
@@ -8,10 +10,17 @@ export const useJsxRegistration = (context: CustomContextType) => {
         return registrationName || (registrationName = context.factory.createUniqueName("__"))
     }
     return (statements: ts.Statement[]) => {
-        if (registrationName) {
+        // console.log("🚀 --> file: useJsxRegistrator.ts --> line 12 --> return --> registrationName", registrationName);
+        const importedModuleInfo = App.moduleThree.get(App.kixModulePath)
+        if (registrationName && importedModuleInfo) {
+
             statements.splice(0, 0, variableStatement([
-                [registrationName, registrationName]
+                [
+                    registrationName,
+                    elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex + "", "__R"])
+                ]
             ]))
+
         }
     }
 }

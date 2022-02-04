@@ -26,11 +26,14 @@ export const exportVisitor = (node) => {
                     export default class className { ... }
                     export default function functionName() { ... }
                     */
+                    const exportNameOrNode = ifHaveExportModifier(node, ts.SyntaxKind.DefaultKeyword) ? "default" : node.name.getText();
                     returnValue.push(factory.createExpressionStatement(nodeToken([
-                        elementAccessExpression([App.uniqAccessKey + "exports", "default"]),
+                        elementAccessExpression([App.uniqAccessKey + "exports", exportNameOrNode]),
                         factory.cloneNode(node.name)
                     ])))
                 } else {
+                    // getVariableDeclarationNames(variableDeclaration.name)
+
                     /*
                     export default class { ... }
                     export default function () { ... }
@@ -48,7 +51,7 @@ export const exportVisitor = (node) => {
         case ts.SyntaxKind.VariableStatement:
             if (ifHaveExportModifier(node)) {
                 for (const variableDeclaration of node.declarationList.declarations) {
-                    // getVariableDeclarationNames(variableDeclaration.name)
+
 
                     const declarationNamesObject = getVariableDeclarationNames(variableDeclaration)
                     for (const variableDefinition in declarationNamesObject) {
@@ -88,9 +91,9 @@ export const exportVisitor = (node) => {
 
 
 }
-const ifHaveExportModifier = (node) => {
+const ifHaveExportModifier = (node, modifierKind = ts.SyntaxKind.ExportKeyword) => {
     for (const { kind } of (node.modifiers || [])) {
-        if (kind === ts.SyntaxKind.ExportKeyword) {
+        if (kind === modifierKind) {
             return true
         }
     }

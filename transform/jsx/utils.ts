@@ -2,15 +2,15 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { arrowFunction } from "../factoryCode/arrowFunction";
 import { callFunction } from "../factoryCode/callFunction";
+import { stringLiteral } from "../factoryCode/stringLiteral";
 
 export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor, context: CustomContextType) => {
     const OldGetRegistrationIdentifier = context.getJSXPropRegistrationIdentifier;
     let getRegistrationIdentifier: ts.Identifier | undefined
-    context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("__REGISTER")))
+    context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("_R")))
     const newNode = visitor(node)
     if (getRegistrationIdentifier) {
-
-        return arrowFunction([getRegistrationIdentifier], [], callFunction(getRegistrationIdentifier, [arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)]))
+        return callFunction(context.getJSXRegistrationDeclarationIdentifier(), [arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)])
     }
     context.getJSXPropRegistrationIdentifier = OldGetRegistrationIdentifier;
 
@@ -20,7 +20,8 @@ export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor,
 
 export const PropertyAccessExpressionOrElementAccessExpression = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression, visitor: ts.Visitor, context: CustomContextType) => {
     if (context.getJSXPropRegistrationIdentifier) {
-        context.getJSXRegistrationDeclarationIdentifier();
+
+
         return visitor(callFunction(context.getJSXPropRegistrationIdentifier(), getExpressionNames(node)))
     }
     return ts.visitEachChild(node, visitor, context)
@@ -33,7 +34,7 @@ const getExpressionNames = (
 ) => {
     if (ts.isPropertyAccessExpression(node)) {
         getExpressionNames(node.expression, expressionIdentifiers)
-        expressionIdentifiers.push(node.name)
+        expressionIdentifiers.push(stringLiteral(node.name.getText()))
     } else if (ts.isElementAccessExpression(node)) {
         getExpressionNames(node.expression, expressionIdentifiers)
         expressionIdentifiers.push(node.argumentExpression)

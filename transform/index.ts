@@ -1,23 +1,23 @@
 import ts, { visitEachChild } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
-import { moduleTransformerBefore, moduleTransformerAfter } from "./module";
+import { moduleTransformerBefore } from "./module";
 import { jsxTransformers } from "./jsx"
 import { globalTransformersAfter, globalTransformersBefore } from "./global";
 
-export type TransformersObjectType = typeof moduleTransformerBefore & typeof jsxTransformers & typeof moduleTransformerAfter;
+export type TransformersObjectType = typeof moduleTransformerBefore & typeof jsxTransformers & typeof globalTransformersBefore;
 
 export type CustomContextType = ts.TransformationContext & {
     currentModuleInfo: ModuleInfoType
-    /* პირველი ფროფერთის სადეკლარაციო Identifier-ი */
+    /*   ფროფერთის სადეკლარაციო Identifier-ი */
     getJSXPropRegistrationIdentifier?: () => ts.Identifier
-    /* პირველი ფროფერთის სადეკლარაციო Identifier-ი სა call ფუნქციიის სახელის Identifier-ი */
+    /*   ფროფერთის სადეკლარაციო Identifier-ი სა call ფუნქციიის სახელის Identifier-ი */
     getJSXRegistrationDeclarationIdentifier: () => ts.Identifier
 }
 
 export const getTransformer = () => {
     const transformsBefore = concatTransformers(globalTransformersBefore, moduleTransformerBefore, jsxTransformers)
-    const transformsAfter = concatTransformers(globalTransformersAfter, moduleTransformerAfter)
+    const transformsAfter = concatTransformers(globalTransformersAfter)
 
     const getVisitor = (transforms: TransformersObjectType) => (context: ts.TransformationContext) => {
 

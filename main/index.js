@@ -1,24 +1,37 @@
 "use strict"
 
 
-// type typeAsType = <T = unknown>() => ;
-
-
-// "[object Array]"
-
-
 const type = (arg) => Object.prototype.toString.call(arg)
-
+const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc
 const abstractNodes = {
 
 }
 const abstractAttributes = {
     setAttr(attribute, value) {
-        this.setAttribute(attribute, value);
-    }
-}
-Object.assign(Node.prototype, abstractAttributes);
+        value = flatFunction(value, this, attribute)
+        abstractAttributes[attribute] ? this[attribute](value, attribute) : this.setAttribute(attribute, value);
+    },
+    Append(childNode) {
+        return kix(this, childNode);
+    },
+    Remove() {
+        const parentNode = this.Parent();
 
+        parentNode && parentNode.removeChild(this);
+
+        return this;
+    },
+    Replace(replaceNode) {
+        const parent = this.Parent()
+        if (parent) {
+            replaceNode = kix(null, flatFunction(replaceNode, this.Parent()));
+            parent.replaceChild(replaceNode, this);
+            return replaceNode;
+        }
+    },
+}
+for (const key of abstractAttributes) { (Node.prototype[key] = abstractAttributes[key]) }
++
 function createApp(createElementName) {
 
 
@@ -33,16 +46,17 @@ function createApp(createElementName) {
                 kix((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
             }
         }
+        return elementNode
     }
-    const registrator = () => { }
 
 
     return function kix(parent, child) {
+
         switch (type(child)) {
             case "[object Array]":
                 return child.map((childNode) => kix(parent, childNode));
             case "[object Function]":
-                return kix(parent, child(registrator));
+                return kix(parent, child(parent));
             case "[object Object]":
                 child = createElement(child);
                 break;
@@ -54,8 +68,8 @@ function createApp(createElementName) {
             case "[object Null]":
             case "[object Boolean]":
                 child = ""
-            case "[object Number]":
             case "[object String]":
+            case "[object Number]":
             case "[object Date]":
             case "[object RegExp]":
             case "[object BigInt]":
@@ -67,7 +81,6 @@ function createApp(createElementName) {
                 child = textNode;
         }
 
-
         return parent && parent.appendChild(child), child;
     }
     // return kix;
@@ -77,3 +90,69 @@ function createApp(createElementName) {
 const createSvgNode = createApp((nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName));
 export const kix = createApp(document.createElement.bind(document));
 export default kix;
+
+
+// const fillArray = (node) => ()
+const toArrayAndFill = (node) => node instanceof Array ? 0 in node ? node : [""] : [node]
+function replaceChildNodes(values, nodes, valuesIndex, returnNodes, value, node) {
+    while ((value = values[valuesIndex]) || (node = nodes[valuesIndex])) {
+        if (value instanceof Array) {
+            values[valuesIndex] = replaceChildNodes(values, nodes, 0, returnNodes)
+        } else if (node instanceof Array) {
+            values[valuesIndex] = replaceChildNodes(values, nodes, 0, returnNodes)
+        } else {
+
+        }
+        valuesIndex++;
+    }
+    return returnNodes
+}
+export function __R(registerFunction) {
+
+    const getRenderValue = (parent, attribute) => {
+        console.log({ parent, attribute, registerFunction })
+        return registerFunction(function () {
+            const Time = new Date().getTime()
+            console.time("objValue" + Time)
+            const objValue = Array.prototype.reduce.call(arguments, (obj, key) => {
+                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+                let value = obj[key],
+                    defineRegistrations = descriptor.registrations || [];
+                if (defineRegistrations.indexOf(registerFunction) !== -1) return value
+                defineRegistrations.push(registerFunction);
+                Object.defineProperty(obj, key, {
+                    enumerable: true,
+                    configurable: true,
+                    registrations: defineRegistrations,
+                    get() {
+                        return value;
+                    },
+                    set(setValue) {
+                        value = setValue;
+                        descriptor.set && descriptor.set(value)
+                        if (attribute) {
+                            parent.setAttr(attribute, value);
+                        } else {
+
+                        }
+                        // (descriptor.set && descriptor.set(currentValue))
+                        // if (attributeName) {
+                        //     exitNodesOrAttributeNode.setAttr(attributeName, getValue())
+                        // } else {
+                        //     let valuesss = toArrayAndFill(getValue())
+                        //     exitNodesOrAttributeNode = replaceChildNodes(valuesss, exitNodesOrAttributeNode, 0, [])
+                        // }
+                    }
+                })
+                console.timeEnd("objValue" + Time)
+                return value
+            })
+            return objValue
+        })
+    }
+    // return (node) => {
+    //     console.log("🚀 --> file: index.js --> line 114 --> return --> node", node);
+    //     return "fddddddddddddd"
+    // }
+    return getRenderValue
+}

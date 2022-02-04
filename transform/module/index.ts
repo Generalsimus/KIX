@@ -15,6 +15,4 @@ export const moduleTransformerBefore = {
     [ts.SyntaxKind.ExportKeyword]: () => { },
     [ts.SyntaxKind.DefaultKeyword]: () => { },
     [ts.SyntaxKind.ExportDeclaration]: () => { },
- 
 }
- 
