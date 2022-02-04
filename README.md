@@ -1,4 +1,4 @@
-# [KIX](https://kixjs.ml/)
+# [KIX-Beta](https://kixjs.ml/)
 
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
