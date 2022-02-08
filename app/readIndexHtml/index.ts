@@ -38,8 +38,7 @@ export function readIndexHtml() {
       },
       App.devMode,
       [
-        App.injectPaths.kix,
-        App.injectPaths.propRegistration,
+        App.injectPaths.kix
       ]
     )
     hostProgram.watcher.createWatcher({

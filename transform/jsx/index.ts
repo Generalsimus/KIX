@@ -3,7 +3,6 @@
 import ts, { factory, Statement } from "typescript";
 import { CustomContextType } from "..";
 import { jsxToObject } from "./jsxToObject";
-import { useJsxRegistration } from "./useJsxRegistrator";
 import { PropertyAccessExpressionOrElementAccessExpression, safeVisitorForJSXRegisters } from "./utils"
 
 export const jsxTransformers = {

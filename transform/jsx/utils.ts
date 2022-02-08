@@ -2,6 +2,7 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { arrowFunction } from "../factoryCode/arrowFunction";
 import { callFunction } from "../factoryCode/callFunction";
+import { createObject } from "../factoryCode/createObject";
 import { stringLiteral } from "../factoryCode/stringLiteral";
 
 export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor, context: CustomContextType): ts.Expression => {
@@ -10,7 +11,9 @@ export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor,
     context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("_R")))
     const newNode = visitor(node)
     if (getRegistrationIdentifier) {
-        return callFunction(context.getJSXRegistrationDeclarationIdentifier(), [arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)])
+        return createObject([
+            ["_R", arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)]
+        ])
     }
     context.getJSXPropRegistrationIdentifier = OldGetRegistrationIdentifier;
 

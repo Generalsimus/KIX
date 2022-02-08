@@ -28,13 +28,22 @@ export const jsxToObject = (
             }
             newChildren.push(stringLiteral(currentChild.getText()))
         } else {
-            
+
             newChildren.push(useJsxPropRegistration(currentChild, visitor, context))
         }
 
         return newChildren
     }, [])
-
+    const tagNameToString = tagName.getText();
+    if (/[A-Z]/.test(tagNameToString)) {
+        return createJSXComponent(
+            visitor,
+            context,
+            tagName,
+            attributes,
+            children
+        )
+    }
     const objectNodeProperties: createObjectArgsType = [
         [
             tagName.getText(), context.factory.createArrayLiteralExpression(
@@ -69,7 +78,7 @@ export const jsxToObject = (
                 } else {
                     attributeValue = attributeValueNode
                 }
-                
+
                 objectNodeProperties.push([attributeName, useJsxPropRegistration(attributeValue, visitor, context)])
             }
         }
@@ -94,3 +103,18 @@ const safeInitializer = (initializer: ts.JsxChild | ts.StringLiteral | ts.JsxExp
     return initializer
 }
 
+const createJSXComponent = (
+    visitor: ts.Visitor,
+    context: CustomContextType,
+    tagName: ts.JsxTagNameExpression,
+    attributes: ts.JsxAttributes,
+    children: ts.NodeArray<ts.JsxChild>
+) => {
+    // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
+    if (ts.isIdentifier(tagName)) {
+
+    }
+    return createObject([
+        ["_C", stringLiteral("")],
+    ])
+}

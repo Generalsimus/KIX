@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.kix = void 0;
-const propRegistration_1 = __importDefault(require("./propRegistration"));
 const type = (arg) => Object.prototype.toString.call(arg);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 const routeParams = {};
@@ -68,6 +64,12 @@ const abstractNodes = {
             });
             return existNode;
         };
+    },
+    _R(objectNodeProperty, objectNode, createElementName, createElement) {
+        return propertyRegistry(objectNode[objectNodeProperty]);
+    },
+    _C(objectNodeProperty, objectNode, createElementName, createElement) {
+        return propertyRegistry(objectNode[objectNodeProperty]);
     }
 };
 const abstractAttributes = {
@@ -101,7 +103,7 @@ const abstractAttributes = {
         if (parent) {
             replaceNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
             if (replaceNode instanceof Array) {
-                (0, propRegistration_1.default)([this], replaceNode);
+                replaceArrayNodes([this], replaceNode);
             }
             else {
                 parent.replaceChild(replaceNode, this);
@@ -128,6 +130,9 @@ const abstractAttributes = {
                 return HtmlNode;
         }
     },
+    _R(objectNodeProperty, objectNode, createElementName, createElement) {
+        return propertyRegistry(objectNode[objectNodeProperty]);
+    }
 };
 for (const key in abstractAttributes) {
     (Node.prototype[key] = abstractAttributes[key]);
@@ -188,3 +193,70 @@ function createApp(createElementName) {
 const KixSVG = createApp(createSVGElement);
 exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
+function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
+    while ((valuesIndex in values) || (nodeIndex in nodes)) {
+        value = values[valuesIndex];
+        node = nodes[nodeIndex];
+        if (value instanceof Array) {
+            nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
+        }
+        else if (node) {
+            if (valuesIndex in values) {
+                returnNodes.push(node.Replace(value));
+            }
+            else {
+                node.Remove();
+            }
+            nodeIndex++;
+        }
+        else {
+            returnNodes.push(returnNodes[returnNodes.length - 1].Insert("after", value));
+        }
+        valuesIndex++;
+    }
+    return nodeIndex;
+}
+function propertyRegistry(registerFunction) {
+    let currentNodes;
+    const getRenderValue = (parent, attribute) => {
+        return registerFunction(function () {
+            const objValue = Array.prototype.reduce.call(arguments, (obj, key) => {
+                var _a;
+                let descriptor = Object.getOwnPropertyDescriptor(obj, key), value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+                if (defineRegistrations.indexOf(registerFunction) === -1) {
+                    defineRegistrations.push(registerFunction);
+                    function set(setValue) {
+                        value = setValue;
+                        descriptor.set && descriptor.set(value);
+                        if (attribute) {
+                            parent.setAttr(attribute, value);
+                        }
+                        else {
+                            replaceArrayNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
+                        }
+                    }
+                    set._R_C = defineRegistrations;
+                    Object.defineProperty(obj, key, {
+                        enumerable: true,
+                        configurable: true,
+                        registrations: defineRegistrations,
+                        get() {
+                            return value;
+                        },
+                        set
+                    });
+                }
+                return typeof value === "function" ? value.bind(obj) : value;
+            });
+            return objValue;
+        });
+    };
+    return (parent, attribute) => {
+        const value = getRenderValue(parent, attribute);
+        if (attribute) {
+            return value;
+        }
+        replaceArrayNodes((0, exports.kix)(parent, [""]), [value], (currentNodes = []));
+        return "";
+    };
+}

@@ -2,7 +2,6 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { App } from "../../app";
 import { moduleBody } from "../factoryCode/moduleBody";
-import { useJsxRegistration } from "../jsx/useJsxRegistrator";
 import { exportVisitor } from "../module/exportVisitor";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
@@ -13,7 +12,6 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     if (moduleInfo) {
         context.currentModuleInfo = moduleInfo
     }
-    const catchNewState = useJsxRegistration(context)
 
     const statements: ts.Statement[] = [
         moduleBody(
@@ -26,10 +24,6 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
             })
         )
     ]
-
-
-    catchNewState(statements)
-
 
     return context.factory.updateSourceFile(node, statements)
 }
