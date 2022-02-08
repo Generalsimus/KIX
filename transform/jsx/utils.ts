@@ -4,7 +4,7 @@ import { arrowFunction } from "../factoryCode/arrowFunction";
 import { callFunction } from "../factoryCode/callFunction";
 import { stringLiteral } from "../factoryCode/stringLiteral";
 
-export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor, context: CustomContextType) => {
+export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor, context: CustomContextType): ts.Expression => {
     const OldGetRegistrationIdentifier = context.getJSXPropRegistrationIdentifier;
     let getRegistrationIdentifier: ts.Identifier | undefined
     context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("_R")))
@@ -14,7 +14,7 @@ export const useJsxPropRegistration = (node: ts.Expression, visitor: ts.Visitor,
     }
     context.getJSXPropRegistrationIdentifier = OldGetRegistrationIdentifier;
 
-    return node
+    return newNode as typeof node
 }
 
 

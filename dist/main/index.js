@@ -3,7 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.__R = exports.kix = void 0;
 const type = (arg) => Object.prototype.toString.call(arg);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-const abstractNodes = {};
+const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName);
+const abstractNodes = {
+    svg(objectNodeProperty, objectNode, createElementName, createElement) {
+        return (parent) => {
+            if (createElementName === createSVGElement) {
+                objectNode = Object.assign({}, objectNode);
+                const node = createSVGElement(objectNodeProperty);
+                KixSVG(node, objectNode[objectNodeProperty]);
+                delete objectNode[objectNodeProperty];
+                return createElement(objectNode, parent, node);
+            }
+            else {
+                return KixSVG(parent, objectNode);
+            }
+        };
+    }
+};
 const abstractAttributes = {
     setAttr(attribute, value) {
         value = flatFunction(value, this, attribute);
@@ -11,6 +27,16 @@ const abstractAttributes = {
     },
     Append(childNode) {
         return (0, exports.kix)(this, childNode);
+    },
+    e(eventsObject) {
+        for (var eventNames in eventsObject) {
+            for (var eventName of eventNames.split("_")) {
+                if (eventsObject[eventName] instanceof Function) {
+                    this.addEventListener(eventName, eventsObject[eventName].bind(this));
+                }
+            }
+        }
+        return this;
     },
     Remove() {
         const parentNode = this.Parent();
@@ -25,21 +51,44 @@ const abstractAttributes = {
             return replaceNode;
         }
     },
+    Insert(method, node) {
+        const parent = this.Parent(), HtmlNode = (0, exports.kix)(null, flatFunction(node, parent));
+        if (!parent)
+            return;
+        switch (method) {
+            case "after":
+                const netNode = this.nextSibling;
+                if (netNode) {
+                    parent.insertBefore(HtmlNode, netNode);
+                    return HtmlNode;
+                }
+                else {
+                    return parent.Append(node);
+                }
+            case "before":
+                parent.insertBefore(HtmlNode, this);
+                return HtmlNode;
+        }
+    },
+    Parent(parentIndex) {
+        return this.parentNode;
+    },
 };
-for (const key of abstractAttributes) {
+for (const key in abstractAttributes) {
     (Node.prototype[key] = abstractAttributes[key]);
 }
-+function createApp(createElementName) {
-    function createElement(objectNode, elementNode) {
-        for (var objectNodeProperty in objectNode) {
+function createApp(createElementName) {
+    function createElement(objectNode, parent, elementNode) {
+        for (const objectNodeProperty in objectNode) {
             if (elementNode) {
                 elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
             }
             else {
-                if (abstractNodes[objectNodeProperty]) {
-                    return abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
+                if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
+                    return (0, exports.kix)(parent, abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement));
                 }
                 (0, exports.kix)((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
+                elementNode._kixNode = objectNode;
             }
         }
         return elementNode;
@@ -51,7 +100,7 @@ for (const key of abstractAttributes) {
             case "[object Function]":
                 return kix(parent, child(parent));
             case "[object Object]":
-                child = createElement(child);
+                child = createElement(child, parent);
                 break;
             case "[object Promise]":
                 child.then(function (result) {
@@ -72,63 +121,83 @@ for (const key of abstractAttributes) {
                 const textNode = document.createTextNode(String(child));
                 textNode._kixNode = child;
                 child = textNode;
+                break;
+            default:
+                if (!child instanceof Node) {
+                    return kix(parent, String(child));
+                }
         }
         return parent && parent.appendChild(child), child;
     };
-};
-const createSvgNode = createApp((nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName));
+}
+const KixSVG = createApp(createSVGElement);
 exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
-const toArrayAndFill = (node) => node instanceof Array ? 0 in node ? node : [""] : [node];
-function replaceChildNodes(values, nodes, valuesIndex, returnNodes, value, node) {
-    while ((value = values[valuesIndex]) || (node = nodes[valuesIndex])) {
+function replaceChildNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
+    while ((valuesIndex in values) || (nodeIndex in nodes)) {
+        value = values[valuesIndex];
+        node = nodes[nodeIndex];
         if (value instanceof Array) {
-            values[valuesIndex] = replaceChildNodes(values, nodes, 0, returnNodes);
+            nodeIndex = replaceChildNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
         }
-        else if (node instanceof Array) {
-            values[valuesIndex] = replaceChildNodes(values, nodes, 0, returnNodes);
+        else if (node) {
+            if (valuesIndex in values) {
+                returnNodes.push(node.Replace(value));
+            }
+            else {
+                node.Remove();
+            }
+            nodeIndex++;
         }
         else {
+            returnNodes.push(returnNodes[returnNodes.length - 1].Insert("after", value));
         }
         valuesIndex++;
     }
-    return returnNodes;
+    return nodeIndex;
 }
 function __R(registerFunction) {
+    let currentNodes;
     const getRenderValue = (parent, attribute) => {
-        console.log({ parent, attribute, registerFunction });
         return registerFunction(function () {
-            const Time = new Date().getTime();
-            console.time("objValue" + Time);
             const objValue = Array.prototype.reduce.call(arguments, (obj, key) => {
-                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                let value = obj[key], defineRegistrations = descriptor.registrations || [];
-                if (defineRegistrations.indexOf(registerFunction) !== -1)
-                    return value;
-                defineRegistrations.push(registerFunction);
-                Object.defineProperty(obj, key, {
-                    enumerable: true,
-                    configurable: true,
-                    registrations: defineRegistrations,
-                    get() {
-                        return value;
-                    },
-                    set(setValue) {
+                var _a;
+                let descriptor = Object.getOwnPropertyDescriptor(obj, key), value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+                if (defineRegistrations.indexOf(registerFunction) === -1) {
+                    defineRegistrations.push(registerFunction);
+                    function set(setValue) {
                         value = setValue;
                         descriptor.set && descriptor.set(value);
                         if (attribute) {
                             parent.setAttr(attribute, value);
                         }
                         else {
+                            replaceChildNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
                         }
                     }
-                });
-                console.timeEnd("objValue" + Time);
-                return value;
+                    set._R_C = defineRegistrations;
+                    Object.defineProperty(obj, key, {
+                        enumerable: true,
+                        configurable: true,
+                        registrations: defineRegistrations,
+                        get() {
+                            return value;
+                        },
+                        set
+                    });
+                }
+                return typeof value === "function" ? value.bind(obj) : value;
             });
             return objValue;
         });
     };
-    return getRenderValue;
+    return (parent, attribute) => {
+        const value = getRenderValue(parent, attribute);
+        if (attribute) {
+            return value;
+        }
+        replaceChildNodes((0, exports.kix)(parent, [""]), [value], (currentNodes = []));
+        return currentNodes;
+    };
 }
 exports.__R = __R;

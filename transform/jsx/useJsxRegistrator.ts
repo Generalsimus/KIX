@@ -19,7 +19,7 @@ export const useJsxRegistration = (context: CustomContextType) => {
                     registrationName,
                     elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex + "", "__R"])
                 ]
-            ]))
+            ], ts.NodeFlags.None))
 
         }
     }
