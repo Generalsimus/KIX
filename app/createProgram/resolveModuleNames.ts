@@ -25,7 +25,7 @@ const resolveModule = (moduleName: string, containingFile: string): ts.ResolvedM
         }
     } catch (e) {
         const defaultModulePaths: Record<string, string> = {
-            kix: App.kixModulePath
+            kix: App.injectPaths.kix
         }
         const defaultResolvedFileName = defaultModulePaths[moduleName]
 

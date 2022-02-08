@@ -4,9 +4,10 @@ import { ModuleInfoType } from "../utils/getModuleInfo";
 import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
+import { getInjectCodePaths } from "../utils/getInjectCodePaths";
 
 const runDirName = path.resolve("./");
-const kixModulePath = resolveKixModule(runDirName);
+// const kixModulePath = resolveKixModule(runDirName);
 export const App = {
   runDirName,
   realModuleDirName: path.resolve(__dirname, "../../"),
@@ -18,9 +19,10 @@ export const App = {
   uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
   windowModuleLocationName: "_KIX" + new Date().getTime(),
   requestsThreshold: new Map<string, express.RequestHandler>(),
+  injectPaths: getInjectCodePaths(runDirName),
   moduleThree: new Map<string, ModuleInfoType>(),
-  kixModulePath,
-  kixModuleTypePath: kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts",
+  // kixModulePath,
+  // kixModuleTypePath: kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts",
   devMode: false,
   parsedArgs: undefined as (ArgumentsCamelCase | undefined),
   start() {

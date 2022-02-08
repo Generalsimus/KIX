@@ -25,7 +25,7 @@ export function readIndexHtml() {
         jsx: ts.JsxEmit.Preserve,
         esModuleInterop: false,
         lib: [
-          App.kixModuleTypePath
+          App.injectPaths.kixType
         ],
 
         // moduleResolution:ts.ModuleResolutionKind.NodeJs,
@@ -38,7 +38,8 @@ export function readIndexHtml() {
       },
       App.devMode,
       [
-        App.kixModulePath
+        App.injectPaths.kix,
+        App.injectPaths.propRegistration,
       ]
     )
     hostProgram.watcher.createWatcher({

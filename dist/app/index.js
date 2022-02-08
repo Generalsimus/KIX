@@ -5,10 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.App = void 0;
 const path_1 = __importDefault(require("path"));
-const resolveKixModule_1 = require("../utils/resolveKixModule");
 const command_1 = require("../command");
+const getInjectCodePaths_1 = require("../utils/getInjectCodePaths");
 const runDirName = path_1.default.resolve("./");
-const kixModulePath = (0, resolveKixModule_1.resolveKixModule)(runDirName);
 exports.App = {
     runDirName,
     realModuleDirName: path_1.default.resolve(__dirname, "../../"),
@@ -19,9 +18,8 @@ exports.App = {
     uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
     windowModuleLocationName: "_KIX" + new Date().getTime(),
     requestsThreshold: new Map(),
+    injectPaths: (0, getInjectCodePaths_1.getInjectCodePaths)(runDirName),
     moduleThree: new Map(),
-    kixModulePath,
-    kixModuleTypePath: kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts",
     devMode: false,
     parsedArgs: undefined,
     start() {

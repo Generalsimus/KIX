@@ -26,11 +26,12 @@ function readIndexHtml() {
             jsx: typescript_1.default.JsxEmit.Preserve,
             esModuleInterop: false,
             lib: [
-                index_1.App.kixModuleTypePath
+                index_1.App.injectPaths.kixType
             ],
             suppressOutputPathCheck: true,
         }, index_1.App.devMode, [
-            index_1.App.kixModulePath
+            index_1.App.injectPaths.kix,
+            index_1.App.injectPaths.propRegistration,
         ]);
         hostProgram.watcher.createWatcher({
             filePath: indexHTMLPath,

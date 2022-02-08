@@ -10,6 +10,7 @@ export const ImportDeclaration = (node, visitor, context) => {
     // console.log("🚀 --> file: module.ts --> line 13 --> node", node);
 
     const importedModuleInfo = context.currentModuleInfo.moduleCollection[node.moduleSpecifier.text];
+
     var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
     if (!importedModuleInfo) {
         return ts.visitEachChild(node, visitor, context);
