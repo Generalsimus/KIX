@@ -1,9 +1,10 @@
 // TransformersObjectType
 
-import ts, { factory, Statement } from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "..";
 import { jsxToObject } from "./jsxToObject";
-import { PropertyAccessExpressionOrElementAccessExpression, safeVisitorForJSXRegisters } from "./utils"
+import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
+import { visitFunctionDeclarationForJsxRegistration } from "./utils/visitFunctionDeclarationForJsxRegistration";
 
 export const jsxTransformers = {
     [ts.SyntaxKind.JsxElement]: (node: ts.JsxElement, visitor: ts.Visitor, context: CustomContextType) => {
@@ -22,8 +23,12 @@ export const jsxTransformers = {
 
         return jsxToObject(visitor, context, node.tagName, node.attributes, [] as any)
     },
-
+    [ts.SyntaxKind.ArrowFunction]: visitFunctionDeclarationForJsxRegistration,
+    [ts.SyntaxKind.FunctionDeclaration]: visitFunctionDeclarationForJsxRegistration,
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
 
 }
+
+
+

@@ -32,7 +32,7 @@ export function emitPolyfills(writer: rootWriter, host: createProgramHost) {
             sourceFile,
             (__fileName, content) => {
                 if (path.extname(__fileName) === ".js") {
-                    writer.writeJsCode(content)
+                    writer.writeJsCode(__fileName, content)
                 }
             }
         )

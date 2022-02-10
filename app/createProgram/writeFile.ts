@@ -18,13 +18,13 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
 
             if (!moduleInfo) continue;
             if (moduleInfo.isNodeModule) {
-                this.moduleRootWriter.writeJsCode(content);
+                this.moduleRootWriter.writeJsCode(sourceFile.fileName, content);
                 continue;
             }
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
 
                 console.log({ content })
-                writer.writeJsCode(content);
+                writer.writeJsCode(sourceFile.fileName, content);
             });
 
         }

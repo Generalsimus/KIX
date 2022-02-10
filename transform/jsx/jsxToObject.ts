@@ -5,7 +5,9 @@ import { callClass } from "../factoryCode/callClass";
 import { callFunction } from "../factoryCode/callFunction";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { stringLiteral } from "../factoryCode/stringLiteral";
-import { createJsxChildrenNode, forEachJsxAttributes, safeInitializer, useJsxPropRegistration } from "./utils";
+import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
+import { forEachJsxAttributes } from "./utils/forEachJsxAttributes";
+import { useJsxPropRegistration } from "./utils/useJsxPropRegistration";
 
 
 
@@ -62,7 +64,6 @@ export const jsxToObject = (
                     objectNodeProperties.push([attributeName, node])
                 }
             })
-            // objectNodeProperties.push([attributeName, useJsxPropRegistration(attributeValue, visitor, context)])
         }
     })
     if (dynamicObjectNodeProperties.length) {
@@ -86,36 +87,11 @@ const createJSXComponent = (
     attributes: ts.JsxAttributes,
     children: ts.NodeArray<ts.JsxChild>
 ) => {
-    // @ts-ignore
-    /*
-    const ex = {
-        _C: (registerobject) => new dsssss(regisrator((registerProp) => ({
-            children: [],
-            regExa: registerProp(sss, "aa", "zzz", "ww", "sss")
-            // ...props
-        })))
-    }
-     
-    arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)
-    */
-
-    /*
-       const ex = { _C: (regisrator) =>((new dsssss(regisrator({
-           children:
-       }))) }
-    */
-    // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
-    // if (ts.isIdentifier(tagName)) {
-
-    // }
-
     const childrenNode = createJsxChildrenNode(
         visitor,
         context,
         children
     )
-
-
 
     const propsObjectNodesForFactoryCode: [string, ts.Expression][] = [
         ["children", childrenNode]
@@ -149,5 +125,4 @@ const createJSXComponent = (
             ])
         }
     )
-
 }

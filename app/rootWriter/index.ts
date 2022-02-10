@@ -22,13 +22,8 @@ export class rootWriter {
         })
 
     }
-    writeJsCode(content: string) {
-        //     console.log("🚀 --> file: index.ts --> line 21 --> rootWriter --> writeJsCode --> content", content);
-        //    console.log( App.moduleThree.get(App.moduleControllerPath))
-        //     console.log("🚀 --> file: index.ts --> line 26 --> rootWriter --> writeJsCode --> moduleControllerModuleInfo", this.moduleControllerModuleInfo);
-        this.code += content.replace(this.sourceMapCommentRegExp, "");
-
-
+    writeJsCode(fileName: string | undefined, content: string) { 
+        this.code += content.replace(this.sourceMapCommentRegExp, ""); 
     }
     writeSourceMap(fileName: string, content: string) {
         // writeSourceMap

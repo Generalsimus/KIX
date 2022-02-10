@@ -69,7 +69,7 @@ const abstractNodes = {
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
     _C(objectNodeProperty, objectNode, createElementName, createElement) {
-        return propertyRegistry(objectNode[objectNodeProperty]);
+        return objectNode[objectNodeProperty](registerProps);
     }
 };
 const abstractAttributes = {
@@ -195,6 +195,43 @@ function createApp(createElementName) {
 const KixSVG = createApp(createSVGElement);
 exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
+function registerProps(registerFunction) {
+    const prop = registerFunction(function () {
+        return [getPropValue, arguments];
+    });
+    function getPropValue(propName, args) {
+        return Array.prototype.reduce.call(args, (obj, key) => {
+            var _a;
+            let descriptor = Object.getOwnPropertyDescriptor(obj, key), value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+            if (defineRegistrations.indexOf(registerFunction) === -1) {
+                defineRegistrations.push(registerFunction);
+                function set(setValue) {
+                    value = setValue;
+                    descriptor.set && descriptor.set(value);
+                    prop[propName] = getPropValue(propName, args);
+                }
+                set._R_C = defineRegistrations;
+                Object.defineProperty(obj, key, {
+                    enumerable: true,
+                    configurable: true,
+                    registrations: defineRegistrations,
+                    get() {
+                        return value;
+                    },
+                    set
+                });
+            }
+            return value;
+        });
+    }
+    for (const propName in prop) {
+        const value = prop[propName];
+        if (value instanceof Array && value[0] === getPropValue) {
+            prop[propName] = getPropValue(propName, value[1]);
+        }
+    }
+    return prop;
+}
 function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
     while ((valuesIndex in values) || (nodeIndex in nodes)) {
         value = values[valuesIndex];

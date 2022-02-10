@@ -17,7 +17,6 @@ export const runCommands = () => {
             App.devMode = true;
         case "build":
             readIndexHtml();
-           
             break;
     }
 

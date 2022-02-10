@@ -87,7 +87,9 @@ const abstractNodes = {
 
         // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
 
-        return propertyRegistry(objectNode[objectNodeProperty])
+
+
+        return objectNode[objectNodeProperty](registerProps)
     }
 }
 const abstractAttributes = {
@@ -227,8 +229,44 @@ export default kix;
 /*
 დინამიური jsx კომპონენტების prop ები სარეგისტრაციო
 */
-function registerProps() {
+function registerProps(registerFunction) {
+    const prop = registerFunction(function () {
+        return [getPropValue, arguments]
+    })
+    function getPropValue(propName, args) {
+        return Array.prototype.reduce.call(args, (obj, key) => {
+            let descriptor = Object.getOwnPropertyDescriptor(obj, key),
+                value = obj[key],
+                defineRegistrations = descriptor?.set?._R_C || [];
+            if (defineRegistrations.indexOf(registerFunction) === -1) {
+                defineRegistrations.push(registerFunction);
+                function set(setValue) {
+                    value = setValue;
+                    descriptor.set && descriptor.set(value)
+                    prop[propName] = getPropValue(propName, args);
+                }
+                set._R_C = defineRegistrations
+                Object.defineProperty(obj, key, {
+                    enumerable: true,
+                    configurable: true,
+                    registrations: defineRegistrations,
+                    get() {
+                        return value;
+                    },
+                    set
+                })
+            }
 
+            return value
+        })
+    }
+    for (const propName in prop) {
+        const value = prop[propName];
+        if (value instanceof Array && value[0] === getPropValue) {
+            prop[propName] = getPropValue(propName, value[1])
+        }
+    }
+    return prop;
 }
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
