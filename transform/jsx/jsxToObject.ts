@@ -1,8 +1,11 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
+import { arrowFunction } from "../factoryCode/arrowFunction";
+import { callClass } from "../factoryCode/callClass";
+import { callFunction } from "../factoryCode/callFunction";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { stringLiteral } from "../factoryCode/stringLiteral";
-import { useJsxPropRegistration } from "./utils";
+import { createJsxChildrenNode, forEachJsxAttributes, safeInitializer, useJsxPropRegistration } from "./utils";
 
 
 
@@ -13,27 +16,11 @@ export const jsxToObject = (
     attributes: ts.JsxAttributes,
     children: ts.NodeArray<ts.JsxChild>
 ) => {
-    const newChildren = children.reduce((newChildren: ts.Expression[], child, index) => {
-        let currentChild = safeInitializer(child)
-        if (!currentChild) {
-            return newChildren
-        }
-
-        if (ts.SyntaxKind.JsxText === currentChild.kind) {
-            if (index === 0 || index === (children.length - 1)) {
-                const jsxText = currentChild.getText().trim()
-                if (jsxText.length === 0) {
-                    return newChildren
-                }
-            }
-            newChildren.push(stringLiteral(currentChild.getText()))
-        } else {
-
-            newChildren.push(useJsxPropRegistration(currentChild, visitor, context))
-        }
-
-        return newChildren
-    }, [])
+    const childrenNode = createJsxChildrenNode(
+        visitor,
+        context,
+        children
+    )
     const tagNameToString = tagName.getText();
     if (/[A-Z]/.test(tagNameToString)) {
         return createJSXComponent(
@@ -44,44 +31,42 @@ export const jsxToObject = (
             children
         )
     }
+    // newChildren.length === 1 ? newChildren[0] : context.factory.createArrayLiteralExpression(newChildren),
     const objectNodeProperties: createObjectArgsType = [
-        [
-            tagName.getText(), context.factory.createArrayLiteralExpression(
-                newChildren,
-                false
-            )
-        ]
+        [tagName.getText(), childrenNode]
     ]
 
     const eventObjectNodeProperties: createObjectArgsType = []
-    for (const attribute of attributes.properties) {
-        if (attribute.kind === ts.SyntaxKind.JsxAttribute) {
-            const attributeName = attribute.name.getText()
-            const attributeValueNode = safeInitializer(attribute.initializer)
+    const dynamicObjectNodeProperties: createObjectArgsType = []
+    forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
+        if (/^(on+[A-Z])/.test(attributeName)) {
 
-            if (!attributeValueNode) continue;
-            if (/^(on+[A-Z])/.test(attributeName)) {
-                if (ts.isJsxText(attributeValueNode)) continue;
-
-                eventObjectNodeProperties.push([attributeName.replace(/^on/, "").toLowerCase(), attributeValueNode])
-            } else if (attributeName === "e") {
-                if (ts.isJsxText(attributeValueNode)) continue;
-                if (ts.isObjectLiteralExpression(attributeValueNode)) {
-                    eventObjectNodeProperties.push(...attributeValueNode.properties)
-                } else {
-                    eventObjectNodeProperties.push(attributeValueNode)
-                }
+            eventObjectNodeProperties.push([attributeName.replace(/^on/, "").toLowerCase(), attributeValueNode])
+        } else if (attributeName === "e") {
+            if (ts.isObjectLiteralExpression(attributeValueNode)) {
+                eventObjectNodeProperties.push(...attributeValueNode.properties)
             } else {
-                let attributeValue: ts.Expression | undefined
-                if (ts.isJsxText(attributeValueNode)) {
-                    attributeValue = stringLiteral(attributeValueNode.getText())
-                } else {
-                    attributeValue = attributeValueNode
-                }
-
-                objectNodeProperties.push([attributeName, useJsxPropRegistration(attributeValue, visitor, context)])
+                eventObjectNodeProperties.push(attributeValueNode)
             }
+        } else {
+            let attributeValue: ts.Expression | undefined
+            if (ts.isJsxText(attributeValueNode)) {
+                attributeValue = stringLiteral(attributeValueNode.getText())
+            } else {
+                attributeValue = attributeValueNode
+            }
+            useJsxPropRegistration(attributeValue, visitor, context, (node, isRegisterNode) => {
+                if (isRegisterNode) {
+                    dynamicObjectNodeProperties.push([attributeName, node])
+                } else {
+                    objectNodeProperties.push([attributeName, node])
+                }
+            })
+            // objectNodeProperties.push([attributeName, useJsxPropRegistration(attributeValue, visitor, context)])
         }
+    })
+    if (dynamicObjectNodeProperties.length) {
+        objectNodeProperties.push(["_R", createObject(dynamicObjectNodeProperties)])
     }
     if (eventObjectNodeProperties.length) {
         objectNodeProperties.push(["e", createObject(eventObjectNodeProperties)])
@@ -92,16 +77,7 @@ export const jsxToObject = (
 }
 
 
-const safeInitializer = (initializer: ts.JsxChild | ts.StringLiteral | ts.JsxExpression | undefined) => {
-    if (!initializer) return;
-    if (initializer.kind === ts.SyntaxKind.JsxExpression) {
-        if (!initializer.expression) {
-            return
-        }
-        return initializer.expression
-    }
-    return initializer
-}
+
 
 const createJSXComponent = (
     visitor: ts.Visitor,
@@ -110,11 +86,68 @@ const createJSXComponent = (
     attributes: ts.JsxAttributes,
     children: ts.NodeArray<ts.JsxChild>
 ) => {
-    // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
-    if (ts.isIdentifier(tagName)) {
-
+    // @ts-ignore
+    /*
+    const ex = {
+        _C: (registerobject) => new dsssss(regisrator((registerProp) => ({
+            children: [],
+            regExa: registerProp(sss, "aa", "zzz", "ww", "sss")
+            // ...props
+        })))
     }
-    return createObject([
-        ["_C", stringLiteral("")],
-    ])
+     
+    arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression)
+    */
+
+    /*
+       const ex = { _C: (regisrator) =>((new dsssss(regisrator({
+           children:
+       }))) }
+    */
+    // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
+    // if (ts.isIdentifier(tagName)) {
+
+    // }
+
+    const childrenNode = createJsxChildrenNode(
+        visitor,
+        context,
+        children
+    )
+
+
+
+    const propsObjectNodesForFactoryCode: [string, ts.Expression][] = [
+        ["children", childrenNode]
+    ]
+
+    forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
+        propsObjectNodesForFactoryCode.push([attributeName, attributeValueNode])
+    })
+    const componentRegistryIdentifier = context.factory.createUniqueName("RC")
+    return useJsxPropRegistration(
+        createObject(propsObjectNodesForFactoryCode),
+        visitor,
+        context,
+        (node, isJSXregistererNode) => {
+            const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction
+            return createObject([
+                [
+                    "_C",
+                    arrowFunction(
+                        [componentRegistryIdentifier],
+                        [],
+                        createComponentNode(tagName, (isJSXregistererNode ? [
+                            callFunction(
+                                componentRegistryIdentifier,
+                                [node]
+                            )
+                        ] : [node]))
+
+                    )
+                ],
+            ])
+        }
+    )
+
 }

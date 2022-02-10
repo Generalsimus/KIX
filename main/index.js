@@ -70,7 +70,7 @@ const abstractNodes = {
 
             window.addEventListener("popstate", (routeEvent) => {
 
-                const newNode = createRouterNode(routeEvent.detail?._routeID)
+                const newNode = createRouterNode(routeEvent.detail?._routeID);
                 if (existNode !== newNode) {
 
                     existNode = existNode.Replace(newNode);
@@ -148,8 +148,10 @@ const abstractAttributes = {
                 return HtmlNode;
         }
     },
-    _R(objectNodeProperty, objectNode, createElementName, createElement) {
-        return propertyRegistry(objectNode[objectNodeProperty])
+    _R(value) {
+        for (const attributeName in value) {
+            this.setAttr(attributeName, propertyRegistry(value[attributeName]));
+        }
     }
 }
 for (const key in abstractAttributes) { (Node.prototype[key] = abstractAttributes[key]) }
@@ -221,7 +223,14 @@ export const kix = createApp(document.createElement.bind(document));
 export default kix;
 
 
+//////////////////////////////////////////////////////////////////////////////////////
+/*
+დინამიური jsx კომპონენტების prop ები სარეგისტრაციო
+*/
+function registerProps() {
 
+}
+//////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 /*
 ანაცვლებს მასივურ ელემენტებს ახლით

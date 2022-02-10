@@ -11,8 +11,6 @@ export type CustomContextType = ts.TransformationContext & {
     currentModuleInfo: ModuleInfoType
     /*   ფროფერთის სადეკლარაციო Identifier-ი */
     getJSXPropRegistrationIdentifier?: () => ts.Identifier
-    /*   ფროფერთის სადეკლარაციო Identifier-ი სა call ფუნქციიის სახელის Identifier-ი */
-    getJSXRegistrationDeclarationIdentifier: () => ts.Identifier
 }
 
 export const getTransformer = () => {

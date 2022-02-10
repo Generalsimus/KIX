@@ -130,8 +130,10 @@ const abstractAttributes = {
                 return HtmlNode;
         }
     },
-    _R(objectNodeProperty, objectNode, createElementName, createElement) {
-        return propertyRegistry(objectNode[objectNodeProperty]);
+    _R(value) {
+        for (const attributeName in value) {
+            this.setAttr(attributeName, propertyRegistry(value[attributeName]));
+        }
     }
 };
 for (const key in abstractAttributes) {
