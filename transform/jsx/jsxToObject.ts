@@ -1,14 +1,11 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { arrowFunction } from "../factoryCode/arrowFunction";
-import { callClass } from "../factoryCode/callClass";
-import { callFunction } from "../factoryCode/callFunction";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { stringLiteral } from "../factoryCode/stringLiteral";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { forEachJsxAttributes } from "./utils/forEachJsxAttributes";
 import { useJsxPropRegistration } from "./utils/useJsxPropRegistration";
-
+import { createJSXComponent } from "./utils/createJSXComponent";
 
 
 export const jsxToObject = (
@@ -78,51 +75,3 @@ export const jsxToObject = (
 }
 
 
-
-
-const createJSXComponent = (
-    visitor: ts.Visitor,
-    context: CustomContextType,
-    tagName: ts.JsxTagNameExpression,
-    attributes: ts.JsxAttributes,
-    children: ts.NodeArray<ts.JsxChild>
-) => {
-    const childrenNode = createJsxChildrenNode(
-        visitor,
-        context,
-        children
-    )
-
-    const propsObjectNodesForFactoryCode: [string, ts.Expression][] = [
-        ["children", childrenNode]
-    ]
-
-    forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
-        propsObjectNodesForFactoryCode.push([attributeName, attributeValueNode])
-    })
-    const componentRegistryIdentifier = context.factory.createUniqueName("RC")
-    return useJsxPropRegistration(
-        createObject(propsObjectNodesForFactoryCode),
-        visitor,
-        context,
-        (node, isJSXregistererNode) => {
-            const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction
-            return createObject([
-                [
-                    "_C",
-                    arrowFunction(
-                        [componentRegistryIdentifier],
-                        [],
-                        createComponentNode(tagName, (isJSXregistererNode ? [
-                            callFunction(
-                                componentRegistryIdentifier,
-                                [node]
-                            )
-                        ] : [node]))
-
-                    )
-                ],
-            ])
-        }
-    )
-}

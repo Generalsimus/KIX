@@ -15,7 +15,7 @@ import { getLocalFileWatcher } from "./getLocalFileWatcher";
 import { Server } from "../../server";
 import { writeFile } from "./writeFile";
 import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
-import { CacheController } from "./cacheController";
+// import { CacheController } from "./cacheController";
 import { buildModules } from "./buildModules";
 import { rootWriter } from "../rootWriter";
 import { FileWatcher } from "./fileWatcher";
@@ -35,7 +35,7 @@ import { getDefaultLibFileName } from "./getDefaultLibFileName";
 //   return fs.existsSync(fileName) ? parseConfigFileTextToJson(fileName, readFileSync(fileName, "utf8")).config : {}
 // }
 // ParsedCommandLine
-export const unicssssss = ts.factory.createUniqueName("unicssssss");
+// export const unicssssss = ts.factory.createUniqueName("unicssssss");
 export class createProgramHost {
   rootNames: string[];
   moduleRootNamesSet: Set<string>;
@@ -46,22 +46,18 @@ export class createProgramHost {
   configFileParsingDiagnostics = new Set<ts.Diagnostic>()
   reportDiagnoseTime: string = ""
   watch: boolean
-  cacheController: CacheController
+  // cacheController: CacheController
   moduleRootWriter: rootWriter
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
-
     this.options = options;
-    useConfigFileParser(this)
+    useConfigFileParser(this);
     this.defaultLibLocation = normalizeSlashes(path.dirname(ts.sys.getExecutingFilePath()));
     this.defaultLibFileName = getDefaultLibFileName(this.defaultLibLocation, this.options);
-    // normalizeSlashes(path.join(this.defaultLibLocation, ts.getDefaultLibFileName(this.options)));
     this.watch = watch
     this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
-    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this)
-    this.cacheController = new CacheController(this, {
-      getSourceFile: 0,
-    })
+    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [], true)
+
 
     this.createProgram()
     this.emit();
@@ -69,6 +65,7 @@ export class createProgramHost {
     this.buildModules(defaultModuleRootNames.length)
     this.getReportDiagnoseTime();
   }
+  sourceFileCache = new Map<string, ts.SourceFile>()
   watcher = new FileWatcher();
   localFileWatcher = getLocalFileWatcher(this)
   server = new Server(this)
@@ -107,6 +104,7 @@ export class createProgramHost {
     })
   }
   close() {
+    this.sourceFileCache.clear();
     this.watcher.close()
     this.server.close()
   }

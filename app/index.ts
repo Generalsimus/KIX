@@ -1,7 +1,6 @@
 import path from "path";
 import express from "express"
 import { ModuleInfoType } from "../utils/getModuleInfo";
-import { resolveKixModule } from "../utils/resolveKixModule";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
 import { getInjectCodePaths } from "../utils/getInjectCodePaths";

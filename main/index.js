@@ -92,6 +92,8 @@ const abstractNodes = {
         return objectNode[objectNodeProperty](registerProps)
     }
 }
+//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს
+
 const abstractAttributes = {
     getAttr(a) {
         return this.getAttribute(a);
