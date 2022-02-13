@@ -1,7 +1,7 @@
 export const resolveQuotesInFileContent = (fileContent: string) => {
-  var STYLE = fileContent,
-    reg =
-      /(?![a-zA-Z]).(url\s*\(\s*)(?:(['"])((?:(?!\2).)*)(\2)|([^'"](?:(?!\)).)*[^'"]))(\s*\))/g,
+  let STYLE = fileContent,
+    reg = /(\burl\s*\(\s*)(?:(['"])((?:(?!\2).)*)(\2)|([^'"](?:(?!\)).)*[^'"]))(\s*\))/g,
+    // /(?![a-zA-Z]).(url\s*\(\s*)(?:(['"])((?:(?!\2).)*)(\2)|([^'"](?:(?!\)).)*[^'"]))(\s*\))/g,
     exec_url,
     NEW_STYLE = "",
     START_INDEX = 0;

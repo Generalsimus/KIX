@@ -9,6 +9,7 @@ export function createRequestListeners(this: rootWriter) {
             this.createCode();
         }
         res.end(this.responseJSCode);
+        // console.log({ responseJSCode: this.responseJSCode });
     })
     if (this.host.options.sourceMap) {
         App.requestsThreshold.set(requestPath + ".map", (req, res) => {
