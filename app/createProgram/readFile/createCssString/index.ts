@@ -1,14 +1,13 @@
-import path from "path";
-import { filePathToUrl } from "../../../../utils/filePathToUrl";
+import { createProgramHost } from "../..";
 import { App } from "../../..";
 import { parseCssFile } from "./parseCssFile";
-import { btoa } from "buffer";
 
 export const createCssString = (
   fileName: string,
-  fileContent: string
+  fileContent: string,
+  host: createProgramHost,
 ): string => {
-  const { css, sourceMap } = parseCssFile(fileName, fileContent);
+  const { css, sourceMap } = parseCssFile(fileName, fileContent, host);
   const styleString = String(css);
   if (App.devMode) {
     // let sourceMappingURL =

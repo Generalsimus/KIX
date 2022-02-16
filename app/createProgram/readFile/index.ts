@@ -1,28 +1,32 @@
 import fs from "fs";
 import path from "path";
-import { App } from "../..";
+import { createProgramHost } from "..";
 import { createCssString } from "./createCssString";
+import { createUrlLoader } from "./createUrlLoader";
 
 
 
-export const newSourceFilesPathSet = new Set<string>();
 
-export const readFile = (fileName: string): string => {
+
+export function readFile(this: createProgramHost, fileName: string): string {
   // console.log("🚀 --> file: index.ts --> line 11 --> readFile --> fileName", fileName);
   // App.moduleThree.get()
   // if (!fs.existsSync(fileName)) { return }
-  newSourceFilesPathSet.add(fileName)
+  // newSourceFilesPathSet.add(fileName)
 
-  let codeScript = fs.readFileSync(fileName, "utf8");
+  // let codeScript = fs.readFileSync(fileName, "utf8");
 
   switch (path.extname(fileName)) {
     case ".css":
     case ".scss":
-      return createCssString(fileName, codeScript);
-    // case ".ts":
-    // case ".tsx":
-    // case ".js":
-    // case ".jsx":
+      return createCssString(fileName, fs.readFileSync(fileName, "utf8"), this);
+    case ".ts":
+    case ".tsx":
+    case ".js":
+    case ".jsx":
+      return fs.readFileSync(fileName, "utf8")
+    default:
+      return createUrlLoader(fileName)
   }
-  return codeScript;
+  // return codeScript;
 };

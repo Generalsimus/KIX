@@ -24,6 +24,7 @@ import { useRootFileWriter } from "./useRootFileWriter";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
 import { getDefaultLibFileName } from "./getDefaultLibFileName";
 import { getSourceFileByPath } from "./getSourceFileByPath";
+import { watcherCallBack } from "./watcherCallBack";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -68,7 +69,9 @@ export class createProgramHost {
   }
   sourceFileCache = new Map<string, ts.SourceFile>()
   watcher = new FileWatcher();
+  watcherCallBack = watcherCallBack
   localFileWatcher = getLocalFileWatcher(this)
+  staticFileWatcher = this.watcher.createSingleFileCallbackWatcher()
   server = new Server(this)
   transformer = getTransformer()
   buildModules = buildModules
