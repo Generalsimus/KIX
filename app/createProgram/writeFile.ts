@@ -1,10 +1,8 @@
-import path from "path";
 import ts from "typescript";
 import { createProgramHost } from ".";
 import { App } from "..";
 import { ModuleInfoType } from "../../utils/getModuleInfo";
 import { rootWriter } from "../rootWriter";
-import { getRootWriterFileName } from "../rootWriter/utils/getRootWriterFileName";
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {

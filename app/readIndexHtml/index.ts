@@ -51,23 +51,7 @@ export function readIndexHtml() {
     return hostProgram
   }
 
-  // const callBack = () => {
-  //   App.resetRequestsThreshold();
-  //   useRootFileWriter(this.rootNames = fixRootNames(readJsDomHtml(indexHTMLPath)));
-
-  //   this.createProgram()
-  //   this.emit();
-  //   this.diagnose()
-  //   this.buildModules(1)
-  //   this.getReportDiagnoseTime();
-  // }
-
-  // this.watcher.createWatcher({
-  //   filePath: indexHTMLPath,
-  //   callBack: callBack
-  // })
-
-  // callBack()
+  
   createHostProgram()
 
 };

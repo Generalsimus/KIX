@@ -10,11 +10,11 @@ import { getCanonicalFileName } from "./getCanonicalFileName";
 import { resolveModuleNames } from "./resolveModuleNames";
 import { getTransformer } from "../../transform";
 import { useConfigFileParser } from "./useConfigFileParser";
-import { diagnose } from "./diagnose";
+import { endBuildProcess } from "./endBuildProcess";
 import { getLocalFileWatcher } from "./getLocalFileWatcher";
 import { Server } from "../../server";
 import { writeFile } from "./writeFile";
-import { getReportDiagnoseTime } from "./getReportDiagnoseTime";
+import { startBuildProcess } from "./startBuildProcess";
 // import { CacheController } from "./cacheController";
 import { buildModules } from "./buildModules";
 import { rootWriter } from "../rootWriter";
@@ -23,6 +23,7 @@ import { fixRootNames } from "./fixRootNames";
 import { useRootFileWriter } from "./useRootFileWriter";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
 import { getDefaultLibFileName } from "./getDefaultLibFileName";
+import { getSourceFileByPath } from "./getSourceFileByPath";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -59,11 +60,11 @@ export class createProgramHost {
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [], true)
 
 
+    this.startBuildProcess();
     this.createProgram()
     this.emit();
-    this.diagnose()
+    this.endBuildProcess()
     this.buildModules(defaultModuleRootNames.length)
-    this.getReportDiagnoseTime();
   }
   sourceFileCache = new Map<string, ts.SourceFile>()
   watcher = new FileWatcher();
@@ -71,8 +72,9 @@ export class createProgramHost {
   server = new Server(this)
   transformer = getTransformer()
   buildModules = buildModules
-  getReportDiagnoseTime = getReportDiagnoseTime
+  startBuildProcess = startBuildProcess
   getSourceFile = getSourceFile
+  getSourceFileByPath = getSourceFileByPath
   readFile = readFile
   getCurrentDirectory = getCurrentDirectory
   getDefaultLibLocation = () => this.defaultLibLocation
@@ -82,7 +84,7 @@ export class createProgramHost {
   getCanonicalFileName = getCanonicalFileName
   useCaseSensitiveFileNames = () => ts.sys.useCaseSensitiveFileNames
   resolveModuleNames = resolveModuleNames
-  diagnose = diagnose
+  endBuildProcess = endBuildProcess
   reportDiagnostics = reportDiagnostics
   writeFile = writeFile
   emit(sourceFile?: ts.SourceFile) {
@@ -101,6 +103,7 @@ export class createProgramHost {
       options: this.options,
       oldProgram,
       host: this,
+      projectReferences: this.oldProgram?.getProjectReferences()
     })
   }
   close() {
@@ -108,35 +111,4 @@ export class createProgramHost {
     this.watcher.close()
     this.server.close()
   }
-}
-// d?
-
-
-// const runnnn = (rootNames: string[]) => {
-
-//   // export const createProgram = (rootFilesPath: string[]) => {
-//   const configPath = getTsconfigFilePath();
-
-//   // createCompilerHostFromProgramHost
-//   const host = ts.createWatchCompilerHost(
-//     // undefined,
-//     configPath,
-//     { rootNames },
-//     ts.sys,
-//     ts.createSemanticDiagnosticsBuilderProgram,
-//     // reportDiagnostic,
-//     // () => { },
-//   );
-
-//   //   // ts.getParsedCommandLineOfConfigFile(configFileName, optionsToExtendForConfigFile, parseConfigFileHost, extendedConfigCache || (extendedConfigCache = new ts.Map()), watchOptionsToExtend, extraFileExtensions)
-//   //   // host.resolveModuleNames = createModuleNamesResolver(host);
-//   //   // host.readFile = readFile;
-
-//   const watchProgram = ts.createWatchProgram(host)
-//   //   // const program = watchProgram.getProgram()
-//   //   // createCompiler(program, rootFilesPath)
-
-
-//   //   return watchProgram;
-//   // };
-// }
+} 
