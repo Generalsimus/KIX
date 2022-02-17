@@ -27,11 +27,9 @@ export const readKixModules = (window: DOMWindow): string[] => {
 
       scriptElement.setAttribute("src", fileNameToUrlPath(getOutputFileName(filePathName)))
 
-      // App.moduleThree.set(filePathName, createModuleInfo(filePathName))
+      
 
-      programFiles.add(
-        filePathName
-      );
+      programFiles.add(filePathName);
     });
   return [...programFiles];
 };

@@ -11,23 +11,23 @@ export function getSourceFile(this: createProgramHost, fileName: string, languag
     if (sourceFile) {
         return sourceFile
     }
-    var text;
+
     try {
 
-        text = this.readFile(fileName);
+
+        sourceFile = ts.createSourceFile(fileName, this.readFile(fileName), languageVersion, true);
+
+        this.sourceFileCache.set(fileName, sourceFile)
+        return sourceFile
     }
     catch (e: any) {
-        // console.log("🚀 --> file: getSourceFile.ts --> line 20 --> getSourceFile --> e", e);
+
         if (onError) {
             onError(e.message);
         }
-        text = "";
+
     }
 
 
-    if (!sourceFile) {
-        sourceFile = ts.createSourceFile(fileName, text, languageVersion, true);
-        this.sourceFileCache.set(fileName, sourceFile)
-    }
-    return sourceFile
+    return ts.createSourceFile(fileName, "", languageVersion, true)
 } 

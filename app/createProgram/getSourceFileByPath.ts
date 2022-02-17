@@ -9,6 +9,6 @@ export function getSourceFileByPath(
     onError?: (message: string) => void,
     shouldCreateNewSourceFile?: boolean
 ): ts.SourceFile | undefined {
-    // resolvedPath
+    
     return this.sourceFileCache.get(fileName)
 }

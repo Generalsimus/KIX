@@ -8,6 +8,7 @@ import { filePathToUrl } from "../../utils/filePathToUrl";
 import { getMapUrl } from "./utils/getMapUrl";
 import { createMapCode } from "./createMapCode";
 import { getCodeSource } from "./getCodeSource";
+import { getRunCodeEmitFilePathIndexes } from "./utils/getRunCodeEmitFilePathIndexes";
 
 export class rootWriter {
     outFileName: string;
@@ -24,12 +25,15 @@ export class rootWriter {
     responseJSCode: string | undefined
     responseMAPCode: string | undefined
     runCode: string
-    constructor(outFileName: string, host: createProgramHost, emitFileIndexes: number[] = [], isNodeModules: boolean = false) {
+    constructor(outFileName: string, host: createProgramHost, emitFilePatsOrIndexes: (string | number)[] = [], isNodeModules: boolean = false) {
         this.host = host;
         this.outFileName = outFileName;
         this.isNodeModules = isNodeModules;
         this.requestPath = filePathToUrl(outFileName);
-        this.runCode = emitFileIndexes.map(moduleIndex => `${App.uniqAccessKey}[${moduleIndex}]`).join("\n")
+
+        
+        this.runCode = getRunCodeEmitFilePathIndexes(emitFilePatsOrIndexes)
+        // .map(moduleIndex => `${App.uniqAccessKey}[${moduleIndex}];`).join("\n")
         emitPolyfills(this, host);
 
         this.createRequestListeners();

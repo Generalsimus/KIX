@@ -48,7 +48,6 @@ export class createProgramHost {
   configFileParsingDiagnostics = new Set<ts.Diagnostic>()
   reportDiagnoseTime: string = ""
   watch: boolean
-  // cacheController: CacheController
   moduleRootWriter: rootWriter
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
     this.options = options;
