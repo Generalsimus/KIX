@@ -19,7 +19,7 @@ App.start()
 // };
 
 // const configPath = ts.findConfigFile(
-//   /*searchPath*/ "../",
+//   /*searchPath*/ "..//",
 //   ts.sys.fileExists,
 //   "tsconfig.json"
 // );
