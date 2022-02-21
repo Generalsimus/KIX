@@ -26,6 +26,7 @@ export const useConfigFileParser = (host: createProgramHost) => {
 
         host.options = compilerOptions;
         
+
         return configFile
     }
     const { configFileName } = onConfigFileChange()

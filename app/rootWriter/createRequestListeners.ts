@@ -4,19 +4,21 @@ import { filePathToUrl } from "../../utils/filePathToUrl";
 
 export function createRequestListeners(this: rootWriter) {
     const requestPath = filePathToUrl(this.outFileName);
-    App.requestsThreshold.set(requestPath, (req, res) => {
+    App.requestsThreshold.set(requestPath, () => {
         if (!this.responseJSCode) {
             this.createCode();
         }
-        res.end(this.responseJSCode);
+        // res.end(this.responseJSCode);
         // console.log({ responseJSCode: this.responseJSCode });
+        return this.responseJSCode!;
     })
     if (this.host.options.sourceMap) {
-        App.requestsThreshold.set(requestPath + ".map", (req, res) => {
+        App.requestsThreshold.set(requestPath + ".map", () => {
             if (!this.responseMAPCode) {
                 this.createMapCode();
             }
-            res.end(this.responseMAPCode)
+            // res.end(this.responseMAPCode)
+            return this.responseMAPCode!;
         })
     }
 

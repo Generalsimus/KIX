@@ -4,6 +4,7 @@ import { createAppTemplate } from "../app/template";
 import { readIndexHtml } from "../app/readIndexHtml";
 import { createProgramHost } from "../app/createProgram";
 import ts from "typescript";
+import { buildProd } from "../app/build";
 
 export const runCommands = () => {
     if (!App.parsedArgs) {
@@ -15,8 +16,11 @@ export const runCommands = () => {
             break;
         case "start":
             App.devMode = true;
+            readIndexHtml();
+            break;
         case "build":
             readIndexHtml();
+            buildProd();
             break;
     }
 

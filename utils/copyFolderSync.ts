@@ -9,6 +9,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
         return
     }
     if (stat.isFile()) {
+        console.log({ from, to })
         fs.copyFileSync(from, to)
     } else if (stat.isSymbolicLink()) {
         fs.symlinkSync(
@@ -18,7 +19,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
     } else if (stat.isDirectory()) {
         try {
             fs.mkdirSync(to);
-        } catch (e) { } 
+        } catch (e) { }
         fs.readdirSync(from).forEach((element) => {
             copyFolderSync(path.join(from, element), path.join(to, element), ignorePaths);
         })

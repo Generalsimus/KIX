@@ -181,6 +181,7 @@ function createApp(createElementName) {
 
 
     return function kix(parent, child) {
+
         switch (type(child)) {
             case "[object Array]":
                 return child.map((childNode) => kix(parent, childNode));
@@ -225,7 +226,7 @@ function createApp(createElementName) {
 const KixSVG = createApp(createSVGElement);
 export const kix = createApp(document.createElement.bind(document));
 export default kix;
-
+export const styleCssDom = kix(document.body, { style: "" });
 
 //////////////////////////////////////////////////////////////////////////////////////
 /*

@@ -17,7 +17,7 @@ export const App = {
   nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
   uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
   windowModuleLocationName: "_KIX" + new Date().getTime(),
-  requestsThreshold: new Map<string, express.RequestHandler>(),
+  requestsThreshold: new Map<string, () => string>(),
   injectPaths: getInjectCodePaths(runDirName),
   moduleThree: new Map<string, ModuleInfoType>(),
   // kixModulePath,

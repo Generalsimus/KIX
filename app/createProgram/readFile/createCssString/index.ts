@@ -8,19 +8,19 @@ export const createCssString = (
   host: createProgramHost,
 ): string => {
   const { css, sourceMap } = parseCssFile(fileName, fileContent, host);
-  const styleString = String(css);
-  if (App.devMode) {
-    // let sourceMappingURL =
-    //   filePathToUrl(fileName) + ".map";
 
+  const styleToString = String(css).trim()
+  if (App.devMode) {
     const sourceMappingURL = `data:application/json;charset=utf8;base64,${Buffer.from(JSON.stringify(sourceMap)).toString("base64")}`
+
     return `import kix from "kix";
-      const s = kix(document.head,{style:""});
-      export default kix(s,${"`" + String(styleString) + "`"});
-      kix(s,"\\n/*# sourceMappingURL=${sourceMappingURL} */");`;
+      const s = kix(document.head, { style: "" });
+      export default kix(s, \`${styleToString}\`);
+      kix(s,"\\\\n/*# sourceMappingURL=${sourceMappingURL} */");`;
   } else {
-    return `import kix from "kix";
-    export default kix(kix.style,${styleString});
+
+    return `import kix, { styleCssDom } from "kix";
+    export default kix(styleCssDom, \`${styleToString}"\`);
     `;
   }
 };

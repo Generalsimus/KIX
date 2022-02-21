@@ -16,7 +16,7 @@ const readJsDomHtml = (indexHTMLPath) => {
     const kixModules = (0, readKixModules_1.readKixModules)(window);
     const indexHtmlPageString = "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
     for (const indexHTMLUrlPath of __1.App.indexHTMLUrlPaths) {
-        __1.App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
+        __1.App.requestsThreshold.set(indexHTMLUrlPath, () => indexHtmlPageString);
     }
     return kixModules;
 };

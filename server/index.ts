@@ -25,7 +25,8 @@ export class Server {
 
         if (customResponse) {
             res.header("content-type", mimeTypes.lookup(req.path) || "text/html");
-            customResponse(req, res, next);
+            res.end(customResponse())
+            // next
         } else {
 
             next()

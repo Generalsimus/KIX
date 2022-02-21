@@ -26,7 +26,7 @@ export const readJsDomHtml = (indexHTMLPath: string) => {
   const indexHtmlPageString =
     "<!DOCTYPE html> \n" + document.documentElement.outerHTML;
   for (const indexHTMLUrlPath of App.indexHTMLUrlPaths) {
-    App.requestsThreshold.set(indexHTMLUrlPath, (_, res) => res.end(indexHtmlPageString));
+    App.requestsThreshold.set(indexHTMLUrlPath, () => indexHtmlPageString);
   }
 
   return kixModules
