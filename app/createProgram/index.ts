@@ -60,6 +60,7 @@ export class createProgramHost {
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [], true)
 
 
+    console.log("🚀 --> file: index.ts --> line 54 --> createProgramHost --> constructor --> this.options", this.options);
     this.startBuildProcess();
     this.createProgram()
     this.emit();

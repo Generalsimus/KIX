@@ -4,7 +4,7 @@ import { createAppTemplate } from "../app/template";
 import { readIndexHtml } from "../app/readIndexHtml";
 import { createProgramHost } from "../app/createProgram";
 import ts from "typescript";
-import { buildProd } from "../app/build";
+import { buildProd } from "../app/builder";
 
 export const runCommands = () => {
     if (!App.parsedArgs) {

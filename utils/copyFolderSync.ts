@@ -1,5 +1,6 @@
 import fs from "fs"
 import path from "path";
+import { copyFileSync } from "./copyFileSync";
 
 
 export const copyFolderSync = (from: string, to: string, ignorePaths: string[] = []) => {
@@ -9,8 +10,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
         return
     }
     if (stat.isFile()) {
-        console.log({ from, to })
-        fs.copyFileSync(from, to)
+        copyFileSync(from, to)
     } else if (stat.isSymbolicLink()) {
         fs.symlinkSync(
             fs.readlinkSync(from),
