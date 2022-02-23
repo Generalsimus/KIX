@@ -29,10 +29,12 @@
     "@types/prompts": "^2.0.14",
     "@types/resolve": "^1.20.1",
     "@types/tcp-port-used": "^1.0.0",
+    "@types/uglify-js": "^3.13.1",
     "@types/ws": "^8.2.2",
     "@types/yargs": "^17.0.8"
   },
   "dependencies": {
+    "@ampproject/remapping": "^2.1.2",
     "chokidar": "^3.5.2",
     "consola": "^2.15.3",
     "express": "^4.17.2",
@@ -45,6 +47,7 @@
     "sourcemap-codec": "^1.4.8",
     "tcp-port-used": "^1.0.2",
     "typescript": "4.5.4",
+    "uglify-js": "^3.15.1",
     "url": "^0.11.0",
     "ws": "^8.4.0",
     "yargs": "^17.3.1"

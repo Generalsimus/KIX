@@ -6,6 +6,8 @@ import { rootWriter } from "../rootWriter";
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
+// console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
+// console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> fileName", fileName);
 
 
     if (!sourceFiles) return;

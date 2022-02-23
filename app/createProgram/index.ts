@@ -25,6 +25,7 @@ import { normalizeSlashes } from "../../utils/normalizeSlashes";
 import { getDefaultLibFileName } from "./getDefaultLibFileName";
 import { getSourceFileByPath } from "./getSourceFileByPath";
 import { watcherCallBack } from "./watcherCallBack";
+import { emitLobbyFiles } from "./emitLobbyFiles";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -60,13 +61,16 @@ export class createProgramHost {
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [], true)
 
 
-    console.log("🚀 --> file: index.ts --> line 54 --> createProgramHost --> constructor --> this.options", this.options);
+
     this.startBuildProcess();
     this.createProgram()
     this.emit();
+    this.emitFileLobby.clear();
     this.endBuildProcess()
     this.buildModules(defaultModuleRootNames.length)
   }
+  emitFileLobby: Set<string> = new Set<string>();
+  emitLobbyFiles = emitLobbyFiles
   sourceFileCache = new Map<string, ts.SourceFile>()
   watcher = new FileWatcher();
   watcherCallBack = watcherCallBack

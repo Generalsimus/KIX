@@ -42,5 +42,6 @@ export const readTsConfigFile = (): {
 }
 
 const defaultCompilerOptions = {
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true,
 }

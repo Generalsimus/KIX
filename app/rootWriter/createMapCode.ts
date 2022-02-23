@@ -11,9 +11,11 @@ export function createMapCode(this: rootWriter) {
         "file": this.requestPath,
         "mappings": ""
     }
-    let remapDecodedMappings: SourceMapMappings = new Array((this.injectCode.match(/\n/g)?.length ?? 0) + 1).fill([]);
+    let remapDecodedMappings: SourceMapMappings = new Array((this.injectCode.match(/\n/g)?.length ?? 0)).fill([]);
+    // console.log("🚀 --> file: createMapCode.ts --> line 15 --> createMapCode --> this.injectCode", this.injectCode);
 
     for (const fileName in this.codeByFileName) {
+        remapDecodedMappings.push([]);
         const sourcefile = this.host.sourceFileCache.get(fileName)
         if (!sourcefile) continue;
         const fileIndex = sourcemap.sources.length;

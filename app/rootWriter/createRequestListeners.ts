@@ -12,7 +12,7 @@ export function createRequestListeners(this: rootWriter) {
         // console.log({ responseJSCode: this.responseJSCode });
         return this.responseJSCode!;
     })
-    if (this.host.options.sourceMap) {
+    if (this.host.options.sourceMap && !this.isNodeModules) {
         App.requestsThreshold.set(requestPath + ".map", () => {
             if (!this.responseMAPCode) {
                 this.createMapCode();
