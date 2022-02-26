@@ -2,8 +2,6 @@ import consola from "consola";
 import { App } from "../app"
 import { createAppTemplate } from "../app/template";
 import { readIndexHtml } from "../app/readIndexHtml";
-import { createProgramHost } from "../app/createProgram";
-import ts from "typescript";
 import { buildProd } from "../app/builder";
 
 export const runCommands = () => {

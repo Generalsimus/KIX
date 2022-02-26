@@ -1,31 +1,28 @@
 
-import UglifyJS from "uglify-js"
-import remapping from "@ampproject/remapping"
+import UglifyJS, { SourceMapOptions } from "uglify-js" 
 
 
 
-export const minifyJs = (fileRequestPath: string, content: string, sourceMapString?: string) => {
-    var result = UglifyJS.minify(content, {
-        sourceMap: true
-    });
-    return {
-        code: content,
-        map: sourceMapString
-    };
-    content = result.code || content;
-    let map: ReturnType<typeof remapping> | undefined;
-    if (sourceMapString && result.map) {
-        map = remapping(
-            [result.map, sourceMapString],
-            () => null
-        );
-        console.log("🚀 --> file: minifyJs.ts --> line 19 --> minifyJs --> map", sourceMapString);
-        content = content + `\n//# sourceMappingURL=${fileRequestPath}.map`;
+export const minifyJs = (content: string, sourceMapString?: string) => {
+
+    let sourceMapObject: SourceMapOptions["content"] | undefined
+    try {
+        sourceMapObject = sourceMapString && JSON.parse(sourceMapString)
+    } catch (e) {
+        sourceMapString = undefined
     }
 
+    var result = UglifyJS.minify(content, {
+        sourceMap:  {
+            includeSources: true,
+            names: true,
+            content: sourceMapObject
+        }
+    }); 
+
 
     return {
-        code: content,
-        map: map && JSON.stringify(map)
+        code: result.code || content,
+        map: result.map
     };
 }

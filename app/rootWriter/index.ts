@@ -31,7 +31,7 @@ export class rootWriter {
         this.isNodeModules = isNodeModules;
         this.requestPath = filePathToUrl(outFileName);
 
-        
+
         this.runCode = getRunCodeEmitFilePathIndexes(emitFilePatsOrIndexes)
         // .map(moduleIndex => `${App.uniqAccessKey}[${moduleIndex}];`).join("\n")
         emitPolyfills(this, host);
@@ -45,7 +45,7 @@ export class rootWriter {
     writeJsCode(fileName: string | undefined, content: string) {
         this.responseJSCode = undefined;
         this.responseMAPCode = undefined;
-        content = content.replace(this.sourceMapCommentRegExp, "");
+        content = content.replace(this.sourceMapCommentRegExp, "\n");
         if (fileName) {
             const codeSource = this.getCodeSource(fileName)
             codeSource.code = content

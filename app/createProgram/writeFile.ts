@@ -3,12 +3,13 @@ import { createProgramHost } from ".";
 import { App } from "..";
 import { ModuleInfoType } from "../../utils/getModuleInfo";
 import { rootWriter } from "../rootWriter";
+import fs from "fs"
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
-// console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
-// console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> fileName", fileName);
-
+    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
+    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> fileName", fileName);
+    // fs.writeFileSync(fileName, content, "utf-8")
 
     if (!sourceFiles) return;
     if (/\.((jsx?)|(map))$/.test(fileName)) {

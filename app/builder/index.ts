@@ -8,6 +8,7 @@ import { moveFileSync } from "../../utils/moveFileSync";
 import { writeFileSync } from "../../utils/writeFileSync";
 import { minifyCode } from "./minify";
 
+
 export const buildProd = async () => {
     const runDirName = App.runDirName
     const fileName = path.basename(runDirName)
@@ -20,24 +21,33 @@ export const buildProd = async () => {
         moveFileSync(outputDir, cacheDir);
     }
 
-    copyFolderSync(runDirName, outputDir, [buildDirectory]);
+    copyFolderSync(runDirName, outputDir, [
+        buildDirectory,
+        path.join(App.runDirName, 'node_modules')
+    ]);
 
 
-    console.log("🚀 --> file: index.ts --> line 34 --> App.requestsThreshold.forEach --> App.requestsThreshold", App.requestsThreshold);
+    
 
-    const ignoreUrlPaths = ["/"]
-    App.requestsThreshold.forEach((getFileContent, fileUrlPath) => {
+    const ignoreUrlPaths = ["/"];
+    for (const fileUrlPath of App.requestsThreshold.keys()) {
+        console.log("🚀 --> file: index.ts --> line 30 --> buildProd --> fileUrlPath", fileUrlPath);
+
+    }
+    for (const [fileUrlPath, getFileContent] of App.requestsThreshold.entries()) {
         if (!ignoreUrlPaths.includes(fileUrlPath) && !fileUrlPath.endsWith(".map")) {
-            const { content, sourceMap } = minifyCode(fileUrlPath, getFileContent());
-            const fileFullPath = path.join(outputDir, fileUrlPath)
-            // console.log("🚀 --> file: index.ts --> line 32 --> App.requestsThreshold.forEach --> content", content);
+            const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent());
+            const fileFullPath = path.join(outputDir, fileUrlPath);
+
             writeFileSync(fileFullPath, content)
+
             if (sourceMap) {
                 writeFileSync(fileFullPath + ".map", sourceMap)
             }
         }
 
-    })
+    }
+
 
     process.exit(0)
 }

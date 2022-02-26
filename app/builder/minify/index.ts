@@ -1,9 +1,10 @@
 import path from "path";
 import { App } from "../..";
+import { minifyHtml } from "./minifyHtml";
 import { minifyJs } from "./minifyJs";
 
 
-export const minifyCode = (fileRequestPath: string, content: string) => {
+export const minifyCode = async (fileRequestPath: string, content: string) => {
     // console.log("🚀 --> file: index.ts --> line 7 --> minifyCode --> fileRequestPath", fileRequestPath);
 
 
@@ -14,18 +15,20 @@ export const minifyCode = (fileRequestPath: string, content: string) => {
     switch (path.extname(fileRequestPath).toLocaleLowerCase()) {
         case ".js":
             const jsFileSourceMap = App.requestsThreshold.get(fileRequestPath + ".map")?.();
-            const { code, map } = minifyJs(fileRequestPath, content, jsFileSourceMap);
+            const { code, map } = minifyJs(content, jsFileSourceMap);
             sourceMap = map;
             content = code;
             break;
-        // case ".html":
-        //     return minifyJs(content, sourceMapString)
+        case ".html":
+            content = await minifyHtml(content);
+            break;
         // default:
         //     return content
     }
 
 
 
+    // console.log("🚀 --> file: index.ts --> line 37 --> minifyCode --> fileRequestPath", fileRequestPath);
     return {
         fileRequestPath,
         content,
