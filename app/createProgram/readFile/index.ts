@@ -24,6 +24,7 @@ export function readFile(this: createProgramHost, fileName: string): string {
     case ".tsx":
     case ".js":
     case ".jsx":
+    case ".json":
       return fs.readFileSync(fileName, "utf8")
     default:
       return createUrlLoader(fileName)

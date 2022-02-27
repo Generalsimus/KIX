@@ -16,7 +16,9 @@ export function watcherCallBack(this: createProgramHost, path: string) {
     this.createProgram()
     this.emitFileLobby.add(path)
     this.emitLobbyFiles()
-    this.endBuildProcess();
     this.buildModules(this.moduleRootNamesSet.size - modulesCount)
+    this.server.sendSocketMessage("RESTART_SERVER", undefined)
+    this.endBuildProcess();
+
     // console.log("🚀 --> file: getLocalFileWatcher.ts --> line 21 --> getLocalFileWatcher --> this.moduleRootNamesSet.size - modulesCount)", this.moduleRootNamesSet.size - modulesCount);
 }

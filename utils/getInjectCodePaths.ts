@@ -11,7 +11,8 @@ export const getInjectCodePaths = (runDirName: string) => {
 
     return {
         kix: checkPathIsSafe(kixModulePath),
-        kixType: checkPathIsSafe(kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts")
+        kixType: checkPathIsSafe(kixModulePath.slice(0, kixModulePath.lastIndexOf(".")) + ".d.ts"),
+        codeController: checkPathIsSafe(path.join(mainFolderPath, "controller", "index.ts")),
     }
 }
 const checkPathIsSafe = (path: string) => {

@@ -11,7 +11,7 @@ import { App } from "../../app/index.js";
 const factory = ts.factory;
 
 export const exportVisitor = (node) => {
-    // Aggregating modules დროებით არ მშაობსსსსსსსსსსსსსსსსსსსსსსსსსსსსსსს
+    //TODO: Aggregating modules დროებით არ მშაობსსსსსსსსსსსსსსსსსსსსსსსსსსსსსსს
     // console.log("🚀 --> file: exportVisitor.js --> line 14 --> exportVisitor --> node.kind", ts.SyntaxKind[node.kind]);
     const returnValue = [node];
     switch (node.kind) {

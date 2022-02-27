@@ -4,7 +4,15 @@ import { createProgramHost } from "./";
 
 
 export function reportDiagnostics(this: createProgramHost, diagnostics: readonly ts.Diagnostic[]) {
+  for (const diagnostic of diagnostics) {
+    const diagnose = { ...diagnostic, file: undefined };
 
+    this.server.sendSocketMessage("ALERT_ERROR", {
+      fileText: diagnostic.file?.getText(),
+      ...diagnose
+    })
+
+  }
   ts.sys.write(
     ts.formatDiagnosticsWithColorAndContext(
       diagnostics,

@@ -30,7 +30,8 @@ function readIndexHtml() {
             ],
             suppressOutputPathCheck: true,
         }, index_1.App.devMode, [
-            index_1.App.injectPaths.kix
+            index_1.App.injectPaths.kix,
+            index_1.App.injectPaths.codeController
         ]);
         hostProgram.watcher.createWatcher({
             filePath: indexHTMLPath,

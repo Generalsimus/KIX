@@ -4,10 +4,10 @@ export const getPolyfillsStringCodes = () => {
 
     return [
         /* javascript */`
-        const ${App.uniqAccessKey}_MODULE = (moduleIndex, module, exports) => Object.defineProperty(${App.uniqAccessKey}, moduleIndex, {
-            get: () => (exports || (module(exports = {}), exports)), 
-            configurable:true,
-        }) 
+        const ${App.uniqAccessKey}_MODULE = (moduleIndex, moduleFunc, exports, nodeModuleExport) => Object.defineProperty(${App.uniqAccessKey}, moduleIndex, {
+                  get: () => (exports || (moduleFunc(exports = {}, nodeModuleExport = {}), exports = { ...exports, ...nodeModuleExport })),
+                  configurable: true,
+            })
         `
     ];
 }

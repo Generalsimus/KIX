@@ -1,8 +1,10 @@
+declare const kix: (parent: Element, child: any) => any
+export { kix };
+export default kix;
+
 declare global {
   declare module "kix" {
-    // function  ()=>any;
-    type kix = (parent: Element, child: any) => any;
-
+    export { kix };
     export default kix;
   }
 }

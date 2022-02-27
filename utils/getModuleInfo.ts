@@ -15,6 +15,7 @@ export type ModuleInfoType = {
   resolvedModuleNames?: (ts.ResolvedModule | undefined)[]
   resolvedModule?: ts.ResolvedModule;
   isNodeModule: boolean;
+  jsResolvedModule?: ModuleInfoType;
   // writers: Record<string, RootWriterCacheType>,
   // rootWriter?: rootWriter
   rootWriters: rootWritersType

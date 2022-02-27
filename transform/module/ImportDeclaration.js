@@ -9,14 +9,20 @@ export const ImportDeclaration = (node, visitor, context) => {
     // console.log("🚀 --> file: ImportDeclaration.js --> line 9 --> ImportDeclaration --> context", context);
     // console.log("🚀 --> file: module.ts --> line 13 --> node", node);
 
-    const importedModuleInfo = context.currentModuleInfo.moduleCollection[node.moduleSpecifier.text];
-    
+    const moduleInfo = context.currentModuleInfo.moduleCollection[node.moduleSpecifier.text];
+    const importedModuleInfo = moduleInfo.jsResolvedModule || moduleInfo
 
+    // console.log({
+    //     path: node.moduleSpecifier.text,
+    //     importedModuleInfo
+    // })
     var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
+    // console.log("🚀 --> file: ImportDeclaration.js --> line 19 --> ImportDeclaration --> namespaceDeclaration", namespaceDeclaration);
+    // delete node.parent
+    // console.log({ namespaceDeclaration, node: { ...node, parent: undefined }, path: node.moduleSpecifier.text, })
     if (!importedModuleInfo) {
         return ts.visitEachChild(node, visitor, context);
     }
-    var namespaceDeclaration = ts.getNamespaceDeclarationNode(node);
     // CREATE_Const_Variable
     if (!node.importClause) {
         // import "mod";   
@@ -43,7 +49,10 @@ export const ImportDeclaration = (node, visitor, context) => {
                                 elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
                             ]);
                         case ts.SyntaxKind.NamedImports:
+
+                            // console.log({ namespaceDeclaration, node: { ...node, parent: undefined }, path: node.moduleSpecifier.text, })
                             for (const importElement of childNode.elements) {
+
                                 variablesNameValueNodes.push([
                                     factory.cloneNode(importElement.name),
                                     elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex, (importElement.propertyName || importElement.name).escapedText])

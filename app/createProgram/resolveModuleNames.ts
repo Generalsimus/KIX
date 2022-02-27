@@ -6,6 +6,7 @@ import resolve from "resolve";
 import { isPathNodeModule } from "../../utils/isPathNodeModule";
 import path from "path";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
+import fs from "fs";
 // var resolve = require('resolve/async'); // or, require('resolve')
 // resolve('tap', { basedir: __dirname }, function (err, res) {
 //     if (err) console.error(err);
@@ -18,10 +19,12 @@ const resolveModule = (moduleName: string, containingFile: string): ts.ResolvedM
             basedir: path.dirname(containingFile),
             extensions: ['.js', '.jsx', path.extname(moduleName)]
         }))
-        return {
-            resolvedFileName,
-            isExternalLibraryImport: isPathNodeModule(resolvedFileName),
-            extension: ts.Extension.Js
+        if (fs.existsSync(resolvedFileName)) {
+            return {
+                resolvedFileName,
+                isExternalLibraryImport: isPathNodeModule(resolvedFileName),
+                extension: ts.Extension.Js
+            }
         }
     } catch (e) {
         const defaultModulePaths: Record<string, string> = {
@@ -54,29 +57,42 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 
     resolvedModule = (ts.nodeModuleNameResolver(moduleName, containingFileModuleInfo.modulePath, host.options, host).resolvedModule ||
         resolveModule(moduleName, containingFileModuleInfo.modulePath))
-    // console.log("🚀 --> file: resolveModuleNames.ts --> line 57 --> resolveName --> resolvedModule", resolvedModule);
+    // console.log("🚀 --> file: resolveModuleNames.ts --> line 57 --> resolveName --> resolvedModule",  resolveModule(moduleName, containingFileModuleInfo.modulePath));
+    // console.log("🚀 --> file: --> moduleNames", moduleName, ts.nodeModuleNameResolver(moduleName, containingFileModuleInfo.modulePath, host.options, host);
+
     if (!resolvedModule) return;
 
     // resolvedModule && (resolvedModule.isExternalLibraryImport = false)
     // ts.isExternalModuleIndicator
-    if (  !host.sourceFileCache.has(resolvedModule.resolvedFileName)) {
-        host.emitFileLobby.add(resolvedModule.resolvedFileName)
-    }
+
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
-
-    // console.log("🚀 --> file: resolveModuleNames.ts --> line 53 --> resolveName --> resolvedModule", resolvedModule);
+    if (!host.sourceFileCache.has(resolvedModule.resolvedFileName)) {
+        host.emitFileLobby.add(resolvedModule.resolvedFileName)
+    }
 
     moduleInfo.resolvedModule = resolvedModule;
 
-    // console.log("🚀 --> file: resolveModuleNames.ts --> line 47 --> resolveName --> moduleInfo", moduleInfo.modulePath, (moduleInfo.isNodeModule = (moduleInfo.isNodeModule || host.moduleRootNamesSet.has(moduleInfo.modulePath))));
+    // console.log("🚀 --> file: moduleInfo", /[/\\]node_modules[/\\]/.test(moduleInfo.modulePath), moduleInfo.isNodeModule, containingFileModuleInfo.isNodeModule);
+
     if ((moduleInfo.isNodeModule = (moduleInfo.isNodeModule || containingFileModuleInfo.isNodeModule))) {
-        host.moduleRootNamesSet.add(moduleInfo.modulePath)
+        let resolvedModulePath: ts.ResolvedModule | undefined = resolvedModule
+        if (resolvedModule.resolvedFileName.endsWith(".d.ts")) {
+            resolvedModulePath = resolveModule(moduleName, containingFileModuleInfo.modulePath);
+
+        }
+        // resolveModule(moduleName, containingFileModuleInfo.modulePath)
+        if (resolvedModulePath) {
+            const jsResolvedModuleInfo = getModuleInfo(resolvedModulePath.resolvedFileName);
+            jsResolvedModuleInfo.resolvedModule = resolvedModule;
+            moduleInfo.jsResolvedModule = jsResolvedModuleInfo;
+            host.moduleRootNamesSet.add(resolvedModulePath.resolvedFileName)
+        }
+
     } else {
 
         moduleInfo.rootWriters[containingFileModuleInfo.modulePath] = containingFileModuleInfo.rootWriters
     }
-
     host.localFileWatcher.add(moduleInfo.modulePath)
 
 
@@ -87,7 +103,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
 
 
 export function resolveModuleNames(this: createProgramHost, moduleNames: string[], containingFile: string, reusedNames: string[] | undefined, redirectedReference: ts.ResolvedProjectReference | undefined, options: ts.CompilerOptions, containingSourceFile?: ts.SourceFile): (ts.ResolvedModule | undefined)[] {
-    // console.log("🚀 --> file: resolveModuleNames.ts --> line 86 --> resolveModuleNames --> moduleNames", moduleNames);
+
 
 
     // console.log("🚀 --> file: resolveModuleNames.ts --> line 64 --> resolveModuleNames --> containingFile", containingFile);
@@ -95,6 +111,7 @@ export function resolveModuleNames(this: createProgramHost, moduleNames: string[
 
     const containingFileModuleInfo = getModuleInfo(containingFile)
     const resolvedModuleNames = containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {
+
         // console.log("🚀 --> file:   moduleName", moduleName, resolveName(moduleName, containingFileModuleInfo, this)?.resolvedFileName);
         // if
 

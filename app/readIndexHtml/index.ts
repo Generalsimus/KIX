@@ -38,7 +38,8 @@ export function readIndexHtml() {
       },
       App.devMode,
       [
-        App.injectPaths.kix
+        App.injectPaths.kix,
+        App.injectPaths.codeController
       ]
     )
     hostProgram.watcher.createWatcher({
@@ -51,7 +52,7 @@ export function readIndexHtml() {
     return hostProgram
   }
 
-  
+
   createHostProgram()
 
 };

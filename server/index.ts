@@ -6,7 +6,7 @@ import mimeTypes from "mime-types"
 import { App } from "../app"
 import { createProgramHost } from "../app/createProgram"
 import { getSafePort } from "./utils/getSafePort"
-
+import { webSocketUrlPath } from "../main/controller/webSocketUrlPath"
 export class Server {
     webSocketServer: WebSocket.Server
     server: http.Server
@@ -14,7 +14,7 @@ export class Server {
     constructor(host: createProgramHost) {
         this.expressApp = express();
         this.server = http.createServer(this.expressApp);
-        this.webSocketServer = new WebSocket.Server({ server: this.server, path: "/WebSocket" });
+        this.webSocketServer = new WebSocket.Server({ server: this.server, path: webSocketUrlPath });
         this.expressApp.use(this.middleware);
         this.listen()
     }
@@ -32,9 +32,14 @@ export class Server {
             next()
         }
     }
-    // send() {
+    sendSocketMessage(action: string, data: any) {
+        this.webSocketServer.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ action, data }))
+            }
+        })
 
-    // } 
+    }
     listen() {
         getSafePort(App.port).then((safePort) => {
             this.server.listen(safePort, () => {

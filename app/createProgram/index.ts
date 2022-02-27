@@ -15,7 +15,6 @@ import { getLocalFileWatcher } from "./getLocalFileWatcher";
 import { Server } from "../../server";
 import { writeFile } from "./writeFile";
 import { startBuildProcess } from "./startBuildProcess";
-// import { CacheController } from "./cacheController";
 import { buildModules } from "./buildModules";
 import { rootWriter } from "../rootWriter";
 import { FileWatcher } from "./fileWatcher";
@@ -56,9 +55,11 @@ export class createProgramHost {
     this.defaultLibLocation = normalizeSlashes(path.dirname(ts.sys.getExecutingFilePath()));
     this.defaultLibFileName = getDefaultLibFileName(this.defaultLibLocation, this.options);
     this.watch = watch
+
     this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
+    // console.log(App.moduleThree);
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
-    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [], true)
+    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [App.injectPaths.codeController], true)
 
 
 
@@ -66,8 +67,9 @@ export class createProgramHost {
     this.createProgram()
     this.emit();
     this.emitFileLobby.clear();
-    this.endBuildProcess()
+    // console.log("🚀 --> file: index.ts --> line 59 --> createProgramHost --> constructor --> this.moduleRootNamesSet", this.moduleRootNamesSet);
     this.buildModules(defaultModuleRootNames.length)
+    this.endBuildProcess()
   }
   emitFileLobby: Set<string> = new Set<string>();
   emitLobbyFiles = emitLobbyFiles

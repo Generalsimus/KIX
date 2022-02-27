@@ -5,7 +5,10 @@ import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "../module/exportVisitor";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
+     
     const moduleInfo = App.moduleThree.get(node.fileName)
+     
+    // console.log("🚀 --> file: visitSourceFile.ts --> line 10 --> visitSourceFileBefore --> node.fileName", node.fileName);
 
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
 
