@@ -7,16 +7,51 @@ import { App } from "../app"
 import { createProgramHost } from "../app/createProgram"
 import { getSafePort } from "./utils/getSafePort"
 import { webSocketUrlPath } from "../main/controller/webSocketUrlPath"
+import { filePathToUrl } from "../utils/filePathToUrl"
+import { messageCatcher } from "./catcher"
 export class Server {
     webSocketServer: WebSocket.Server
     server: http.Server
     expressApp: express.Express
+    host: createProgramHost
     constructor(host: createProgramHost) {
+        this.host = host;
         this.expressApp = express();
         this.server = http.createServer(this.expressApp);
         this.webSocketServer = new WebSocket.Server({ server: this.server, path: webSocketUrlPath });
+        this.webSocketServer.on('connection', (client) => {
+            this.initClient(client)
+            client.on('message', (message) => {
+                this.messageCatcher(client, JSON.parse(message.toString()))
+            })
+        });
+
         this.expressApp.use(this.middleware);
         this.listen()
+    }
+    messageCatcher = messageCatcher
+    initClient(client: WebSocket) {
+
+        for (const diagnostic of this.host.currentDiagnostics) {
+            const diagnose = { ...diagnostic, file: undefined };
+            client.send(JSON.stringify({
+                action: "ALERT_ERROR",
+                data: {
+                    fileText: diagnostic.file?.getText(),
+                    filePath: diagnostic.file?.fileName && filePathToUrl(diagnostic.file.fileName),
+                    ...diagnose
+                }
+            }))
+        }
+    }
+    sendSocketMessage(action: string, data: any) {
+        console.log("🚀 --> file: index.ts --> line 36 --> Server --> sendSocketMessage --> action", action);
+        this.webSocketServer.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ action, data }))
+            }
+        })
+
     }
     middleware(req: express.Request, res: express.Response, next: express.NextFunction) {
         const customResponse = App.requestsThreshold.get(req.path)
@@ -31,14 +66,6 @@ export class Server {
 
             next()
         }
-    }
-    sendSocketMessage(action: string, data: any) {
-        this.webSocketServer.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ action, data }))
-            }
-        })
-
     }
     listen() {
         getSafePort(App.port).then((safePort) => {

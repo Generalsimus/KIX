@@ -25,6 +25,7 @@ import { getDefaultLibFileName } from "./getDefaultLibFileName";
 import { getSourceFileByPath } from "./getSourceFileByPath";
 import { watcherCallBack } from "./watcherCallBack";
 import { emitLobbyFiles } from "./emitLobbyFiles";
+import { diagnose } from "./diagnose";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -49,6 +50,7 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   moduleRootWriter: rootWriter
+  currentDiagnostics: ts.Diagnostic[] = []
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
     this.options = options;
     useConfigFileParser(this);
@@ -57,21 +59,21 @@ export class createProgramHost {
     this.watch = watch
 
     this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
-    // console.log(App.moduleThree);
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [App.injectPaths.codeController], true)
 
 
 
     this.startBuildProcess();
-    this.createProgram()
+    this.createProgram();
     this.emit();
-    this.emitFileLobby.clear();
-    // console.log("🚀 --> file: index.ts --> line 59 --> createProgramHost --> constructor --> this.moduleRootNamesSet", this.moduleRootNamesSet);
-    this.buildModules(defaultModuleRootNames.length)
-    this.endBuildProcess()
+    this.emitFileLobby.clear(); 
+    this.diagnose();
+    this.buildModules(defaultModuleRootNames.length);
+    this.endBuildProcess();
   }
   emitFileLobby: Set<string> = new Set<string>();
+  diagnose = diagnose
   emitLobbyFiles = emitLobbyFiles
   sourceFileCache = new Map<string, ts.SourceFile>()
   watcher = new FileWatcher();

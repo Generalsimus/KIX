@@ -1,5 +1,5 @@
 // import * as ts from "typescript"
-import { ErrorType } from "./createError";
+import { createError, ErrorType } from "./createError";
 
 
 // console.log("🚀 --> file: actionFunctions.ts --> line 2 --> ts", ts);
@@ -8,6 +8,6 @@ export const actionFunctions: Record<string, (data: any) => void> = {
         window.location.reload();
     },
     ALERT_ERROR: (data: ErrorType) => {
-
+        createError(data);
     }
 }

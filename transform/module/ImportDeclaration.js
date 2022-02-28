@@ -10,7 +10,8 @@ export const ImportDeclaration = (node, visitor, context) => {
     // console.log("🚀 --> file: module.ts --> line 13 --> node", node);
 
     const moduleInfo = context.currentModuleInfo.moduleCollection[node.moduleSpecifier.text];
-    const importedModuleInfo = moduleInfo.jsResolvedModule || moduleInfo
+    // console.log("🚀 --> file: ImportDeclaration.js --> line 13 --> ImportDeclaration --> node.moduleSpecifier.text", node.moduleSpecifier.text, moduleInfo);
+    const importedModuleInfo = moduleInfo?.jsResolvedModule || moduleInfo
 
     // console.log({
     //     path: node.moduleSpecifier.text,

@@ -17,6 +17,7 @@ export function watcherCallBack(this: createProgramHost, path: string) {
     this.emitFileLobby.add(path)
     this.emitLobbyFiles()
     this.buildModules(this.moduleRootNamesSet.size - modulesCount)
+    this.diagnose()
     this.server.sendSocketMessage("RESTART_SERVER", undefined)
     this.endBuildProcess();
 

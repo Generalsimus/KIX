@@ -18,6 +18,7 @@ export const readTsConfigFile = (): {
         },
         file
     );
+    // console.log("🚀 --> file: readTsConfigFile.ts --> line 21 --> configFileName", configFileName);
 
     if (!configFileName) {
         return {

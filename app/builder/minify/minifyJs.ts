@@ -1,5 +1,5 @@
 
-import UglifyJS, { SourceMapOptions } from "uglify-js" 
+import UglifyJS, { SourceMapOptions } from "uglify-js"
 
 
 
@@ -11,14 +11,18 @@ export const minifyJs = (content: string, sourceMapString?: string) => {
     } catch (e) {
         sourceMapString = undefined
     }
+    // return {
+    //     code: content,
+    //     map: sourceMapString
+    // }
 
     var result = UglifyJS.minify(content, {
-        sourceMap:  {
+        sourceMap: {
             includeSources: true,
             names: true,
             content: sourceMapObject
         }
-    }); 
+    });
 
 
     return {

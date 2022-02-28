@@ -12,13 +12,13 @@ export function createMapCode(this: rootWriter) {
         "mappings": ""
     }
 
-    let remapDecodedMappings: SourceMapMappings = new Array(((this.injectCode.match(/\n/gm)?.length ?? 0) + 2)).fill([])
-    console.log("🚀 --> file: createMapCode.ts --> line 15 --> createMapCode --> remapDecodedMappings", remapDecodedMappings);
+    let remapDecodedMappings: SourceMapMappings = new Array(((this.injectCode.match(/\n/gm)?.length ?? 0) + 0)).fill([])
+    // console.log("🚀 --> file: createMapCode.ts --> line 15 --> createMapCode --> remapDecodedMappings", remapDecodedMappings);
     // console.log("🚀 --> file: createMapCode.ts --> line 15 --> createMapCode --> this.injectCode", this.injectCode);
-    let lineIndex = 1;
+    // let lineIndex = 0;
     for (const fileName in this.codeByFileName) {
 
-        
+
 
         const sourcefile = this.host.sourceFileCache.get(fileName)
         if (!sourcefile) continue;
@@ -30,12 +30,12 @@ export function createMapCode(this: rootWriter) {
 
         remapMappings(fileIndex, decodedMappings);
 
-        remapDecodedMappings = [...remapDecodedMappings,  ...decodedMappings];
+        remapDecodedMappings = [...remapDecodedMappings, [], [], ...decodedMappings];
 
         sourcemap.names = [...sourcemap.names, ...sourceMapNames]
 
 
-        remapDecodedMappings.push(...new Array(++lineIndex).fill([]));
+        // remapDecodedMappings.push(...new Array(lineIndex+=2).fill([]));
         // remapDecodedMappings.push(...new Array(++lineIndex).fill([]));
         sourcemap.mappings = encode(remapDecodedMappings)
         this.responseMAPCode = JSON.stringify(sourcemap);

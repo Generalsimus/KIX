@@ -30,10 +30,7 @@ export const buildProd = async () => {
     
 
     const ignoreUrlPaths = ["/"];
-    for (const fileUrlPath of App.requestsThreshold.keys()) {
-        console.log("🚀 --> file: index.ts --> line 30 --> buildProd --> fileUrlPath", fileUrlPath);
-
-    }
+    
     for (const [fileUrlPath, getFileContent] of App.requestsThreshold.entries()) {
         if (!ignoreUrlPaths.includes(fileUrlPath) && !fileUrlPath.endsWith(".map")) {
             const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent());
