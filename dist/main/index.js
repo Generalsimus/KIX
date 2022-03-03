@@ -257,6 +257,7 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
     return nodeIndex;
 }
 function propertyRegistry(registerFunction) {
+    console.log("🚀 --> file: index.js --> line 306 --> propertyRegistry --> registerFunction", registerFunction);
     let currentNodes;
     const getRenderValue = (parent, attribute) => {
         return registerFunction(function () {

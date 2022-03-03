@@ -1,9 +1,8 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { App } from "../../app"; 
+import { App } from "../../app";
 import { elementAccessExpression } from "../factoryCode/elementAccessExpression";
 import { nodeToken } from "../factoryCode/nodeToken";
-import { variableStatement } from "../factoryCode/variableStatement";
 const factory = ts.factory;
 
 export const ExportAssignment = (node: ts.ExportAssignment, visitor: ts.Visitor, context: CustomContextType) => {

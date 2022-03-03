@@ -1,14 +1,14 @@
 import ts from "typescript";
 
 
-export const getVariableDeclarationNames = (node: ts.BindingElement, currentThree: string[] = [], three: Record<string, string[]> = {}) => {
+export const getVariableDeclarationNames = (node: ts.BindingElement | ts.VariableDeclaration, currentThree: string[] = [], three: Record<string, string[]> = {}) => {
     const currentThreeList = [...currentThree]
-    const identifierName = (node.propertyName || node.name)
+    const identifierName = ((node as any).propertyName || node.name)
     if (ts.isIdentifier(identifierName)) {
-        currentThreeList.push(identifierName.getText());
+        currentThreeList.push(ts.idText(identifierName));
 
         if (ts.isIdentifier(node.name)) {
-            three[node.name.getText()] = currentThreeList
+            three[ts.idText(node.name)] = currentThreeList
         }
 
     }

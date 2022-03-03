@@ -6,9 +6,13 @@ import { parseErrorMessage } from "./utils/parseError";
 
 export const actions = {
     CATCH_ERROR: (serverHost: Server, client: WebSocket, data: cachedErrType) => {
-        const resendMessage = parseErrorMessage(data)
-        if (resendMessage) {
-            client.send(resendMessage)
+        const resendMessages = parseErrorMessage(serverHost.host, data);
+
+        for (const alertMessage of resendMessages) {
+            client.send(JSON.stringify({
+                action: "ALERT_ERROR",
+                data: alertMessage
+            }))
         }
     }
 }

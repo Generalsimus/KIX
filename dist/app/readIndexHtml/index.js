@@ -19,7 +19,7 @@ function readIndexHtml() {
         index_1.App.requestsThreshold.clear();
         const rootNames = (0, readJsDomHtml_1.readJsDomHtml)(indexHTMLPath);
         const hostProgram = new createProgram_1.createProgramHost(rootNames, {
-            module: typescript_1.default.ModuleKind.ESNext,
+            module: typescript_1.default.ModuleKind.None,
             incremental: true,
             allowJs: true,
             removeComments: true,

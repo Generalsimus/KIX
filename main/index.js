@@ -168,6 +168,7 @@ function createApp(createElementName) {
             if (elementNode) {
                 elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
             } else {
+                // console.log("🚀 --> file: index.js --> line 172 --> createElement --> objectNodeProperty", objectNodeProperty);
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
                     return kix(parent, abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement))
 
@@ -181,7 +182,6 @@ function createApp(createElementName) {
 
 
     return function kix(parent, child) {
-
         switch (type(child)) {
             case "[object Array]":
                 return child.map((childNode) => kix(parent, childNode));
@@ -303,6 +303,7 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
 აკეთებს დინამიური ფროფერთების რეგისტრაციას
 */
 function propertyRegistry(registerFunction) {
+    console.log("🚀 --> file: index.js --> line 306 --> propertyRegistry --> registerFunction", registerFunction);
     let currentNodes;
     const getRenderValue = (parent, attribute) => {
 

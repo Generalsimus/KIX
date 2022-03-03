@@ -10,12 +10,12 @@ export const useJsxPropRegistration = <T extends ts.Expression | undefined | voi
 ): T => {
     const OldGetRegistrationIdentifier = context.getJSXPropRegistrationIdentifier;
     let getRegistrationIdentifier: ts.Identifier | undefined
-    context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("_R")))
-    const newNode = visitor(node)
+    context.getJSXPropRegistrationIdentifier = () => (getRegistrationIdentifier || (getRegistrationIdentifier = context.factory.createUniqueName("_R")));
+    const newNode = visitor(node);
+    context.getJSXPropRegistrationIdentifier = OldGetRegistrationIdentifier;
     if (getRegistrationIdentifier) {
         return callBeforeReturn(arrowFunction([getRegistrationIdentifier], [], newNode as ts.Expression), true)
     }
-    context.getJSXPropRegistrationIdentifier = OldGetRegistrationIdentifier;
 
     return callBeforeReturn(newNode as typeof node, false)
 }

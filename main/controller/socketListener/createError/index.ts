@@ -3,19 +3,12 @@ import prism from "../prism/prism";
 import {
     prismaCssStyle
 } from "../prism/prismjsCSS";
+import { AlertErrorType } from "./alertErrorType.js";
 import { getErrorNode } from "./getErrorNode.js";
 
 
-export interface ErrorType {
-    fileText?: string;
-    messageText: string;
-    start: number | undefined;
-    length: number | undefined;
-    filePath?: string;
-}
-
 let GlobalErrorBodyTag: HTMLDivElement | undefined
-export const createError = (error: ErrorType) => {
+export const createError = (error: AlertErrorType) => {
     if (!GlobalErrorBodyTag) {
         let iframe = kix(document.body, {
             iframe: [],

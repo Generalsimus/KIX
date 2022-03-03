@@ -11,14 +11,15 @@ export function readIndexHtml() {
   if (!fs.existsSync(indexHTMLPath)) {
     throw console.error(`Couldn't find ${indexHTMLPath} file.`);
   }
-
+  
   const createHostProgram = () => {
     App.requestsThreshold.clear();
     const rootNames = readJsDomHtml(indexHTMLPath)
     const hostProgram = new createProgramHost(
       rootNames,
       {
-        module: ts.ModuleKind.ESNext,
+        // module: ts.ModuleKind.AMD,
+        module: ts.ModuleKind.None,
         incremental: true,
         allowJs: true,
         removeComments: true,

@@ -1,30 +1,19 @@
-import { ErrorType } from ".";
-import kix from "../../../index"
+import { isNumber } from "../../../../utils/isNumber";
 import Prism from "../prism/prism"
+import { AlertErrorType } from "./alertErrorType";
 
 
-// export interface ErrorType {
-//     fileText?: string;
-//     messageText: string;
-//     start: number | undefined;
-//     length: number | undefined;
-//     filePath?: string;
-// }
 
 
 const getPositionOfLine = (position: number, content: string) => {
     return content.substring(0, position).split("\n").length
 }
 const codeCutCount = 3;
-const getFormattedErrorMessage = (error: ErrorType) => {
-    // console.log("🚀 --> file: --> error_1", error);
-    if (!(error.start && error.length && error.start && error.fileText)) return
-    // console.log("🚀 --> file: --> error_2", error);
+const getFormattedErrorMessage = (error: AlertErrorType) => {
+    if (!(isNumber(error.length) && isNumber(error.start) && error.fileText)) return
     const startLineIndex = getPositionOfLine(error.start, error.fileText)
-    // console.log("🚀 --> file: --> error_3", error);
     const endLineIndex = getPositionOfLine(error.start + error.length, error.fileText)
-    const slitCode = error.fileText.split("\n")
-    // console.log("🚀 --> file: --> error_4", error);
+    const slitCode = error.fileText.split("\n");
     const slicedCode = slitCode.slice(
         Math.max(0, startLineIndex - codeCutCount),
         endLineIndex + codeCutCount + Math.min(startLineIndex - codeCutCount, 0)
@@ -40,7 +29,7 @@ const getFormattedErrorMessage = (error: ErrorType) => {
 
 }
 
-export const getErrorNode = (error: ErrorType) => {
+export const getErrorNode = (error: AlertErrorType) => {
 
     const errorMessageNode = error.messageText && {
         h2: error.messageText,

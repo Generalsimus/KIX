@@ -7,7 +7,7 @@ import fs from "fs"
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
-    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
+
     // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> fileName", fileName);
     // fs.writeFileSync(fileName, content, "utf-8")
 
@@ -23,11 +23,11 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 continue;
             }
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
-
                 // console.log({ content }) 
                 if (fileName.endsWith('.map')) {
                     writer.writeSourceMap(sourceFile.fileName, content);
                 } else {
+                    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
                     writer.writeJsCode(sourceFile.fileName, content);
                 }
             });

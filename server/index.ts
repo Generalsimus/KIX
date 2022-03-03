@@ -45,7 +45,7 @@ export class Server {
         }
     }
     sendSocketMessage(action: string, data: any) {
-        console.log("🚀 --> file: index.ts --> line 36 --> Server --> sendSocketMessage --> action", action);
+        // console.log("🚀 --> file: index.ts --> line 36 --> Server --> sendSocketMessage --> action", action);
         this.webSocketServer.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify({ action, data }))
