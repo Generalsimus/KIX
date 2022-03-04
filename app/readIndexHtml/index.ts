@@ -4,12 +4,13 @@ import ts from "typescript";
 import { App } from "../index";
 import { createProgramHost } from "../createProgram";
 import { readJsDomHtml } from "./readJsDomHtml";
+import consola  from "consola";
 
 export function readIndexHtml() {
   const indexHTMLPath = path.resolve("./index.html");
 
   if (!fs.existsSync(indexHTMLPath)) {
-    throw console.error(`Couldn't find ${indexHTMLPath} file.`);
+    throw consola.error(`Couldn't find ${indexHTMLPath} file.`);
   }
   
   const createHostProgram = () => {

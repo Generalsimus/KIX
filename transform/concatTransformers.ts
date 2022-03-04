@@ -11,7 +11,18 @@ export const concatTransformers = (...transformers: Partial<TransformersObjectTy
                 const newTransformer = (transformersObject as any)[SyntaxKindKey];
 
 
-                (transform as any)[SyntaxKindKey] = (node: ts.Node, ...args: any[]) => (newTransformer as any)((transformer as any)(node, ...args), ...args)
+                (transform as any)[SyntaxKindKey] = (node: ts.Node, ...args: any[]) => {
+                    const newNode = transformer(node, ...args);
+                    if (newNode) {
+                        if (String(newNode.kind) === SyntaxKindKey) {
+                            return newTransformer(newNode, ...args);
+                        } else if (newNode.kind in transform) {
+                            return (transform as any)[newNode.kind](newNode, ...args);
+                        } else {
+                            return newNode;
+                        }
+                    }
+                }
 
             } else {
                 (transform as any)[SyntaxKindKey] = (transformersObject as any)[SyntaxKindKey]

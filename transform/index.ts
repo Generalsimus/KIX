@@ -1,8 +1,10 @@
 import ts, { visitEachChild } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
-import { transformBefore, transformAfter } from "./transformer";
+import { concatTransformers } from "./concatTransformers";
+import { jsxTransformers } from "./jsx";
+import { moduleTransformerAfter, moduleTransformerBefore } from "./module"; 
 
-export type TransformersObjectType = Partial<typeof transformBefore & typeof transformAfter>
+export type TransformersObjectType = Partial<typeof jsxTransformers & typeof moduleTransformerBefore & typeof moduleTransformerAfter>
 
 export type CustomContextType = ts.TransformationContext & {
     currentModuleInfo: ModuleInfoType
@@ -13,10 +15,8 @@ export type CustomContextType = ts.TransformationContext & {
 }
 
 export const getTransformer = () => {
-    const transformsBefore = transformBefore
-    // concatTransformers(moduleTransformerBefore, jsxTransformers, jsxDeclarationTransformers);
-    const transformsAfter = transformAfter
-    //  concatTransformers(moduleTransformerAfter)
+    const transformsBefore =   concatTransformers(moduleTransformerBefore, jsxTransformers);
+    const transformsAfter = concatTransformers(moduleTransformerAfter)
 
     const getVisitor = (transforms: TransformersObjectType) => (context: ts.TransformationContext) => {
 

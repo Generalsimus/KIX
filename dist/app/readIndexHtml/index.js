@@ -10,10 +10,11 @@ const typescript_1 = __importDefault(require("typescript"));
 const index_1 = require("../index");
 const createProgram_1 = require("../createProgram");
 const readJsDomHtml_1 = require("./readJsDomHtml");
+const consola_1 = __importDefault(require("consola"));
 function readIndexHtml() {
     const indexHTMLPath = path_1.default.resolve("./index.html");
     if (!fs_1.default.existsSync(indexHTMLPath)) {
-        throw console.error(`Couldn't find ${indexHTMLPath} file.`);
+        throw consola_1.default.error(`Couldn't find ${indexHTMLPath} file.`);
     }
     const createHostProgram = () => {
         index_1.App.requestsThreshold.clear();
