@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { App } from "../../app";
 import { factoryCode } from "../factoryCode";
-import { elementAccessExpression } from "../factoryCode/elementAccessExpression";
+import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { variableStatement } from "../factoryCode/variableStatement";
 
 export const ImportVisitor = (node, statements, context) => {
@@ -20,7 +20,7 @@ export const ImportVisitor = (node, statements, context) => {
         //     console.log("🚀 --> file: --> importNode.moduleSpecifier?.text", importNode);
         // }
         if (!importNode.importClause) {
-            importsStatements.push(elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex]))
+            importsStatements.push(propertyAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex]))
             continue;
         }
         // if (!importNode.importNode) {
@@ -29,7 +29,7 @@ export const ImportVisitor = (node, statements, context) => {
         // }
         variablesNameValueNodes.push([
             ts.getLocalNameForExternalImport(factory, importNode, node),
-            elementAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
+            propertyAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])
         ])
     }
 

@@ -9,6 +9,7 @@ import { getSafePort } from "./utils/getSafePort"
 import { webSocketUrlPath } from "../main/controller/webSocketUrlPath"
 import { filePathToUrl } from "../utils/filePathToUrl"
 import { messageCatcher } from "./catcher"
+import ts from "typescript"
 export class Server {
     webSocketServer: WebSocket.Server
     server: http.Server
@@ -31,18 +32,23 @@ export class Server {
     }
     messageCatcher = messageCatcher
     initClient(client: WebSocket) {
-
         for (const diagnostic of this.host.currentDiagnostics) {
-            const diagnose = { ...diagnostic, file: undefined };
-            client.send(JSON.stringify({
-                action: "ALERT_ERROR",
-                data: {
-                    fileText: diagnostic.file?.getText(),
-                    filePath: diagnostic.file?.fileName && filePathToUrl(diagnostic.file.fileName),
-                    ...diagnose
-                }
-            }))
+            this.clientSendDiagnostic(client, diagnostic);
+            for (const relatedInformation of diagnostic.relatedInformation || []) {
+                this.clientSendDiagnostic(client, relatedInformation);
+            }
         }
+    }
+    clientSendDiagnostic(client: WebSocket, diagnostic: ts.Diagnostic) {
+        const diagnose = { ...diagnostic, file: undefined, relatedInformation: undefined };
+        client.send(JSON.stringify({
+            action: "ALERT_ERROR",
+            data: {
+                fileText: diagnostic.file?.getText(),
+                filePath: diagnostic.file?.fileName && filePathToUrl(diagnostic.file.fileName),
+                ...diagnose
+            }
+        }))
     }
     sendSocketMessage(action: string, data: any) {
         // console.log("🚀 --> file: index.ts --> line 36 --> Server --> sendSocketMessage --> action", action);

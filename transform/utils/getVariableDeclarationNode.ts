@@ -1,9 +1,9 @@
 import ts from "typescript"
-import { elementAccessExpression } from "../factoryCode/elementAccessExpression"
+import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression"
 
 export const getVariableDeclarationNode = (definedNames: string[]) => {
     if (definedNames.length === 1) {
         return ts.factory.createIdentifier(definedNames[0])
     }
-    return elementAccessExpression(definedNames)
+    return propertyAccessExpression(definedNames)
 }

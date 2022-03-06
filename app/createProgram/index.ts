@@ -50,7 +50,7 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   moduleRootWriter: rootWriter
-  currentDiagnostics: ts.Diagnostic[] = []
+  currentDiagnostics: ts.Diagnostic[] = [] 
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
     this.options = options;
     useConfigFileParser(this);
@@ -67,7 +67,7 @@ export class createProgramHost {
     this.startBuildProcess();
     this.createProgram();
     this.emit();
-    this.emitFileLobby.clear(); 
+    this.emitFileLobby.clear();
     this.diagnose();
     this.buildModules(defaultModuleRootNames.length);
     this.endBuildProcess();

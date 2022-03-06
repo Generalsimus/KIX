@@ -33,9 +33,8 @@ export const createError = (error: AlertErrorType) => {
                 style: `cursor: pointer;display: flex;position: fixed;top: 0;color: white;background: #262626;right: 27px;width: 45px;height: 60px;align-items: end;justify-content: center;border: 1px solid #e3303047;border-top: navajowhite;box-shadow: 0px 0px 20px #ff000012;border-bottom-left-radius: 250px;border-bottom-right-radius: 250px;padding-bottom: 10px;z-index: 222222222222222222222;`,
                 e: {
                     click: () => {
-                        if (GlobalErrorBodyTag) {
-                            GlobalErrorBodyTag.remove()
-                        }
+                        GlobalErrorBodyTag = undefined;
+                        iframe.Remove();
                     }
                 }
             },

@@ -3,8 +3,10 @@ import { CustomContextType } from "../.."
 import { arrowFunction } from "../../factoryCode/arrowFunction"
 import { callFunction } from "../../factoryCode/callFunction"
 import { createObject } from "../../factoryCode/createObject"
+import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression"
 import { createJsxChildrenNode } from "./createJsxChildrenNode"
 import { forEachJsxAttributes } from "./forEachJsxAttributes"
+import { getExpressionNames } from "./getExpressionNames"
 import { useJsxPropRegistration } from "./useJsxPropRegistration"
 
 //TODO:კლასის კომპენენტის შემთXვევაში უნდა იყოს ასე new ClassName().method() და არა ესე new ClassName.method()
@@ -34,19 +36,33 @@ export const createJSXComponent = (
         visitor,
         context,
         (node, isJSXregistererNode) => {
-            const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction
+            const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction;
+            console.log("🚀 --> file: createJSXComponent.ts --> line 38 --> tagName", ts.SyntaxKind[tagName.kind]);
+            // console.log("🚀 --> file: createJSXComponent.ts --> line 41 --> ExpressionNames", ExpressionNames);
+            let componentCallNameNode: ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.JsxTagNameExpression = tagName;
+            if (ts.isPropertyAccessExpression(tagName)) {
+                const ExpressionNames = getExpressionNames(tagName)
+                ExpressionNames[0] = callFunction(ExpressionNames[0], [], "createNewExpression")
+                componentCallNameNode = propertyAccessExpression(ExpressionNames)
+            }
+
+            // "createCallExpression" | "createNewExpression"
             return createObject([
                 [
                     "_C",
                     arrowFunction(
                         [componentRegistryIdentifier],
                         [],
-                        createComponentNode(tagName, (isJSXregistererNode ? [
-                            callFunction(
-                                componentRegistryIdentifier,
-                                [node]
-                            )
-                        ] : [node]))
+                        callFunction(
+                            componentCallNameNode,
+                            (isJSXregistererNode ? [
+                                callFunction(
+                                    componentRegistryIdentifier,
+                                    [node]
+                                )
+                            ] : [node])
+                            // (ts.isIdentifier(tagName) ? "createCallExpression" : "createNewExpression")
+                        )
 
                     )
                 ],

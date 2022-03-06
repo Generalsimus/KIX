@@ -227,7 +227,9 @@ const KixSVG = createApp(createSVGElement);
 export const kix = createApp(document.createElement.bind(document));
 export default kix;
 export const styleCssDom = kix(document.body, { style: "" });
-
+export class Component {
+    props = {}
+}
 //////////////////////////////////////////////////////////////////////////////////////
 /*
 დინამიური jsx კომპონენტების prop ები სარეგისტრაციო

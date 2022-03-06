@@ -19,7 +19,7 @@ export function readIndexHtml() {
     const hostProgram = new createProgramHost(
       rootNames,
       {
-        // module: ts.ModuleKind.AMD,
+        
         module: ts.ModuleKind.None,
         incremental: true,
         allowJs: true,

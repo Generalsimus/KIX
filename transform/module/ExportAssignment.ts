@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
 import { App } from "../../app";
-import { elementAccessExpression } from "../factoryCode/elementAccessExpression";
+import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { nodeToken } from "../factoryCode/nodeToken";
 const factory = ts.factory;
 
@@ -29,7 +29,7 @@ export const ExportAssignment = (node: ts.ExportAssignment, visitor: ts.Visitor,
     // returnValue.push
     // console.log("🚀 --> file: ExportAssignment.js --> line 28 --> ExportAssignment --> node", node);
     return nodeToken([
-        elementAccessExpression(["export", "default"]),
+        propertyAccessExpression(["export", "default"]),
         node.expression
     ])
 }

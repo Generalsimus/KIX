@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styleCssDom = exports.kix = void 0;
+exports.Component = exports.styleCssDom = exports.kix = void 0;
 const type = (arg) => Object.prototype.toString.call(arg);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 const routeParams = {};
@@ -196,6 +196,12 @@ const KixSVG = createApp(createSVGElement);
 exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
 exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
+class Component {
+    constructor() {
+        this.props = {};
+    }
+}
+exports.Component = Component;
 function registerProps(registerFunction) {
     const prop = registerFunction(function () {
         return [getPropValue, arguments];
