@@ -23,49 +23,78 @@ export const createJSXComponent = (
         children
     )
 
-    const propsObjectNodesForFactoryCode: [string, ts.Expression][] = [
-        ["children", childrenNode]
+    const propsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = [
+        ["_F", tagName],
+        ["c", childrenNode]
     ]
 
+    const dynamicPropsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = []
+    const staticPropsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = []
+
+
     forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
-        propsObjectNodesForFactoryCode.push([attributeName, attributeValueNode])
+        useJsxPropRegistration(
+            attributeValueNode,
+            visitor,
+            context,
+            (node, isJSXregistererNode) => {
+                if (isJSXregistererNode) {
+                    dynamicPropsObjectNodesForFactoryCode.push([attributeName, node])
+                } else {
+                    staticPropsObjectNodesForFactoryCode.push([attributeName, node])
+                }
+            }
+        )
     })
-    const componentRegistryIdentifier = context.factory.createUniqueName("RC")
-    return useJsxPropRegistration(
+    if (dynamicPropsObjectNodesForFactoryCode.length) {
+        propsObjectNodesForFactoryCode.push(["d", createObject(dynamicPropsObjectNodesForFactoryCode)])
+    }
+    /*
+    
+    (_P)=>(_R({}),_R({}),FooComponent)
+    */
+
+    if (staticPropsObjectNodesForFactoryCode.length) {
+        propsObjectNodesForFactoryCode.push(["s", createObject(staticPropsObjectNodesForFactoryCode)])
+    }
+
+    // const componentRegistryIdentifier = context.factory.createUniqueName("RC")
+
+    return createObject(propsObjectNodesForFactoryCode)
+
+    useJsxPropRegistration(
         createObject(propsObjectNodesForFactoryCode),
         visitor,
         context,
         (node, isJSXregistererNode) => {
-            const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction;
-            console.log("🚀 --> file: createJSXComponent.ts --> line 38 --> tagName", ts.SyntaxKind[tagName.kind]);
+            // const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction;
+            // console.log("🚀 --> file: createJSXComponent.ts --> line 38 --> tagName", ts.SyntaxKind[tagName.kind]);
             // console.log("🚀 --> file: createJSXComponent.ts --> line 41 --> ExpressionNames", ExpressionNames);
-            let componentCallNameNode: ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.JsxTagNameExpression = tagName;
-            if (ts.isPropertyAccessExpression(tagName)) {
-                const ExpressionNames = getExpressionNames(tagName)
-                ExpressionNames[0] = callFunction(ExpressionNames[0], [], "createNewExpression")
-                componentCallNameNode = propertyAccessExpression(ExpressionNames)
-            }
+            // let componentCallNameNode: ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.JsxTagNameExpression = tagName;
+            // if (ts.isPropertyAccessExpression(tagName)) {
+            //     const ExpressionNames = getExpressionNames(tagName)
+            //     ExpressionNames[0] = callFunction(ExpressionNames[0], [], "createNewExpression")
+            //     componentCallNameNode = propertyAccessExpression(ExpressionNames)
+            // } 
+            /* 
+            <Component/>>
+            ({_C:(R)=>{}})
+            */
+            /* */
+            // {
+            //     _C: Component,
 
+            // }
+            // * /
+            // W((_R_1) => (_R_1(ss, "i") + 2000))("WWW")
+
+            // (Wee("O","i")("WEE"),)/
             // "createCallExpression" | "createNewExpression"
             return createObject([
-                [
-                    "_C",
-                    arrowFunction(
-                        [componentRegistryIdentifier],
-                        [],
-                        callFunction(
-                            componentCallNameNode,
-                            (isJSXregistererNode ? [
-                                callFunction(
-                                    componentRegistryIdentifier,
-                                    [node]
-                                )
-                            ] : [node])
-                            // (ts.isIdentifier(tagName) ? "createCallExpression" : "createNewExpression")
-                        )
-
-                    )
-                ],
+                ["_C", tagName],
+                ["R",
+                    node
+                ]
             ])
         }
     )

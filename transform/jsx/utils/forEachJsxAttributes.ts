@@ -5,11 +5,11 @@ import { safeInitializer } from "./safeInitializer";
 
 export const forEachJsxAttributes = (
     attributeProperties: ts.JsxAttributes["properties"],
-    forEachCallback: (attributeName: string, attributeValueNode: ts.Expression) => void
+    forEachCallback: (attributeName: ts.Identifier, attributeValueNode: ts.Expression) => void
 ) => {
     for (const attribute of attributeProperties) {
         if (attribute.kind === ts.SyntaxKind.JsxAttribute) {
-            const attributeName = attribute.name.getText()
+            const attributeName = attribute.name
             let attributeValueNode = safeInitializer(attribute.initializer)
             if (!attributeValueNode) continue;
             if (ts.isJsxText(attributeValueNode)) {

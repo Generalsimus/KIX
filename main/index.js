@@ -2,7 +2,7 @@ const type = (arg) => Object.prototype.toString.call(arg)
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 const routeParams = {};
 const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName)
-
+// TODO:svg Ns ის დეფაულთი და ასევე გენერირებული
 const abstractNodes = {
     svg(objectNodeProperty, objectNode, createElementName, createElement) {
         return (parent) => {
@@ -83,13 +83,31 @@ const abstractNodes = {
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty])
     },
-    _C(objectNodeProperty, objectNode, createElementName, createElement) {
+    _F(objectNodeProperty, objectNode, createElementName, createElement) {
+        const component = objectNode._F
+        if (!(component instanceof Function)) return;
+        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype')
+        if (component.prototype.render || !prototypeDescriptor?.writable) {
+            class ComponentNode extends component {
+                constructor(props) {
+                    const props = { ...(objectNode.s || {}), ...registerProps(this, objectNode.d) }
 
-        // const ex = { _C: (regisrator,object) =>((), new dsssss(object)) }
+                    for (const propKey in props) {
+                        this[propKey] = props[propKey];
+                    }
+                    this.children = objectNode.c || this.children
+                    this.render = this.render || (() => { })
+                    super(this);
+                }
+            }
+
+            return new ComponentNode().render();
+        } else {
+            const props = registerProps({}, objectNode.d);
+            return component(props)
+        }
 
 
-
-        return objectNode[objectNodeProperty](registerProps)
     }
 }
 //TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს
@@ -127,12 +145,14 @@ const abstractAttributes = {
         if (parent) {
             replaceNode = kix(null, flatFunction(replaceNode, parent));
             if (replaceNode instanceof Array) {
-                replaceArrayNodes([this], replaceNode);
+                // console.log("🚀 --> file: index.js --> line 149 --> Replace --> this", this);
+                replaceArrayNodes([this], replaceNode, []);
             } else {
                 parent.replaceChild(replaceNode, this);
             }
             return replaceNode;
         }
+        return this;
     },
     Insert(method, node) {
         const parent = this.parentNode,
@@ -211,7 +231,7 @@ function createApp(createElementName) {
                 child = textNode;
                 break;
             default:
-                if (!child instanceof Node) {
+                if (!(child instanceof Node)) {
                     return kix(parent, String(child));
                 }
 
@@ -227,20 +247,43 @@ const KixSVG = createApp(createSVGElement);
 export const kix = createApp(document.createElement.bind(document));
 export default kix;
 export const styleCssDom = kix(document.body, { style: "" });
-export class Component {
-    props = {}
-}
-//////////////////////////////////////////////////////////////////////////////////////
-/*
-დინამიური jsx კომპონენტების prop ები სარეგისტრაციო
-*/
-function registerProps(registerFunction) {
-    const prop = registerFunction(function () {
-        return [getPropValue, arguments]
-    })
-    function getPropValue(propName, args) {
-        return Array.prototype.reduce.call(args, (obj, key) => {
-            let descriptor = Object.getOwnPropertyDescriptor(obj, key),
+export class Component { }
+export const useListener = (objectValue, propertyName, callback) => {
+    let closed = false;
+    let callBackList = [];
+    const listenerService = {
+        addCallback(callback) {
+            if (callback instanceof Function) {
+                callBackList.push(callback)
+            }
+            return listenerService
+        },
+        removeCallback(callback) {
+            callBackList = callBackList.filter(f => (f !== callback))
+            return listenerService
+        },
+        close() {
+            closed = true;
+        },
+        open() {
+            closed = false;
+        }
+    }
+    const registerFunction = (r) => (r(objectValue, propertyName));
+    ((registration(registerFunction, (value) => {
+        if (closed) return;
+        for (const callback of callBackList) {
+            callback(value, propertyName)
+        }
+    }))());
+
+    return listenerService.addCallback(callback)
+};
+/////////////////////////////////////
+function registration(registerFunction, onSet) {
+    const getValue = () => (registerFunction(function () {
+        return Array.prototype.reduce.call(arguments, (obj, key) => {
+            let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {},
                 value = obj[key],
                 defineRegistrations = descriptor?.set?._R_C || [];
             if (defineRegistrations.indexOf(registerFunction) === -1) {
@@ -248,36 +291,43 @@ function registerProps(registerFunction) {
                 function set(setValue) {
                     value = setValue;
                     descriptor.set && descriptor.set(value)
-                    prop[propName] = getPropValue(propName, args);
+                    onSet(value);
                 }
                 set._R_C = defineRegistrations
                 Object.defineProperty(obj, key, {
                     enumerable: true,
                     configurable: true,
-                    registrations: defineRegistrations,
                     get() {
                         return value;
                     },
                     set
                 })
             }
-
-            return value
+            return obj[key]
         })
+    }));
+    return getValue
+}
+/////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+/*
+დინამიური jsx კომპონენტების prop ები სარეგისტრაციო
+*/
+function registerProps(props, registerProps) {
+    for (const attrKey in (registerProps || {})) {
+        const getValue = registration(registerProps[attrKey], () => {
+            props[attrKey] = getValue()
+        })
+        props[attrKey] = getValue()
     }
-    for (const propName in prop) {
-        const value = prop[propName];
-        if (value instanceof Array && value[0] === getPropValue) {
-            prop[propName] = getPropValue(propName, value[1])
-        }
-    }
-    return prop;
+    return props;
 }
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 /*
 ანაცვლებს მასივურ ელემენტებს ახლით
 */
+// document.getElementsById("test");
 
 function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
     while ((valuesIndex in values) || (nodeIndex in nodes)) {
@@ -287,6 +337,12 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
             nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
         } else if (node) {
             if (valuesIndex in values) {
+                const replacedNodes = node.Replace(value)
+                if (replacedNodes instanceof Array) {
+                    returnNodes.push(...replacedNodes)
+                } else {
+                    returnNodes.push(replacedNodes)
+                }
                 returnNodes.push(node.Replace(value));
             } else {
                 node.Remove();
@@ -305,53 +361,24 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
 აკეთებს დინამიური ფროფერთების რეგისტრაციას
 */
 function propertyRegistry(registerFunction) {
-    console.log("🚀 --> file: index.js --> line 306 --> propertyRegistry --> registerFunction", registerFunction);
     let currentNodes;
-    const getRenderValue = (parent, attribute) => {
-
-        return registerFunction(function () {
-
-            const objValue = Array.prototype.reduce.call(arguments, (obj, key) => {
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key),
-                    value = obj[key],
-                    defineRegistrations = descriptor?.set?._R_C || [];
-                if (defineRegistrations.indexOf(registerFunction) === -1) {
-                    defineRegistrations.push(registerFunction);
-                    function set(setValue) {
-                        value = setValue;
-                        descriptor.set && descriptor.set(value)
-                        if (attribute) {
-                            parent.setAttr(attribute, value);
-                        } else {
-                            replaceArrayNodes(
-                                currentNodes,
-                                [getRenderValue(parent, attribute)],
-                                (currentNodes = [])
-                            );
-                        }
-                    }
-                    set._R_C = defineRegistrations
-                    Object.defineProperty(obj, key, {
-                        enumerable: true,
-                        configurable: true,
-                        registrations: defineRegistrations,
-                        get() {
-                            return value;
-                        },
-                        set
-                    })
-                }
-
-                return typeof value === "function" ? value.bind(obj) : value
-            })
-            return objValue
-        })
-    }
-
     return (parent, attribute) => {
-        const value = getRenderValue(parent, attribute)
+        const getRenderValue = registration(registerFunction, (value) => {
+            if (attribute) {
+                parent.setAttr(attribute, value);
+            } else {
+                replaceArrayNodes(
+                    currentNodes,
+                    [getRenderValue(parent, attribute)],
+                    (currentNodes = [])
+                );
+                console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
+            }
+        });
+
+        const value = getRenderValue();
         if (attribute) {
-            return value
+            return value;
         }
         replaceArrayNodes(
             kix(parent, [""]),

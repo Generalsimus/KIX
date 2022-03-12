@@ -4,6 +4,7 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
+import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { visitFunctionDeclarationForJsxRegistration } from "./utils/visitFunctionDeclarationForJsxRegistration";
 import { VariableStatement } from "./VariableStatement";
@@ -24,6 +25,14 @@ export const jsxTransformers = {
     [ts.SyntaxKind.JsxSelfClosingElement]: (node: ts.JsxSelfClosingElement, visitor: ts.Visitor, context: CustomContextType) => {
 
         return jsxToObject(visitor, context, node.tagName, node.attributes, [] as any)
+    },
+    [ts.SyntaxKind.JsxFragment]: (node: ts.JsxFragment, visitor: ts.Visitor, context: CustomContextType) => {
+        const childrenNode = createJsxChildrenNode(
+            visitor,
+            context,
+            node.children
+        )
+        return childrenNode
     },
     [ts.SyntaxKind.ArrowFunction]: visitFunctionDeclarationForJsxRegistration,
     [ts.SyntaxKind.FunctionDeclaration]: visitFunctionDeclarationForJsxRegistration,

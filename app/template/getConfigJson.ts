@@ -4,7 +4,16 @@ import packageJson from "../../package.json";
 export const getConfigJson = (projectName: string) => {
     return {
         tsConfig: {
-
+            "compilerOptions": {
+                "target": "es2016",
+                "jsx": "preserve",
+                "module": "none",
+                "moduleResolution": "node",
+                "esModuleInterop": true,
+                "forceConsistentCasingInFileNames": true,
+                "strict": true,
+                "skipLibCheck": true
+            }
         },
         packageJson: {
             "name": projectName,

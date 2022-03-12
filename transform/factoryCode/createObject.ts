@@ -24,6 +24,11 @@ export const createObject = (objectPropertiesNodes: createObjectArgsType) => {
                             node[1]
                         )
                     }
+                } else if (ts.isIdentifier(propertyNameNode)) {
+                    return factory.createPropertyAssignment(
+                        propertyNameNode,
+                        node[1]
+                    )
                 } else {
                     return factory.createPropertyAssignment(
                         factory.createComputedPropertyName(propertyNameNode),

@@ -38,10 +38,11 @@ export const jsxToObject = (
     const eventObjectNodeProperties: createObjectArgsType = []
     const dynamicObjectNodeProperties: createObjectArgsType = []
     forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
-        if (/^(on+[A-Z])/.test(attributeName)) {
+        const attributeNameString = ts.idText(attributeName)
+        if (/^(on+[A-Z])/.test(attributeNameString)) {
 
-            eventObjectNodeProperties.push([attributeName.replace(/^on/, "").toLowerCase(), attributeValueNode])
-        } else if (attributeName === "e") {
+            eventObjectNodeProperties.push([attributeNameString.replace(/^on/, "").toLowerCase(), attributeValueNode])
+        } else if (attributeNameString === "e") {
             if (ts.isObjectLiteralExpression(attributeValueNode)) {
                 eventObjectNodeProperties.push(...attributeValueNode.properties)
             } else {

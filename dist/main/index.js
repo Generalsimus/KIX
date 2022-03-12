@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Component = exports.styleCssDom = exports.kix = void 0;
+exports.useListener = exports.Component = exports.styleCssDom = exports.kix = void 0;
 const type = (arg) => Object.prototype.toString.call(arg);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 const routeParams = {};
@@ -68,8 +68,29 @@ const abstractNodes = {
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
-    _C(objectNodeProperty, objectNode, createElementName, createElement) {
-        return objectNode[objectNodeProperty](registerProps);
+    _F(objectNodeProperty, objectNode, createElementName, createElement) {
+        const component = objectNode._F;
+        if (!(component instanceof Function))
+            return;
+        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype');
+        if (component.prototype.render || !(prototypeDescriptor === null || prototypeDescriptor === void 0 ? void 0 : prototypeDescriptor.writable)) {
+            class ComponentNode extends component {
+                constructor(props) {
+                    const props = Object.assign(Object.assign({}, (objectNode.s || {})), registerProps(this, objectNode.d));
+                    for (const propKey in props) {
+                        this[propKey] = props[propKey];
+                    }
+                    this.children = objectNode.c || this.children;
+                    this.render = this.render || (() => { });
+                    super(this);
+                }
+            }
+            return new ComponentNode().render();
+        }
+        else {
+            const props = registerProps({}, objectNode.d);
+            return component(props);
+        }
     }
 };
 const abstractAttributes = {
@@ -103,13 +124,14 @@ const abstractAttributes = {
         if (parent) {
             replaceNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
             if (replaceNode instanceof Array) {
-                replaceArrayNodes([this], replaceNode);
+                replaceArrayNodes([this], replaceNode, []);
             }
             else {
                 parent.replaceChild(replaceNode, this);
             }
             return replaceNode;
         }
+        return this;
     },
     Insert(method, node) {
         const parent = this.parentNode, HtmlNode = (0, exports.kix)(null, flatFunction(node, parent));
@@ -185,7 +207,7 @@ function createApp(createElementName) {
                 child = textNode;
                 break;
             default:
-                if (!child instanceof Node) {
+                if (!(child instanceof Node)) {
                     return kix(parent, String(child));
                 }
         }
@@ -197,47 +219,75 @@ exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
 exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
 class Component {
-    constructor() {
-        this.props = {};
-    }
 }
 exports.Component = Component;
-function registerProps(registerFunction) {
-    const prop = registerFunction(function () {
-        return [getPropValue, arguments];
-    });
-    function getPropValue(propName, args) {
-        return Array.prototype.reduce.call(args, (obj, key) => {
+const useListener = (objectValue, propertyName, callback) => {
+    let closed = false;
+    let callBackList = [];
+    const listenerService = {
+        addCallback(callback) {
+            if (callback instanceof Function) {
+                callBackList.push(callback);
+            }
+            return listenerService;
+        },
+        removeCallback(callback) {
+            callBackList = callBackList.filter(f => (f !== callback));
+            return listenerService;
+        },
+        close() {
+            closed = true;
+        },
+        open() {
+            closed = false;
+        }
+    };
+    const registerFunction = (r) => (r(objectValue, propertyName));
+    ((registration(registerFunction, (value) => {
+        if (closed)
+            return;
+        for (const callback of callBackList) {
+            callback(value, propertyName);
+        }
+    }))());
+    return listenerService.addCallback(callback);
+};
+exports.useListener = useListener;
+function registration(registerFunction, onSet) {
+    const getValue = () => (registerFunction(function () {
+        return Array.prototype.reduce.call(arguments, (obj, key) => {
             var _a;
-            let descriptor = Object.getOwnPropertyDescriptor(obj, key), value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+            let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {}, value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
             if (defineRegistrations.indexOf(registerFunction) === -1) {
                 defineRegistrations.push(registerFunction);
                 function set(setValue) {
                     value = setValue;
                     descriptor.set && descriptor.set(value);
-                    prop[propName] = getPropValue(propName, args);
+                    onSet(value);
                 }
                 set._R_C = defineRegistrations;
                 Object.defineProperty(obj, key, {
                     enumerable: true,
                     configurable: true,
-                    registrations: defineRegistrations,
                     get() {
                         return value;
                     },
                     set
                 });
             }
-            return value;
+            return obj[key];
         });
+    }));
+    return getValue;
+}
+function registerProps(props, registerProps) {
+    for (const attrKey in (registerProps || {})) {
+        const getValue = registration(registerProps[attrKey], () => {
+            props[attrKey] = getValue();
+        });
+        props[attrKey] = getValue();
     }
-    for (const propName in prop) {
-        const value = prop[propName];
-        if (value instanceof Array && value[0] === getPropValue) {
-            prop[propName] = getPropValue(propName, value[1]);
-        }
-    }
-    return prop;
+    return props;
 }
 function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
     while ((valuesIndex in values) || (nodeIndex in nodes)) {
@@ -248,6 +298,13 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
         }
         else if (node) {
             if (valuesIndex in values) {
+                const replacedNodes = node.Replace(value);
+                if (replacedNodes instanceof Array) {
+                    returnNodes.push(...replacedNodes);
+                }
+                else {
+                    returnNodes.push(replacedNodes);
+                }
                 returnNodes.push(node.Replace(value));
             }
             else {
@@ -263,43 +320,18 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
     return nodeIndex;
 }
 function propertyRegistry(registerFunction) {
-    console.log("🚀 --> file: index.js --> line 306 --> propertyRegistry --> registerFunction", registerFunction);
     let currentNodes;
-    const getRenderValue = (parent, attribute) => {
-        return registerFunction(function () {
-            const objValue = Array.prototype.reduce.call(arguments, (obj, key) => {
-                var _a;
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key), value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
-                if (defineRegistrations.indexOf(registerFunction) === -1) {
-                    defineRegistrations.push(registerFunction);
-                    function set(setValue) {
-                        value = setValue;
-                        descriptor.set && descriptor.set(value);
-                        if (attribute) {
-                            parent.setAttr(attribute, value);
-                        }
-                        else {
-                            replaceArrayNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
-                        }
-                    }
-                    set._R_C = defineRegistrations;
-                    Object.defineProperty(obj, key, {
-                        enumerable: true,
-                        configurable: true,
-                        registrations: defineRegistrations,
-                        get() {
-                            return value;
-                        },
-                        set
-                    });
-                }
-                return typeof value === "function" ? value.bind(obj) : value;
-            });
-            return objValue;
-        });
-    };
     return (parent, attribute) => {
-        const value = getRenderValue(parent, attribute);
+        const getRenderValue = registration(registerFunction, (value) => {
+            if (attribute) {
+                parent.setAttr(attribute, value);
+            }
+            else {
+                replaceArrayNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
+                console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
+            }
+        });
+        const value = getRenderValue();
         if (attribute) {
             return value;
         }
