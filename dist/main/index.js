@@ -75,14 +75,16 @@ const abstractNodes = {
         const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype');
         if (component.prototype.render || !(prototypeDescriptor === null || prototypeDescriptor === void 0 ? void 0 : prototypeDescriptor.writable)) {
             class ComponentNode extends component {
-                constructor(props) {
+                constructor() {
+                    super();
+                    console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
+                    console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
                     const props = Object.assign(Object.assign({}, (objectNode.s || {})), registerProps(this, objectNode.d));
                     for (const propKey in props) {
                         this[propKey] = props[propKey];
                     }
                     this.children = objectNode.c || this.children;
                     this.render = this.render || (() => { });
-                    super(this);
                 }
             }
             return new ComponentNode().render();

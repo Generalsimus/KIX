@@ -25,6 +25,7 @@ export const useConfigFileParser = (host: createProgramHost) => {
         }
 
         host.options = compilerOptions;
+        // console.log("🚀 --> file: useConfigFileParser.ts --> line 28 --> onConfigFileChange --> host.options", host.options);
         
 
         return configFile

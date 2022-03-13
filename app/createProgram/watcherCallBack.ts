@@ -3,6 +3,7 @@ import { App } from "..";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
 
 export function watcherCallBack(this: createProgramHost, path: string) {
+
     path = normalizeSlashes(path)
     const moduleInfo = App.moduleThree.get(path)
     moduleInfo && (moduleInfo.resolvedModuleNames = undefined);

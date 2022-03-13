@@ -15,7 +15,7 @@
     /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     // "jsx": "preserve",                                /* Specify what JSX code is generated. */
-    "experimentalDecorators": true,                   /* Enable experimental support for TC39 stage 2 draft decorators. */
+    "experimentalDecorators": true /* Enable experimental support for TC39 stage 2 draft decorators. */,
     // "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
     // "jsxFactory": "",                                 /* Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h' */
     // "jsxFragmentFactory": "",                         /* Specify the JSX Fragment reference used for fragments when targeting React JSX emit e.g. 'React.Fragment' or 'Fragment'. */
@@ -27,7 +27,7 @@
     /* Modules */
     "module": "commonjs",
     /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
-    "lib": ["es2016","DOM"],
+    "lib": ["es2016", "DOM"],
     /* Specify library files to be included in the compilation. */
     "allowJs": true,
     /* Allow javascript files to be compiled. */
@@ -39,7 +39,7 @@
     "sourceMap": false /* Generates corresponding '.map' file. */,
     // "outFile": "./",                             /* Concatenate and emit output to single file. */
     "outDir": "./dist/",
-    // "outDir": "C:\\Users\\totor\\Desktop\\kixDemoSource\\node_modules\\kix\\dist",
+    // "outDir": "C:/Users/PC/Desktop/PROJECTS/KIXDOC/node_modules/kix/dist",
     /* Redirect output structure to the directory. */
     // "rootDir": "./",                             /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                           /* Enable project compilation */

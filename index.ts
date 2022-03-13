@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import { App } from "./app";
-
-
 // TODO: ავტორელოადი გაქ დასამატებელი სოკეტისთვის
+
 App.start()
 // import path from "path";
 // import ts from "typescript";

@@ -48,12 +48,12 @@ MIT
 [standard-js-src]: https://img.shields.io/badge/license-MIT-brightgreen?&style=flat-square
 [standard-js-href]: https://github.com/Generalsimus/KIX/blob/master/LICENSE
 
-[npm-version-src]: https://img.shields.io/npm/v/kix-js?&style=flat-square
-[npm-version-href]: https://www.npmjs.com/package/kix-js
+[npm-version-src]: https://img.shields.io/npm/v/kix?&style=flat-square
+[npm-version-href]: https://www.npmjs.com/package/kix
 
-[npm-downloads-src]: https://img.shields.io/npm/dt/kix-js?&style=flat-square
-[npm-downloads-href]: https://www.npmjs.com/package/kix-js
+[npm-downloads-src]: https://img.shields.io/npm/dt/kix?&style=flat-square
+[npm-downloads-href]: https://www.npmjs.com/package/kix
 
-[bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix-js?&style=flat-square&color=red
-[bundle-phobia-href]: https://packagephobia.com/result?p=kix-js
+[bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix?&style=flat-square&color=red
+[bundle-phobia-href]: https://packagephobia.com/result?p=kix
  

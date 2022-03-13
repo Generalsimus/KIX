@@ -27,7 +27,7 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 if (fileName.endsWith('.map')) {
                     writer.writeSourceMap(sourceFile.fileName, content);
                 } else {
-                    console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
+                    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
                     writer.writeJsCode(sourceFile.fileName, content);
                 }
             });

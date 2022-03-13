@@ -86,10 +86,13 @@ const abstractNodes = {
     _F(objectNodeProperty, objectNode, createElementName, createElement) {
         const component = objectNode._F
         if (!(component instanceof Function)) return;
-        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype')
+        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype');
         if (component.prototype.render || !prototypeDescriptor?.writable) {
             class ComponentNode extends component {
-                constructor(props) {
+                constructor() {
+                    super();
+                    console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
+                    console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
                     const props = { ...(objectNode.s || {}), ...registerProps(this, objectNode.d) }
 
                     for (const propKey in props) {
@@ -97,7 +100,6 @@ const abstractNodes = {
                     }
                     this.children = objectNode.c || this.children
                     this.render = this.render || (() => { })
-                    super(this);
                 }
             }
 
