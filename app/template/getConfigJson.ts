@@ -7,7 +7,7 @@ export const getConfigJson = (projectName: string) => {
             "compilerOptions": {
                 "target": "es2016",
                 "jsx": "preserve",
-                "module": "none",
+                "module": "commonjs",
                 "moduleResolution": "node",
                 "esModuleInterop": true,
                 "forceConsistentCasingInFileNames": true,

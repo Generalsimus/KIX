@@ -13,8 +13,9 @@ export function watcherCallBack(this: createProgramHost, path: string) {
 
     const modulesCount = this.moduleRootNamesSet.size
 
+    // console.log("EMITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", iiii)
     this.startBuildProcess();
-    this.createProgram()
+    this.createProgram();
     this.emitFileLobby.add(path)
     this.emitLobbyFiles()
     this.buildModules(this.moduleRootNamesSet.size - modulesCount)
@@ -23,4 +24,5 @@ export function watcherCallBack(this: createProgramHost, path: string) {
     this.endBuildProcess();
 
     // console.log("🚀 --> file: getLocalFileWatcher.ts --> line 21 --> getLocalFileWatcher --> this.moduleRootNamesSet.size - modulesCount)", this.moduleRootNamesSet.size - modulesCount);
+
 }

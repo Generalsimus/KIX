@@ -77,8 +77,6 @@ const abstractNodes = {
             class ComponentNode extends component {
                 constructor() {
                     super();
-                    console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
-                    console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
                     const props = Object.assign(Object.assign({}, (objectNode.s || {})), registerProps(this, objectNode.d));
                     for (const propKey in props) {
                         this[propKey] = props[propKey];
@@ -326,11 +324,10 @@ function propertyRegistry(registerFunction) {
     return (parent, attribute) => {
         const getRenderValue = registration(registerFunction, (value) => {
             if (attribute) {
-                parent.setAttr(attribute, value);
+                parent.setAttr(attribute, getRenderValue(parent, attribute));
             }
             else {
                 replaceArrayNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
-                console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
             }
         });
         const value = getRenderValue();

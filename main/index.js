@@ -40,6 +40,41 @@ const abstractNodes = {
         return (parent) => createElement(switchObjectNode, parent, namedNode)
 
     },
+    routing(_, routeObjectNode) {
+        let tagName = routeObjectNode.tagName || "div",
+            ifEmptyComponent = routeObjectNode.ifEmptyComponent || "",
+            routing = routeObjectNode.routing,
+            fakeNode = kix(null, ""),
+            existNode = fakeNode,
+            newRouteObjectNode = {
+                [tagName]: [fakeNode, routing],
+                ...routeObjectNode,
+            };
+
+        delete newRouteObjectNode.tagName;
+        delete newRouteObjectNode.ifEmptyComponent;
+        delete newRouteObjectNode.routing;
+
+
+        const node = kix(null, newRouteObjectNode)
+
+
+        const resetRoute = () => {
+            let exis_node = existNode.previousElementSibling || existNode.nextElementSibling
+            if (exis_node && fakeNode != existNode) {
+                existNode.Replace(fakeNode)
+                existNode = fakeNode
+            } else if (!exis_node && fakeNode == existNode) {
+                existNode.Replace(ifEmptyComponent = kix(null, ifEmptyComponent));
+                existNode = ifEmptyComponent;
+            }
+        }
+        window.addEventListener("popstate", resetRoute)
+        resetRoute()
+
+
+        return node;
+    },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
         /////////////////////////////////////////////////////////////////
         return (parent) => {
@@ -66,17 +101,34 @@ const abstractNodes = {
 
                     return routeRegExp.test(localPath) ? routeNodes[_routeID] || (routeNodes[_routeID] = componentValue) : "";
                 };
-            let existNode = kix(parent, createRouterNode())
+            // console.log("🚀 --> file: index.js --> line 107 --> return --> createRouterNode()", componentValue);
+            let currentNodes;
+            // console.log("🚀 --> file: index.js --> line 106 --> return --> currentNodes", currentNodes);
+
+            console.log({
+                currentNodes,
+                // newNode,
+                value: createRouterNode()
+            });
+            replaceArrayNodes(
+                kix(parent, [""]),
+                [createRouterNode()],
+                (currentNodes = [])
+            )
 
             window.addEventListener("popstate", (routeEvent) => {
-
                 const newNode = createRouterNode(routeEvent.detail?._routeID);
-                if (existNode !== newNode) {
-
-                    existNode = existNode.Replace(newNode);
-                }
+                console.log({
+                    currentNodes,
+                    newNode,
+                    value: createRouterNode()
+                });
+                replaceArrayNodes(
+                    currentNodes,
+                    [newNode],
+                    (currentNodes = [])
+                );
             })
-            return existNode
         }
 
     },
@@ -91,8 +143,8 @@ const abstractNodes = {
             class ComponentNode extends component {
                 constructor() {
                     super();
-                    console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
-                    console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
+                    // console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
+                    // console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
                     const props = { ...(objectNode.s || {}), ...registerProps(this, objectNode.d) }
 
                     for (const propKey in props) {
@@ -106,6 +158,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         } else {
             const props = registerProps({}, objectNode.d);
+            // console.log(component(props))
             return component(props)
         }
 
@@ -145,8 +198,11 @@ const abstractAttributes = {
     Replace(replaceNode) {
         const parent = this.parentNode
         if (parent) {
+            // console.log("🚀 --> file: index.js --> line 202 --> Replace --> replaceNode", replaceNode);
+            console.log({ replaceNode, vvv: flatFunction(replaceNode, parent), node: kix(null, flatFunction(replaceNode, parent)) });
             replaceNode = kix(null, flatFunction(replaceNode, parent));
             if (replaceNode instanceof Array) {
+
                 // console.log("🚀 --> file: index.js --> line 149 --> Replace --> this", this);
                 replaceArrayNodes([this], replaceNode, []);
             } else {
@@ -192,7 +248,9 @@ function createApp(createElementName) {
             } else {
                 // console.log("🚀 --> file: index.js --> line 172 --> createElement --> objectNodeProperty", objectNodeProperty);
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
+
                     return kix(parent, abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement))
+                    //  kix(parent, "");
 
                 }
                 kix((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
@@ -332,12 +390,14 @@ function registerProps(props, registerProps) {
 // document.getElementsById("test");
 
 function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
+
     while ((valuesIndex in values) || (nodeIndex in nodes)) {
         value = values[valuesIndex];
         node = nodes[nodeIndex];
         if (value instanceof Array) {
             nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
         } else if (node) {
+            console.log({ node, value, returnNodes });
             if (valuesIndex in values) {
                 const replacedNodes = node.Replace(value)
                 if (replacedNodes instanceof Array) {
@@ -367,14 +427,14 @@ function propertyRegistry(registerFunction) {
     return (parent, attribute) => {
         const getRenderValue = registration(registerFunction, (value) => {
             if (attribute) {
-                parent.setAttr(attribute, value);
+                parent.setAttr(attribute, getRenderValue(parent, attribute));
             } else {
                 replaceArrayNodes(
                     currentNodes,
                     [getRenderValue(parent, attribute)],
                     (currentNodes = [])
                 );
-                console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
+                // console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
             }
         });
 
