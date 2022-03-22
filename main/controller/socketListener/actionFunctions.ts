@@ -8,8 +8,7 @@ export const actionFunctions: Record<string, (data: any) => void> = {
     RESTART_SERVER: () => {
         window.location.reload();
     },
-    ALERT_ERROR: (data: AlertErrorType) => {
-        // console.log("🚀 --> file: actionFunctions.ts --> line 12 --> data", data);
+    ALERT_ERROR: (data: AlertErrorType) => { 
         createError(data);
     }
 }

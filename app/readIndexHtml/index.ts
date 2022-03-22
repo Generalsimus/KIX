@@ -4,7 +4,7 @@ import ts from "typescript";
 import { App } from "../index";
 import { createProgramHost } from "../createProgram";
 import { readJsDomHtml } from "./readJsDomHtml";
-import consola  from "consola";
+import consola from "consola";
 
 export function readIndexHtml() {
   const indexHTMLPath = path.resolve("./index.html");
@@ -12,14 +12,14 @@ export function readIndexHtml() {
   if (!fs.existsSync(indexHTMLPath)) {
     throw consola.error(`Couldn't find ${indexHTMLPath} file.`);
   }
-  
+
   const createHostProgram = () => {
     App.requestsThreshold.clear();
     const rootNames = readJsDomHtml(indexHTMLPath)
     const hostProgram = new createProgramHost(
       rootNames,
       {
-        
+
         target: ts.ScriptTarget.ES2020,
         module: ts.ModuleKind.CommonJS,
         incremental: true,

@@ -12,6 +12,7 @@ export const ImportVisitor = (node, statements, context) => {
     for (const importNode of currentModuleInfo.externalImports) {
         const moduleInfo = context.currentModuleInfo.moduleCollection[importNode.moduleSpecifier?.text];
         const importedModuleInfo = moduleInfo?.jsResolvedModule || moduleInfo;
+
         if (!importedModuleInfo) continue;
         // delete importNode.parent;
         // console.log("🚀 --> file: --> importNode.moduleSpecifier?.text", importNode);

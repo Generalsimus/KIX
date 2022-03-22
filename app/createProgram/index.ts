@@ -50,7 +50,7 @@ export class createProgramHost {
   reportDiagnoseTime: string = ""
   watch: boolean
   moduleRootWriter: rootWriter
-  currentDiagnostics: ts.Diagnostic[] = [] 
+  currentDiagnostics: ts.Diagnostic[] = []
   constructor(rootNames: string[] = [], options: ts.CompilerOptions = {}, watch: boolean = false, defaultModuleRootNames: string[] = []) {
     this.options = options;
     useConfigFileParser(this);
@@ -58,6 +58,7 @@ export class createProgramHost {
     this.defaultLibFileName = getDefaultLibFileName(this.defaultLibLocation, this.options);
     this.watch = watch
 
+    // console.log("🚀 --> file: index.ts --> line 75 --> createProgramHost --> constructor --> options", options);
     this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
     this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [App.injectPaths.codeController], true)
@@ -71,6 +72,8 @@ export class createProgramHost {
     this.diagnose();
     this.buildModules(defaultModuleRootNames.length);
     this.endBuildProcess();
+
+
   }
   emitFileLobby: Set<string> = new Set<string>();
   diagnose = diagnose
@@ -107,6 +110,7 @@ export class createProgramHost {
       undefined,
       this.transformer,
     );
+
   }
   createProgram(rootNames = this.rootNames, oldProgram = this.oldProgram) {
     return this.oldProgram = ts.createProgram({

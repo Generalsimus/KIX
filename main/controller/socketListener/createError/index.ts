@@ -23,7 +23,9 @@ export const createError = (error: AlertErrorType) => {
                         ]
                     })
                     iframeBody.style = "margin: 0px;padding: 0px;"
-                    kix(iframeBody, GlobalErrorBodyTag)
+
+                    kix(iframeBody, GlobalErrorBodyTag);
+
                 }
             }
         })

@@ -2,7 +2,7 @@ import { createProgramHost } from ".";
 
 export function diagnose(this: createProgramHost) {
     if (!this.oldProgram) return;
-
+    
     this.currentDiagnostics = [
         ...this.configFileParsingDiagnostics,
         // ...this.oldProgram.getOptionsDiagnostics(),

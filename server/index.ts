@@ -28,6 +28,7 @@ export class Server {
         });
 
         this.expressApp.use(this.middleware);
+        this.expressApp.use(this.redirectIndexHtmlMiddleware);
         this.listen()
     }
     messageCatcher = messageCatcher
@@ -67,11 +68,12 @@ export class Server {
         if (customResponse) {
             res.header("content-type", mimeTypes.lookup(req.path) || "text/html");
             res.end(customResponse())
-            // next
         } else {
-
             next()
         }
+    }
+    redirectIndexHtmlMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+        res.end(App.requestsThreshold.get("/")?.())
     }
     listen() {
         getSafePort(App.port).then((safePort) => {

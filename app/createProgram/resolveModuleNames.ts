@@ -7,6 +7,7 @@ import { isPathNodeModule } from "../../utils/isPathNodeModule";
 import path from "path";
 import { normalizeSlashes } from "../../utils/normalizeSlashes";
 import fs from "fs";
+import { getResolvedModuleObject } from "../../utils/getResolvedModuleObject";
 // var resolve = require('resolve/async'); // or, require('resolve')
 // resolve('tap', { basedir: __dirname }, function (err, res) {
 //     if (err) console.error(err);
@@ -19,27 +20,24 @@ const resolveModule = (moduleName: string, containingFile: string): ts.ResolvedM
             basedir: path.dirname(containingFile),
             extensions: ['.js', '.jsx', path.extname(moduleName)]
         }))
-        if (fs.existsSync(resolvedFileName)) {
-
-            return {
-                resolvedFileName,
-                isExternalLibraryImport: isPathNodeModule(resolvedFileName),
-                extension: ts.Extension.Js
-            }
-        }
+        return getResolvedModuleObject(resolvedFileName)
     } catch (e) {
-        const defaultModulePaths: Record<string, string> = {
-            kix: App.injectPaths.kix
-        }
-        const defaultResolvedFileName = defaultModulePaths[moduleName]
-
-        if (defaultResolvedFileName) {
-            return {
-                resolvedFileName: normalizeSlashes(defaultResolvedFileName),
+        const defaultModulePaths: Record<string, ts.ResolvedModuleFull> = {
+            kix: {
+                resolvedFileName: App.injectPaths.kixType,
+                extension: ts.Extension.Dts,
                 isExternalLibraryImport: false,
-                extension: ts.Extension.Js
             }
         }
+        return defaultModulePaths[moduleName]
+
+        // if (defaultResolvedFileName) {
+        //     return {
+        //         resolvedFileName: normalizeSlashes(defaultResolvedFileName),
+        //         isExternalLibraryImport: false,
+        //         extension: ts.Extension.Js
+        //     }
+        // }
         // return defaultModulePaths[moduleName]
     }
 }
@@ -60,11 +58,17 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
         resolveModule(moduleName, containingFileModuleInfo.modulePath))
     // console.log("🚀 --> file: resolveModuleNames.ts --> line 57 --> resolveName --> resolvedModule",  resolveModule(moduleName, containingFileModuleInfo.modulePath));
     // console.log("🚀 --> file: --> moduleNames", moduleName, ts.nodeModuleNameResolver(moduleName, containingFileModuleInfo.modulePath, host.options, host);
-
+    // if ('kix' === moduleName) {
+    //     console.log({
+    //         moduleName,
+    //         resolvedModule
+    //     });
+    // }
     if (!resolvedModule) return;
 
     // resolvedModule && (resolvedModule.isExternalLibraryImport = false)
     // ts.isExternalModuleIndicator
+
 
     const moduleInfo = getModuleInfo(resolvedModule.resolvedFileName);
 
@@ -75,21 +79,23 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     moduleInfo.resolvedModule = resolvedModule;
 
     // console.log("🚀 --> file: moduleInfo", /[/\\]node_modules[/\\]/.test(moduleInfo.modulePath), moduleInfo.isNodeModule, containingFileModuleInfo.isNodeModule);
+    let resolvedModuleJsPath: ts.ResolvedModule | undefined = resolvedModule
+    if (resolvedModule.resolvedFileName.endsWith(".d.ts")) {
+        resolvedModuleJsPath = (
+            getResolvedModuleObject(resolvedModule.resolvedFileName.replace(/(\.d\.ts)$/, ".js")) ||
+            resolveModule(moduleName, containingFileModuleInfo.modulePath)
+        );
+    }
 
-    if ((moduleInfo.isNodeModule = (moduleInfo.isNodeModule || containingFileModuleInfo.isNodeModule))) {
-        let resolvedModulePath: ts.ResolvedModule | undefined = resolvedModule
-        if (resolvedModule.resolvedFileName.endsWith(".d.ts")) {
-            resolvedModulePath = resolveModule(moduleName, containingFileModuleInfo.modulePath);
+    if (resolvedModuleJsPath) {
+        const jsResolvedModuleInfo = getModuleInfo(resolvedModuleJsPath.resolvedFileName);
+        jsResolvedModuleInfo.resolvedModule = resolvedModule;
+        moduleInfo.jsResolvedModule = jsResolvedModuleInfo;
+    }
 
-        }
-        // resolveModule(moduleName, containingFileModuleInfo.modulePath)
-        if (resolvedModulePath) {
-            const jsResolvedModuleInfo = getModuleInfo(resolvedModulePath.resolvedFileName);
-            jsResolvedModuleInfo.resolvedModule = resolvedModule;
-            moduleInfo.jsResolvedModule = jsResolvedModuleInfo;
-            host.moduleRootNamesSet.add(resolvedModulePath.resolvedFileName)
-        }
+    if ((moduleInfo.isNodeModule = (moduleInfo.isNodeModule || containingFileModuleInfo.isNodeModule)) && resolvedModuleJsPath) {
 
+        host.moduleRootNamesSet.add(resolvedModuleJsPath.resolvedFileName);
     } else {
 
         moduleInfo.rootWriters[containingFileModuleInfo.modulePath] = containingFileModuleInfo.rootWriters

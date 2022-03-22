@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useListener = exports.Component = exports.styleCssDom = exports.kix = void 0;
+exports.useListener = exports.routeParams = exports.Component = exports.styleCssDom = exports.kix = void 0;
 const type = (arg) => Object.prototype.toString.call(arg);
+const isHtml = (tag) => ((tag === null || tag === void 0 ? void 0 : tag.__proto__.ELEMENT_NODE) === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-const routeParams = {};
 const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName);
 const abstractNodes = {
     svg(objectNodeProperty, objectNode, createElementName, createElement) {
@@ -13,7 +13,7 @@ const abstractNodes = {
                 const node = createSVGElement(objectNodeProperty);
                 KixSVG(node, objectNode[objectNodeProperty]);
                 delete objectNode[objectNodeProperty];
-                return createElement(objectNode, parent, node);
+                return createElement(objectNode, node);
             }
             else {
                 return KixSVG(parent, objectNode);
@@ -30,18 +30,38 @@ const abstractNodes = {
                 e.preventDefault();
                 window.scrollTo(0, 0);
                 const state = {
-                    _routeID: new Date().getTime()
+                    routeTime: new Date().getTime()
                 };
-                const routeEvent = new CustomEvent('popstate', { detail: state });
+                const routeEvent = new CustomEvent('popstate');
                 history.pushState(state, document.title, this.getAttr("href"));
                 window.dispatchEvent(routeEvent);
             },
         });
-        return (parent) => createElement(switchObjectNode, parent, namedNode);
+        return (parent) => createElement(switchObjectNode, namedNode);
+    },
+    routing(_, routeObjectNode) {
+        return (parent) => {
+            const tagName = routeObjectNode.tagName || "div";
+            const ifEmptyComponent = routeObjectNode.ifEmptyComponent || "";
+            const children = routeObjectNode.routing;
+            let currentNodes = (0, exports.kix)(null, ['']);
+            const newRouteBoxNode = Object.assign({ [tagName]: [currentNodes, children] }, routeObjectNode);
+            delete newRouteBoxNode.tagName;
+            delete newRouteBoxNode.ifEmptyComponent;
+            delete newRouteBoxNode.routing;
+            const routeDomNode = (0, exports.kix)(parent, newRouteBoxNode);
+            const rerender = () => {
+                const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
+                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+            };
+            window.addEventListener("popstate", rerender);
+            rerender();
+        };
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
         return (parent) => {
-            const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
+            let currentNodes = (0, exports.kix)(parent, [""]);
+            const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
                 escapeRegexp,
                 [/:[^\s/]+/g, "([\\w-]+)"]
             ] : [
@@ -49,20 +69,20 @@ const abstractNodes = {
                 [/\((.*?)\)/g, "(?:$1)?"],
                 [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
                 [/\*\w+/g, "(.*?)"]
-            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? toPath : "^" + toPath + "$", "i"), routeNodes = {}, createRouterNode = (_routeID) => {
-                var localPath = decodeURI(document.location.pathname), matchPath = localPath.match(routeRegExp) || [];
-                to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
-                return routeRegExp.test(localPath) ? routeNodes[_routeID] || (routeNodes[_routeID] = componentValue) : "";
-            };
-            let existNode = (0, exports.kix)(parent, createRouterNode());
-            window.addEventListener("popstate", (routeEvent) => {
-                var _a;
-                const newNode = createRouterNode((_a = routeEvent.detail) === null || _a === void 0 ? void 0 : _a._routeID);
-                if (existNode !== newNode) {
-                    existNode = existNode.Replace(newNode);
+            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? toPath : "^" + toPath + "$", "i"), routeNodes = {}, createRouterNode = () => {
+                const localPath = decodeURI(document.location.pathname);
+                const matchPath = localPath.match(routeRegExp) || [];
+                const preCurrentNodes = [];
+                to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
+                let renderComponent = "";
+                if (routeRegExp.test(localPath)) {
+                    renderComponent = routeNodes[routeRegExp] || componentValue;
+                    routeNodes[routeRegExp] = preCurrentNodes;
                 }
-            });
-            return existNode;
+                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
+            };
+            createRouterNode();
+            window.addEventListener("popstate", createRouterNode);
         };
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
@@ -162,56 +182,45 @@ for (const key in abstractAttributes) {
     (Node.prototype[key] = abstractAttributes[key]);
 }
 function createApp(createElementName) {
-    function createElement(objectNode, parent, elementNode) {
+    function createElement(objectNode, elementNode) {
         for (const objectNodeProperty in objectNode) {
             if (elementNode) {
                 elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
             }
             else {
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
-                    return (0, exports.kix)(parent, abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement));
+                    const newNode = abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
+                    return newNode instanceof Node ? (newNode.parentNode ? null : newNode) : newNode;
                 }
                 (0, exports.kix)((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
-                elementNode._kixNode = objectNode;
             }
         }
         return elementNode;
     }
-    return function kix(parent, child) {
-        switch (type(child)) {
+    return function kix(parent, children) {
+        switch (type(children)) {
             case "[object Array]":
-                return child.map((childNode) => kix(parent, childNode));
+                return children.map((childNode) => kix(parent, childNode));
             case "[object Function]":
-                return kix(parent, child(parent));
+                return kix(parent, children(parent));
             case "[object Object]":
-                child = createElement(child, parent);
-                break;
+                return kix(parent, createElement(children));
             case "[object Promise]":
-                child.then(function (result) {
-                    child.Replace(result);
-                });
+                children.then((result) => children.Replace(result));
+                return children = kix(parent, "");
             case "[object Undefined]":
             case "[object Null]":
             case "[object Boolean]":
-                child = "";
-            case "[object String]":
-            case "[object Number]":
-            case "[object Date]":
-            case "[object RegExp]":
-            case "[object BigInt]":
-            case "[object Symbol]":
-            case "[object Error]":
-            case "[object Date]":
-                const textNode = document.createTextNode(String(child));
-                textNode._kixNode = child;
-                child = textNode;
-                break;
+                children = "";
             default:
-                if (!(child instanceof Node)) {
-                    return kix(parent, String(child));
+                if (!isHtml(children)) {
+                    children = document.createTextNode(children + "");
                 }
         }
-        return parent && parent.appendChild(child), child;
+        if (isHtml(parent)) {
+            parent.appendChild(children);
+        }
+        return children;
     };
 }
 const KixSVG = createApp(createSVGElement);
@@ -221,6 +230,7 @@ exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
 class Component {
 }
 exports.Component = Component;
+exports.routeParams = {};
 const useListener = (objectValue, propertyName, callback) => {
     let closed = false;
     let callBackList = [];
@@ -305,7 +315,6 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
                 else {
                     returnNodes.push(replacedNodes);
                 }
-                returnNodes.push(node.Replace(value));
             }
             else {
                 node.Remove();

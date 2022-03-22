@@ -1,36 +1,55 @@
 
-export type JSXElement = any
-declare const kix: (parent?: HTMLElement | null | undefined, child: JSXElement) => any
-// HTMLElement
-export { kix };
-export default kix;
-
 
 /// <reference lib="dom" />
+
+declare const kix: (parent?: HTMLElement | null | undefined, child: any) => any
+
+export { kix };
+export default kix;
+export let Component = class Component { } as new <
+  Model extends {
+    [key: string]: any;
+  } = {}
+  >() => Model & {
+    children: any;
+    ____$$$$$$$$$$$Props: Model;
+  };
+
+
+/// START CLASS COMPONENT DECLARATION //////////////////////////////////////////
+abstract class AbstractComponent<Model extends Record<string, any>> {
+  children: any;
+  private ____$$$$$$$$$$$Props: Model;
+}
+
+export let Component = class Component { } as new <
+  Model extends Record<string, any> = {}
+  >() => Model & AbstractComponent<Model>;
+/// END CLASS COMPONENT DECLARATION ////////////////////////////////////////////
+
+
+
+/// START EXPORT ROUTE PARAMS //////////////////////////////////////////////////
+export var routeParams: { readonly [key: string | number | symbol]: any } = {}
+/// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////
+
+/// START PROPERTY LISTENER /////////////////////////////////////////
+export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T) => any;
+export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
+  addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+  removeCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+  close: () => void;
+  open: () => void;
+}
+export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+/// END PROPERTY LISTENER ///////////////////////////////////////////
+
 declare global {
+
   /// START KIX MODULE //////////////////////////////////////////////////
-  declare module "kix" {
-    export { kix };
-    export default kix;
-    export let Component = class Component { } as new <
-      Model extends {
-        [key: string]: any;
-      } = {}
-      >() => Model & {
-        children: any;
-        ____$$$$$$$$$$$Props: Model;
-      };
-    /// START PROPERTY LISTENER /////////////////////////////////////////
-    export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T) => any;
-    export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
-      addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-      removeCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-      close: () => void;
-      open: () => void;
-    }
-    export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-    /// END PROPERTY LISTENER ///////////////////////////////////////////
-  }
+  // declare module "kix" {
+
+  // }
   /// END KIX MODULE //////////////////////////////////////////////////
 
 
@@ -41,13 +60,6 @@ declare global {
 
 
   ///START JSX TYPE ////////////////////////////////////////////////////
-  abstract class AbstractComponent<Model extends Record<string, any>> {
-    children: any;
-    private ____$$$$$$$$$$$Props: Model;
-  }
-  export let Component = class Component { } as new <
-    Model extends Record<string, any> = {}
-    >() => Model & AbstractComponent<Model>;
 
   type HTMLElements = HTMLElementTagNameMap &
     SVGElementTagNameMap &
@@ -83,6 +95,9 @@ declare global {
 
 
 }
-
+// // // HTMLElement
+// export { kix };
+// export * from "kix"
+// export { default as default } from "kix"
 
 
