@@ -89,11 +89,11 @@ const abstractNodes = {
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
     _F(objectNodeProperty, objectNode, createElementName, createElement) {
+        var _a, _b;
         const component = objectNode._F;
         if (!(component instanceof Function))
             return;
-        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype');
-        if (component.prototype.render || !(prototypeDescriptor === null || prototypeDescriptor === void 0 ? void 0 : prototypeDescriptor.writable)) {
+        if ((_a = component.prototype) === null || _a === void 0 ? void 0 : _a.render) {
             class ComponentNode extends component {
                 constructor() {
                     super();
@@ -107,7 +107,7 @@ const abstractNodes = {
             }
             return new ComponentNode().render();
         }
-        else {
+        else if (((_b = Object.getOwnPropertyDescriptor(component, 'prototype')) === null || _b === void 0 ? void 0 : _b.writable) !== false) {
             const props = registerProps({}, objectNode.d);
             return component(props);
         }
@@ -228,6 +228,7 @@ exports.kix = createApp(document.createElement.bind(document));
 exports.default = exports.kix;
 exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
 class Component {
+    render() { }
 }
 exports.Component = Component;
 exports.routeParams = {};

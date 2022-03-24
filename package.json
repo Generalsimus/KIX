@@ -1,12 +1,13 @@
 {
   "name": "kix",
-  "version": "3.0.5-beta.10",
+  "version": "3.0.5-beta.14",
   "main": "./main/index.js",
   "author": "soso tsertsvadze",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Generalsimus/KIX.git"
   },
+
   "homepage": "https://kixjs.ml/",
   "bin": {
     "kix": "./dist/index.js",
@@ -18,8 +19,25 @@
     "dev": "tsc --watch",
     "start": "node ./dist/index.js"
   },
-  "keywords": [],
-  "license": "ISC",
+  "keywords": [
+    "kix",
+    "javascript",
+    "typescript",
+    "dom",
+    "kixjs",
+    "kix-js",
+    "kidjs",
+    "kid-js",
+    "js-kix",
+    "jskix",
+    "kid",
+    "kid-js-lib",
+    "js",
+    "jskid",
+    "jsdom",
+    "kixdom"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/html-minifier-terser": "^6.1.0",

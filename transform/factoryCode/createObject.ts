@@ -10,31 +10,23 @@ export const createObject = (objectPropertiesNodes: createObjectArgsType) => {
     return factory.createObjectLiteralExpression(
         objectPropertiesNodes.map((node) => {
             if (node instanceof Array) {
-                const propertyNameNode = node[0]
+                let propertyNameNode = node[0];
+                let propertyNode: ts.Identifier | ts.StringLiteral | ts.ComputedPropertyName
 
-                if (typeof propertyNameNode === "string") {
-                    if (saferPropertyRegexp.test(propertyNameNode)) {
-                        return factory.createPropertyAssignment(
-                            identifier(propertyNameNode),
-                            node[1]
-                        )
-                    } else {
-                        return factory.createPropertyAssignment(
-                            stringLiteral(propertyNameNode),
-                            node[1]
-                        )
-                    }
-                } else if (ts.isIdentifier(propertyNameNode)) {
-                    return factory.createPropertyAssignment(
-                        propertyNameNode,
-                        node[1]
-                    )
+                if (typeof propertyNameNode === "string" || ts.isIdentifier(propertyNameNode)) {
+
+                    propertyNameNode = typeof propertyNameNode === "string" ? propertyNameNode : ts.idText(propertyNameNode);
+
+                    propertyNode = saferPropertyRegexp.test(propertyNameNode) ? identifier(propertyNameNode) : stringLiteral(propertyNameNode);
+
                 } else {
-                    return factory.createPropertyAssignment(
-                        factory.createComputedPropertyName(propertyNameNode),
-                        node[1]
-                    )
+                    propertyNode = factory.createComputedPropertyName(propertyNameNode);
                 }
+
+                return factory.createPropertyAssignment(
+                    propertyNode,
+                    node[1]
+                )
             } else if (ts.isObjectLiteralElementLike(node)) {
                 return node
             }

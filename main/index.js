@@ -138,8 +138,8 @@ const abstractNodes = {
     _F(objectNodeProperty, objectNode, createElementName, createElement) {
         const component = objectNode._F
         if (!(component instanceof Function)) return;
-        const prototypeDescriptor = Object.getOwnPropertyDescriptor(component, 'prototype');
-        if (component.prototype.render || !prototypeDescriptor?.writable) {
+
+        if (component.prototype?.render) {
             class ComponentNode extends component {
                 constructor() {
                     super();
@@ -156,10 +156,11 @@ const abstractNodes = {
             }
 
             return new ComponentNode().render();
-        } else {
+        } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
+
             const props = registerProps({}, objectNode.d);
 
-            return component(props)
+            return component(props);
         }
 
 
@@ -292,7 +293,7 @@ const KixSVG = createApp(createSVGElement);
 export const kix = createApp(document.createElement.bind(document));
 export default kix;
 export const styleCssDom = kix(document.body, { style: "" });
-export class Component { }
+export class Component { render() { } }
 export var routeParams = {};
 export const useListener = (objectValue, propertyName, callback) => {
     let closed = false;
