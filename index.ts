@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { App } from "./app";
 // TODO: ავტორელოადი გაქ დასამატებელი სოკეტისთვის
-
+// TODO: ბილდზე კოდის კონტროლერები ამოიღე
 App.start()
 // import path from "path";
 // import ts from "typescript";

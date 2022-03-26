@@ -158,7 +158,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
 
-            const props = registerProps({}, objectNode.d);
+            const props = registerProps({ ...(objectNode.s || {}) }, objectNode.d);
 
             return component(props);
         }
@@ -330,27 +330,30 @@ export const useListener = (objectValue, propertyName, callback) => {
 function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
-            let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {},
-                value = obj[key],
-                defineRegistrations = descriptor?.set?._R_C || [];
-            if (defineRegistrations.indexOf(registerFunction) === -1) {
-                defineRegistrations.push(registerFunction);
-                function set(setValue) {
-                    value = setValue;
-                    descriptor.set && descriptor.set(value)
-                    onSet(value);
+            if (obj) {
+                let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {},
+                    value = obj[key],
+                    defineRegistrations = descriptor?.set?._R_C || [];
+                if (defineRegistrations.indexOf(registerFunction) === -1) {
+                    defineRegistrations.push(registerFunction);
+                    function set(setValue) {
+                        value = setValue;
+                        descriptor.set && descriptor.set(value)
+                        onSet(value);
+                    }
+                    set._R_C = defineRegistrations
+                    Object.defineProperty(obj, key, {
+                        enumerable: true,
+                        configurable: true,
+                        get() {
+                            return value;
+                        },
+                        set
+                    })
                 }
-                set._R_C = defineRegistrations
-                Object.defineProperty(obj, key, {
-                    enumerable: true,
-                    configurable: true,
-                    get() {
-                        return value;
-                    },
-                    set
-                })
+
+                return typeof value === "function" ? value.bind(obj) : value;
             }
-            return obj[key]
         })
     }));
     return getValue

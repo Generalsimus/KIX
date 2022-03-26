@@ -23,7 +23,8 @@ export const getConfigJson = (projectName: string) => {
             "scripts": {
                 "test": "echo \"Error: no test specified\" && exit 1",
                 "dev": "kix start",
-                "start": "kix start"
+                "start": "kix start",
+                "build": "kix build"
             },
             "repository": {
                 "type": "git",
