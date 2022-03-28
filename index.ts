@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { App } from "./app";
 // TODO: ავტორელოადი გაქ დასამატებელი სოკეტისთვის
-// TODO: ბილდზე კოდის კონტროლერები ამოიღე
+// TODO: ბილდზე კოდის კონტროლერების ფაილები ამოიღე
+// TODO: css ის sourcemap ირევა
 App.start()
 // import path from "path";
 // import ts from "typescript";

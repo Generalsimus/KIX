@@ -133,7 +133,8 @@ const abstractNodes = {
 
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
-        return propertyRegistry(objectNode[objectNodeProperty])
+
+        return propertyRegistry(objectNode[objectNodeProperty]);
     },
     _F(objectNodeProperty, objectNode, createElementName, createElement) {
         const component = objectNode._F
@@ -143,8 +144,7 @@ const abstractNodes = {
             class ComponentNode extends component {
                 constructor() {
                     super();
-                    // console.log("🚀 --> file: index.js --> line 94 --> ComponentNode --> constructor --> this", this);
-                    // console.log("🚀 --> file: index.js --> line 95 --> ComponentNode --> constructor --> objectNode", objectNode);
+
                     const props = { ...(objectNode.s || {}), ...registerProps(this, objectNode.d) }
 
                     for (const propKey in props) {
@@ -214,6 +214,7 @@ const abstractAttributes = {
     Insert(method, node) {
         const parent = this.parentNode,
             HtmlNode = kix(null, flatFunction(node, parent));
+
         if (!parent) return;
         switch (method) {
             case "after":
@@ -222,7 +223,7 @@ const abstractAttributes = {
                     parent.insertBefore(HtmlNode, netNode);
                     return HtmlNode;
                 } else {
-                    return parent.Append(node);
+                    return parent.Append(HtmlNode);
                 }
             case "before":
                 parent.insertBefore(HtmlNode, this);
@@ -230,6 +231,8 @@ const abstractAttributes = {
         }
     },
     _R(value) {
+
+
         for (const attributeName in value) {
             this.setAttr(attributeName, propertyRegistry(value[attributeName]));
         }
@@ -241,6 +244,7 @@ function createApp(createElementName) {
 
 
     function createElement(objectNode, elementNode) {
+
         for (const objectNodeProperty in objectNode) {
             if (elementNode) {
                 elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
@@ -330,7 +334,7 @@ export const useListener = (objectValue, propertyName, callback) => {
 function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
-            if (obj) {
+            if (obj && key in obj) {
                 let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {},
                     value = obj[key],
                     defineRegistrations = descriptor?.set?._R_C || [];
@@ -356,6 +360,7 @@ function registration(registerFunction, onSet) {
             }
         })
     }));
+
     return getValue
 }
 /////////////////////////////////////
@@ -377,7 +382,6 @@ function registerProps(props, registerProps) {
 /*
 ანაცვლებს მასივურ ელემენტებს ახლით
 */
-// document.getElementsById("test");
 
 function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
 
@@ -387,8 +391,8 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
         if (value instanceof Array) {
             nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
         } else if (node) {
-            // console.log({ node, value, returnNodes });
-            // console.log("🚀 --> file: index.js --> line 389 --> replaceArrayNodes --> returnNodes", returnNodes);
+
+
             if (valuesIndex in values) {
                 const replacedNodes = node.Replace(value)
                 if (replacedNodes instanceof Array) {
@@ -415,8 +419,9 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
 function propertyRegistry(registerFunction) {
     let currentNodes;
     return (parent, attribute) => {
-        const getRenderValue = registration(registerFunction, (value) => {
+        const getRenderValue = registration((a) => registerFunction(a), (value) => {
             if (attribute) {
+
                 parent.setAttr(attribute, getRenderValue(parent, attribute));
             } else {
                 replaceArrayNodes(
@@ -424,20 +429,22 @@ function propertyRegistry(registerFunction) {
                     [getRenderValue(parent, attribute)],
                     (currentNodes = [])
                 );
-                // console.log("🚀 --> file: index.js --> line 374 --> getRenderValue --> currentNodes", currentNodes);
+
             }
         });
 
         const value = getRenderValue();
+
         if (attribute) {
             return value;
         }
+
         replaceArrayNodes(
             kix(parent, [""]),
             [value],
             (currentNodes = [])
         )
-        return "";
+        // return "";
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////

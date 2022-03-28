@@ -32,6 +32,6 @@ export const createObject = (objectPropertiesNodes: createObjectArgsType) => {
             }
             return factory.createSpreadAssignment(factory.createParenthesizedExpression(identifier(node)))
         }),
-        true
+        false
     )
 }

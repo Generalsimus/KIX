@@ -165,7 +165,7 @@ const abstractAttributes = {
                     return HtmlNode;
                 }
                 else {
-                    return parent.Append(node);
+                    return parent.Append(HtmlNode);
                 }
             case "before":
                 parent.insertBefore(HtmlNode, this);
@@ -268,7 +268,7 @@ function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
             var _a;
-            if (obj) {
+            if (obj && key in obj) {
                 let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {}, value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
@@ -334,7 +334,7 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
 function propertyRegistry(registerFunction) {
     let currentNodes;
     return (parent, attribute) => {
-        const getRenderValue = registration(registerFunction, (value) => {
+        const getRenderValue = registration((a) => registerFunction(a), (value) => {
             if (attribute) {
                 parent.setAttr(attribute, getRenderValue(parent, attribute));
             }
@@ -347,6 +347,5 @@ function propertyRegistry(registerFunction) {
             return value;
         }
         replaceArrayNodes((0, exports.kix)(parent, [""]), [value], (currentNodes = []));
-        return "";
     };
 }
