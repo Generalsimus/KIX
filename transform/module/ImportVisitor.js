@@ -21,7 +21,7 @@ export const ImportVisitor = (node, statements, context) => {
         //     console.log("🚀 --> file: --> importNode.moduleSpecifier?.text", importNode);
         // }
         if (!importNode.importClause) {
-            importsStatements.push(propertyAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex]))
+            importsStatements.push(factory.createExpressionStatement(propertyAccessExpression([App.uniqAccessKey, importedModuleInfo.moduleIndex])))
             continue;
         }
         // if (!importNode.importNode) {

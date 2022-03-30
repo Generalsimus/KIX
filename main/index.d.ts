@@ -7,7 +7,7 @@ declare const kix: (parent?: HTMLElement | null | undefined, child: any) => any
 export { kix };
 export default kix;
 
-const ss = class Stss { } as any
+
 export let Component = class Component { } as new <
   Model extends {
     [key: string]: any;
@@ -15,7 +15,7 @@ export let Component = class Component { } as new <
   >() => Model & {
     children: any;
     ____$$$$$$$$$$$Props: Model;
-  } & Stss;
+  };
 
 
 /// START CLASS COMPONENT DECLARATION //////////////////////////////////////////

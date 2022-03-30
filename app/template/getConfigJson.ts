@@ -9,6 +9,8 @@ export const getConfigJson = (projectName: string) => {
                 "jsx": "preserve",
                 "module": "commonjs",
                 "moduleResolution": "node",
+                "outDir": "./dist",
+                "allowJs": true,
                 "esModuleInterop": true,
                 "forceConsistentCasingInFileNames": true,
                 "strict": true,

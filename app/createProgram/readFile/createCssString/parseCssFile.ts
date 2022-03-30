@@ -13,6 +13,7 @@ export const parseCssFile = (
   host: createProgramHost,
 ) => {
 
+  // console.log("🚀 --> file: parseCssFile.ts --> line 19 --> fileName", fileName);
   try {
     const result = nodeSass.renderSync({
       file: fileName,
@@ -37,6 +38,7 @@ export const parseCssFile = (
 
         return Error(`Import Module ${url} not found`);
       },
+      sourceMapRoot: App.runDirName,
       data: fileContent,
       outputStyle: 'compressed',
       sourceMapContents: true,

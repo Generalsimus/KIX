@@ -3,6 +3,9 @@ import { App } from "./app";
 // TODO: ავტორელოადი გაქ დასამატებელი სოკეტისთვის
 // TODO: ბილდზე კოდის კონტროლერების ფაილები ამოიღე
 // TODO: css ის sourcemap ირევა
+// TODO: ბილდზე ვაჩერის ლოგი არ უნდა ილოგებოდეს
+// TODO: css ის მოდულების არსებობა გადაამოწმე
+// TODO: ბილდი დაფიქსე მგონი ურევს
 App.start()
 // import path from "path";
 // import ts from "typescript";

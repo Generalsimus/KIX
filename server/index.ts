@@ -28,6 +28,7 @@ export class Server {
         });
 
         this.expressApp.use(this.middleware);
+        this.expressApp.use(express.static(App.runDirName))
         this.expressApp.use(this.redirectIndexHtmlMiddleware);
         this.listen()
     }
