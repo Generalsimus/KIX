@@ -334,9 +334,9 @@ export const useListener = (objectValue, propertyName, callback) => {
 function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
-            if (obj && key in obj) {
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {},
-                    value = obj[key],
+            let value = obj?.[key]
+            if (obj?.hasOwnProperty(key)) {
+                let descriptor = Object.getOwnPropertyDescriptor(obj, key),
                     defineRegistrations = descriptor?.set?._R_C || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
@@ -355,9 +355,8 @@ function registration(registerFunction, onSet) {
                         set
                     })
                 }
-
-                return typeof value === "function" ? value.bind(obj) : value;
             }
+            return typeof value === "function" ? value.bind(obj) : value;
         })
     }));
 

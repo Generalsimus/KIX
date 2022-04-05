@@ -1,6 +1,6 @@
 {
   "name": "kix",
-  "version": "3.0.5-beta.17",
+  "version": "3.0.5-beta.19",
   "main": "./main/index.js",
   "author": "soso tsertsvadze",
   "repository": {
@@ -14,7 +14,7 @@
     "KIX": "./dist/index.js"
   },
   "preferGlobal": true,
-  "description": "",
+  "description": "Kix is a platform for building web applications. Kix makes it painless to create interactive UIs. Declarative views make your code more predictable and easier to debug.",
   "scripts": {
     "dev": "tsc --watch",
     "start": "node ./dist/index.js"

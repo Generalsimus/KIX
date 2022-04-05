@@ -6,6 +6,7 @@ import { App } from "./app";
 // TODO: ბილდზე ვაჩერის ლოგი არ უნდა ილოგებოდეს
 // TODO: css ის მოდულების არსებობა გადაამოწმე
 // TODO: ბილდი დაფიქსე მგონი ურევს
+// TODO: გადაამოწმე კარგად css ის remaper ი 
 App.start()
 // import path from "path";
 // import ts from "typescript";

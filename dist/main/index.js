@@ -268,8 +268,9 @@ function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
             var _a;
-            if (obj && key in obj) {
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key) || {}, value = obj[key], defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+            let value = obj === null || obj === void 0 ? void 0 : obj[key];
+            if (obj === null || obj === void 0 ? void 0 : obj.hasOwnProperty(key)) {
+                let descriptor = Object.getOwnPropertyDescriptor(obj, key), defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
                     function set(setValue) {
@@ -287,8 +288,8 @@ function registration(registerFunction, onSet) {
                         set
                     });
                 }
-                return typeof value === "function" ? value.bind(obj) : value;
             }
+            return typeof value === "function" ? value.bind(obj) : value;
         });
     }));
     return getValue;
