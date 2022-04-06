@@ -3,6 +3,7 @@ import nodeSass from "node-sass";
 import path from "path";
 import { createProgramHost } from "../..";
 import { App } from "../../..";
+import { filePathToUrl } from "../../../../utils/filePathToUrl";
 import { remapCssURL } from "./remapCssURL";
 
 
@@ -38,7 +39,7 @@ export const parseCssFile = (
 
         return Error(`Import Module ${url} not found`);
       },
-      sourceMapRoot: App.runDirName,
+      sourceMapRoot: filePathToUrl(path.dirname(fileName)),
       data: fileContent,
       outputStyle: 'compressed',
       sourceMapContents: true,

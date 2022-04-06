@@ -140,14 +140,14 @@ const abstractAttributes = {
         return this;
     },
     Replace(replaceNode) {
-        const parent = this.parentNode;
+        let parent = this.parentNode;
         if (parent) {
             replaceNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
             if (replaceNode instanceof Array) {
                 replaceArrayNodes([this], replaceNode, []);
             }
             else {
-                parent.replaceChild(replaceNode, this);
+                parent === null || parent === void 0 ? void 0 : parent.replaceChild(replaceNode, this);
             }
             return replaceNode;
         }
@@ -270,7 +270,8 @@ function registration(registerFunction, onSet) {
             var _a;
             let value = obj === null || obj === void 0 ? void 0 : obj[key];
             if (obj === null || obj === void 0 ? void 0 : obj.hasOwnProperty(key)) {
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key), defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+                const defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
                     function set(setValue) {

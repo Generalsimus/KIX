@@ -197,15 +197,16 @@ const abstractAttributes = {
         return this;
     },
     Replace(replaceNode) {
-        const parent = this.parentNode
-        if (parent) {
+        let parent = this.parentNode
 
+        if (parent) {
             replaceNode = kix(null, flatFunction(replaceNode, parent));
+
             if (replaceNode instanceof Array) {
 
                 replaceArrayNodes([this], replaceNode, []);
             } else {
-                parent.replaceChild(replaceNode, this);
+                parent?.replaceChild(replaceNode, this);
             }
             return replaceNode;
         }
@@ -336,8 +337,8 @@ function registration(registerFunction, onSet) {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
             let value = obj?.[key]
             if (obj?.hasOwnProperty(key)) {
-                let descriptor = Object.getOwnPropertyDescriptor(obj, key),
-                    defineRegistrations = descriptor?.set?._R_C || [];
+                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+                const defineRegistrations = descriptor?.set?._R_C || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
                     function set(setValue) {
