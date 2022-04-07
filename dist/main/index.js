@@ -63,12 +63,12 @@ const abstractNodes = {
             let currentNodes = (0, exports.kix)(parent, [""]);
             const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
                 escapeRegexp,
-                [/:[^\s/]+/g, "([\\w-]+)"]
-            ] : [
-                escapeRegexp,
                 [/\((.*?)\)/g, "(?:$1)?"],
                 [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
                 [/\*\w+/g, "(.*?)"]
+            ] : [
+                escapeRegexp,
+                [/:[^\s/]+/g, "([\\w-]+)"]
             ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? toPath : "^" + toPath + "$", "i"), routeNodes = {}, createRouterNode = () => {
                 const localPath = decodeURI(document.location.pathname);
                 const matchPath = localPath.match(routeRegExp) || [];
