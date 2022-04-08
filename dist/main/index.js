@@ -40,50 +40,45 @@ const abstractNodes = {
         return (parent) => createElement(switchObjectNode, namedNode);
     },
     routing(_, routeObjectNode) {
-        return (parent) => {
-            const tagName = routeObjectNode.tagName || "div";
-            const ifEmptyComponent = routeObjectNode.ifEmptyComponent || "";
-            const children = routeObjectNode.routing;
-            let currentNodes = (0, exports.kix)(null, ['']);
-            const newRouteBoxNode = Object.assign({ [tagName]: [currentNodes, children] }, routeObjectNode);
-            delete newRouteBoxNode.tagName;
-            delete newRouteBoxNode.ifEmptyComponent;
-            delete newRouteBoxNode.routing;
-            const routeDomNode = (0, exports.kix)(parent, newRouteBoxNode);
-            const rerender = () => {
-                const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
-                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
-            };
-            window.addEventListener("popstate", rerender);
-            rerender();
-        };
+        const tagName = flatFunction(routeObjectNode.tagName) || "div";
+        const ifEmptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
+        const children = routeObjectNode.routing;
+        let currentNodes = (0, exports.kix)(null, ['']);
+        const newRouteBoxNode = Object.assign({ [tagName]: [currentNodes, children] }, routeObjectNode);
+        delete newRouteBoxNode.tagName;
+        delete newRouteBoxNode.ifEmptyComponent;
+        delete newRouteBoxNode.routing;
+        const routeDomNode = (0, exports.kix)(null, newRouteBoxNode);
+        function rerender() {
+            const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
+            replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+        }
+        window.addEventListener("popstate", rerender);
+        return [routeDomNode, rerender];
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-        return (parent) => {
-            let currentNodes = (0, exports.kix)(parent, [""]);
-            const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
-                escapeRegexp,
-                [/\((.*?)\)/g, "(?:$1)?"],
-                [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
-                [/\*\w+/g, "(.*?)"]
-            ] : [
-                escapeRegexp,
-                [/:[^\s/]+/g, "([\\w-]+)"]
-            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? toPath : "^" + toPath + "$", "i"), routeNodes = {}, createRouterNode = () => {
-                const localPath = decodeURI(document.location.pathname);
-                const matchPath = localPath.match(routeRegExp) || [];
-                const preCurrentNodes = [];
-                to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
-                let renderComponent = "";
-                if (routeRegExp.test(localPath)) {
-                    renderComponent = routeNodes[routeRegExp] || componentValue;
-                    routeNodes[routeRegExp] = preCurrentNodes;
-                }
-                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
-            };
-            createRouterNode();
-            window.addEventListener("popstate", createRouterNode);
+        let currentNodes = (0, exports.kix)(null, [""]);
+        const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
+            escapeRegexp,
+            [/\((.*?)\)/g, "(?:$1)?"],
+            [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
+            [/\*\w+/g, "(.*?)"]
+        ] : [
+            escapeRegexp,
+            [/:[^\s/]+/g, "([\\w-]+)"]
+        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i"), routeNodes = {}, createRouterNode = () => {
+            const localPath = decodeURI(document.location.pathname);
+            const matchPath = localPath.match(routeRegExp) || [];
+            const preCurrentNodes = [];
+            to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
+            let renderComponent = "";
+            if (routeRegExp.test(localPath)) {
+                renderComponent = routeNodes[routeRegExp] || componentValue;
+                routeNodes[routeRegExp] = preCurrentNodes;
+            }
+            replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
         };
+        return [currentNodes, () => (createRouterNode(), window.addEventListener("popstate", createRouterNode))];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
@@ -111,6 +106,18 @@ const abstractNodes = {
             const props = registerProps(Object.assign({}, (objectNode.s || {})), objectNode.d);
             return component(props);
         }
+    },
+    _D(objectNodeProperty, objectNode, createElementName, createElement) {
+        let node;
+        for (const attributeName in objectNode) {
+            if (node) {
+                node[attributeName] = (tagNode) => (propertyRegistry(objectNode[attributeName])(tagNode, attributeName));
+            }
+            else {
+                node = Object.assign({}, objectNode[attributeName]);
+            }
+        }
+        return node;
     }
 };
 const abstractAttributes = {
@@ -172,11 +179,6 @@ const abstractAttributes = {
                 return HtmlNode;
         }
     },
-    _R(value) {
-        for (const attributeName in value) {
-            this.setAttr(attributeName, propertyRegistry(value[attributeName]));
-        }
-    }
 };
 for (const key in abstractAttributes) {
     (Node.prototype[key] = abstractAttributes[key]);
@@ -190,7 +192,7 @@ function createApp(createElementName) {
             else {
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
                     const newNode = abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
-                    return newNode instanceof Node ? (newNode.parentNode ? null : newNode) : newNode;
+                    return isHtml(newNode) ? (newNode.parentNode ? null : newNode) : newNode;
                 }
                 (0, exports.kix)((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
             }

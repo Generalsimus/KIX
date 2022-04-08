@@ -64,13 +64,17 @@ export const jsxToObject = (
             })
         }
     })
-    if (dynamicObjectNodeProperties.length) {
-        objectNodeProperties.push(["_R", createObject(dynamicObjectNodeProperties)])
-    }
+    /*
+    _D:switch (tagName.getText()) {}
+     atr: _R_1 => (_R_1(s, "i"))
+    */
+
     if (eventObjectNodeProperties.length) {
         objectNodeProperties.push(["e", createObject(eventObjectNodeProperties)])
     }
-
+    if (dynamicObjectNodeProperties.length) {
+        return createObject([["_D", createObject(objectNodeProperties)], ...dynamicObjectNodeProperties])
+    }
 
     return createObject(objectNodeProperties)
 }

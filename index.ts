@@ -6,6 +6,7 @@ import { App } from "./app";
 // TODO: css ის მოდულების არსებობა გადაამოწმე
 // TODO: ბილდი დაფიქსე მგონი ურევს
 // TODO: გადაამოწმე კარგად css ის remaper ი 
+// TODO: პორტ ჩექერი გადაამოწმე როგორ მუშაობს მგონი სხვა პორზე ვერ ხსნის
 App.start()
 // import path from "path";
 // import ts from "typescript";

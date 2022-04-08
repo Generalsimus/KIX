@@ -45,92 +45,73 @@ const abstractNodes = {
     },
     routing(_, routeObjectNode) {
 
+        const tagName = flatFunction(routeObjectNode.tagName) || "div",
+        const ifEmptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "",
+        const children = routeObjectNode.routing;
+        let currentNodes = kix(null, [''])
+        const newRouteBoxNode = {
+            [tagName]: [currentNodes, children],
+            ...routeObjectNode,
+        };
 
-        // const node = kix(null, newRouteObjectNode)
+        delete newRouteBoxNode.tagName;
+        delete newRouteBoxNode.ifEmptyComponent;
+        delete newRouteBoxNode.routing;
+        const routeDomNode = kix(null, newRouteBoxNode)
 
+        function rerender() {
+            const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
 
-        // const resetRoute = () => {
-        //     let exis_node = existNode.previousElementSibling || existNode.nextElementSibling
-        //     if (exis_node && fakeNode != existNode) {
-        //         existNode.Replace(fakeNode)
-        //         existNode = fakeNode
-        //     } else if (!exis_node && fakeNode == existNode) {
-        //         existNode.Replace(ifEmptyComponent = kix(null, ifEmptyComponent));
-        //         existNode = ifEmptyComponent;
-        //     }
-        // }
-        return (parent) => {
-            const tagName = routeObjectNode.tagName || "div",
-            const ifEmptyComponent = routeObjectNode.ifEmptyComponent || "",
-            const children = routeObjectNode.routing;
-            let currentNodes = kix(null, [''])
-            const newRouteBoxNode = {
-                [tagName]: [currentNodes, children],
-                ...routeObjectNode,
-            };
+            replaceArrayNodes(
+                currentNodes,
+                [renderComponent],
+                (currentNodes = [])
+            )
+        }
 
-            delete newRouteBoxNode.tagName;
-            delete newRouteBoxNode.ifEmptyComponent;
-            delete newRouteBoxNode.routing;
-            const routeDomNode = kix(parent, newRouteBoxNode)
-            const rerender = () => {
-                const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
+        window.addEventListener("popstate", rerender);
+
+        return [routeDomNode, rerender]
+    },
+    router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
+
+        let currentNodes = kix(null, [""]);
+        const to = flatFunction(path),
+            uniqValue = flatFunction(unique),
+            componentValue = flatFunction(component),
+            escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"],
+            toPath = (uniqValue ? [
+                escapeRegexp,
+                [/\((.*?)\)/g, "(?:$1)?"],
+                [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
+                [/\*\w+/g, "(.*?)"]
+            ] : [
+                escapeRegexp,
+                [/:[^\s/]+/g, "([\\w-]+)"]
+            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to),
+            routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i"),
+            routeNodes = {},
+            createRouterNode = () => {
+                const localPath = decodeURI(document.location.pathname);
+                const matchPath = localPath.match(routeRegExp) || [];
+                const preCurrentNodes = [];
+
+                to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
+
+                let renderComponent = "";
+                if (routeRegExp.test(localPath)) {
+                    renderComponent = routeNodes[routeRegExp] || componentValue;
+                    routeNodes[routeRegExp] = preCurrentNodes;
+                }
 
                 replaceArrayNodes(
                     currentNodes,
                     [renderComponent],
-                    (currentNodes = [])
-                )
-            }
+                    (currentNodes = preCurrentNodes)
+                );
+            };
 
-
-            window.addEventListener("popstate", rerender)
-            rerender()
-
-
-        };
-    },
-    router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-        /////////////////////////////////////////////////////////////////
-        return (parent) => {
-            let currentNodes = kix(parent, [""]);
-            const to = flatFunction(path),
-                uniqValue = flatFunction(unique),
-                componentValue = flatFunction(component),
-                escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"],
-                toPath = (uniqValue ? [
-                    escapeRegexp,
-                    [/\((.*?)\)/g, "(?:$1)?"],
-                    [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
-                    [/\*\w+/g, "(.*?)"]
-                ] : [
-                    escapeRegexp,
-                    [/:[^\s/]+/g, "([\\w-]+)"]
-                ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to),
-                routeRegExp = new RegExp(uniqValue ? toPath : "^" + toPath + "$", "i"),
-                routeNodes = {},
-                createRouterNode = () => {
-                    const localPath = decodeURI(document.location.pathname);
-                    const matchPath = localPath.match(routeRegExp) || [];
-                    const preCurrentNodes = [];
-
-                    to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
-
-                    let renderComponent = "";
-                    if (routeRegExp.test(localPath)) {
-                        renderComponent = routeNodes[routeRegExp] || componentValue;
-                        routeNodes[routeRegExp] = preCurrentNodes;
-                    }
-                    replaceArrayNodes(
-                        currentNodes,
-                        [renderComponent],
-                        (currentNodes = preCurrentNodes)
-                    )
-                };
-            createRouterNode();
-            window.addEventListener("popstate", createRouterNode)
-        }
-
+        return [currentNodes, () => (createRouterNode(), window.addEventListener("popstate", createRouterNode))]
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
 
@@ -163,6 +144,19 @@ const abstractNodes = {
             return component(props);
         }
 
+
+    },
+    _D(objectNodeProperty, objectNode, createElementName, createElement) {
+        let node
+        for (const attributeName in objectNode) {
+            if (node) {
+                node[attributeName] = (tagNode) => (propertyRegistry(objectNode[attributeName])(tagNode, attributeName));
+            } else {
+                node = { ...objectNode[attributeName] };
+            }
+        }
+
+        return node
 
     }
 }
@@ -231,13 +225,7 @@ const abstractAttributes = {
                 return HtmlNode;
         }
     },
-    _R(value) {
 
-
-        for (const attributeName in value) {
-            this.setAttr(attributeName, propertyRegistry(value[attributeName]));
-        }
-    }
 }
 for (const key in abstractAttributes) { (Node.prototype[key] = abstractAttributes[key]) }
 
@@ -252,7 +240,7 @@ function createApp(createElementName) {
             } else {
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
                     const newNode = abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
-                    return newNode instanceof Node ? (newNode.parentNode ? null : newNode) : newNode;
+                    return isHtml(newNode) ? (newNode.parentNode ? null : newNode) : newNode;
                 }
                 kix((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
             }
@@ -395,6 +383,7 @@ function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeInde
 
             if (valuesIndex in values) {
                 const replacedNodes = node.Replace(value)
+
                 if (replacedNodes instanceof Array) {
                     returnNodes.push(...replacedNodes)
                 } else {

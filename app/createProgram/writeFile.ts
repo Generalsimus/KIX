@@ -8,9 +8,6 @@ import fs from "fs"
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
 
-    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> fileName", fileName);
-    // fs.writeFileSync(fileName, content, "utf-8")
-
     if (!sourceFiles) return;
     if (/\.((jsx?)|(map))$/.test(fileName)) {
         for (const sourceFile of sourceFiles) {
@@ -24,6 +21,8 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
             }
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
                 // console.log({ content }) 
+                // console.log({ fileName, content });
+
                 if (fileName.endsWith('.map')) {
                     writer.writeSourceMap(sourceFile.fileName, content);
                 } else {
