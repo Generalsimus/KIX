@@ -40,7 +40,7 @@ const abstractNodes = {
                 window.dispatchEvent(routeEvent);
             },
         });
-        return (parent) => createElement(switchObjectNode, namedNode)
+        return createElement(switchObjectNode, namedNode)
 
     },
     routing(_, routeObjectNode) {
@@ -50,31 +50,45 @@ const abstractNodes = {
         const children = routeObjectNode.routing;
         let currentNodes = kix(null, [''])
         const newRouteBoxNode = {
-            [tagName]: [currentNodes, children],
+            [tagName]: [currentNodes, children, (routeNode) => {
+
+
+                function rerender() {
+                    const children = routeNode.childNodes;
+                    let renderComponent = ifEmptyComponent;
+                    for (const node of children) {
+                        if (
+                            currentNodes.includes(node) ||
+                            (
+                                node.nodeType === Node.TEXT_NODE &&
+                                !node.textContent.trim().length
+                            )
+                        ) {
+                            continue
+                        }
+                        renderComponent = ""
+                    }
+                    replaceArrayNodes(
+                        currentNodes,
+                        [renderComponent],
+                        (currentNodes = [])
+                    )
+                }
+
+
+
+                setTimeout(rerender);
+                window.addEventListener("popstate", rerender);
+            }],
             ...routeObjectNode,
         };
 
         delete newRouteBoxNode.tagName;
         delete newRouteBoxNode.ifEmptyComponent;
         delete newRouteBoxNode.routing;
-        const routeDomNode = kix(null, newRouteBoxNode)
-
-        function rerender() {
-            const renderComponent = routeDomNode.firstElementChild || routeDomNode.innerHTML.trim().length ? "" : ifEmptyComponent;
-
-            replaceArrayNodes(
-                currentNodes,
-                [renderComponent],
-                (currentNodes = [])
-            )
-        }
-
-        window.addEventListener("popstate", rerender);
-
-        return [routeDomNode, rerender]
+        return newRouteBoxNode
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-
         let currentNodes = kix(null, [""]);
         const to = flatFunction(path),
             uniqValue = flatFunction(unique),
@@ -110,8 +124,10 @@ const abstractNodes = {
                     (currentNodes = preCurrentNodes)
                 );
             };
+        setTimeout(createRouterNode);
+        window.addEventListener("popstate", createRouterNode);
 
-        return [currentNodes, () => (createRouterNode(), window.addEventListener("popstate", createRouterNode))]
+        return currentNodes
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
 
