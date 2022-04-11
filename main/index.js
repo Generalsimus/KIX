@@ -44,59 +44,37 @@ const abstractNodes = {
 
     },
     routing(_, routeObjectNode) {
-
-        const tagName = flatFunction(routeObjectNode.tagName) || "div",
-        const ifEmptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "",
+        let currentNodes = kix(null, ['']);
+        const startMarker = kix(null, '');
+        const endMarker = kix(null, '');
         const children = routeObjectNode.routing;
-        let currentNodes = kix(null, [''])
-        const newRouteBoxNode = {
-            [tagName]: [currentNodes, children, (routeNode) => {
-
-
-                function rerender() {
-                    const children = routeNode.childNodes;
-                    let renderComponent = ifEmptyComponent;
-                    for (const node of children) {
-                        if (
-                            currentNodes.includes(node) ||
-                            (
-                                node.nodeType === Node.TEXT_NODE &&
-                                !node.textContent.trim().length
-                            )
-                        ) {
-                            continue
-                        }
-                        renderComponent = ""
-                    }
-
-                    // console.log("🚀 --> file: index.js --> line 78 --> rerender --> renderComponent", renderComponent);
-                    replaceArrayNodes(
-                        currentNodes,
-                        [renderComponent],
-                        (currentNodes = [])
-                    );
+        const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
+        return [startMarker, currentNodes, children, endMarker, () => {
+            let nextNode = startMarker
+            let renderComponent = emptyComponent;
+            while (nextNode = nextNode.nextSibling) {
+                if (nextNode === endMarker) break;
+                if (
+                    currentNodes.includes(nextNode) ||
+                    (
+                        nextNode.nodeType === Node.TEXT_NODE &&
+                        !nextNode.textContent.trim().length
+                    )
+                ) {
+                    continue
                 }
+                renderComponent = ""
+            }
 
-
-                window.addEventListener("popstate", rerender);
-
-                rerender()
-            }],
-            ...routeObjectNode,
-        };
-
-        delete newRouteBoxNode.tagName;
-        delete newRouteBoxNode.ifEmptyComponent;
-        delete newRouteBoxNode.routing;
-        return newRouteBoxNode
+            replaceArrayNodes(
+                currentNodes,
+                [renderComponent],
+                (currentNodes = [])
+            );
+        }]
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-        // const dddcompo = flatFunction(component);
-        // let htmlMarker = kix(null, JSON.stringify(dddcompo) + ":::::::::::");
-        // console.log("🚀 --> file: index.js --> line 97 --> router --> dddcompo", dddcompo, Object.keys(dddcompo));
-        // let htmlMarker = kix(null, [JSON.stringify(dddcompo) + ":::"]);
         let currentNodes = kix(null, [""]);
-        // console.log("🚀 --> file: index.js --> line 99 --> router --> currentNodes", currentNodes);
         const to = flatFunction(path),
             uniqValue = flatFunction(unique),
             componentValue = flatFunction(component),

@@ -40,31 +40,26 @@ const abstractNodes = {
         return createElement(switchObjectNode, namedNode);
     },
     routing(_, routeObjectNode) {
-        const tagName = flatFunction(routeObjectNode.tagName) || "div";
-        const ifEmptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
-        const children = routeObjectNode.routing;
         let currentNodes = (0, exports.kix)(null, ['']);
-        const newRouteBoxNode = Object.assign({ [tagName]: [currentNodes, children, (routeNode) => {
-                    function rerender() {
-                        const children = routeNode.childNodes;
-                        let renderComponent = ifEmptyComponent;
-                        for (const node of children) {
-                            if (currentNodes.includes(node) ||
-                                (node.nodeType === Node.TEXT_NODE &&
-                                    !node.textContent.trim().length)) {
-                                continue;
-                            }
-                            renderComponent = "";
-                        }
-                        replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+        const startMarker = (0, exports.kix)(null, '');
+        const endMarker = (0, exports.kix)(null, '');
+        const children = routeObjectNode.routing;
+        const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
+        return [startMarker, currentNodes, children, endMarker, () => {
+                let nextNode = startMarker;
+                let renderComponent = emptyComponent;
+                while (nextNode = nextNode.nextSibling) {
+                    if (nextNode === endMarker)
+                        break;
+                    if (currentNodes.includes(nextNode) ||
+                        (nextNode.nodeType === Node.TEXT_NODE &&
+                            !nextNode.textContent.trim().length)) {
+                        continue;
                     }
-                    window.addEventListener("popstate", rerender);
-                    rerender();
-                }] }, routeObjectNode);
-        delete newRouteBoxNode.tagName;
-        delete newRouteBoxNode.ifEmptyComponent;
-        delete newRouteBoxNode.routing;
-        return newRouteBoxNode;
+                    renderComponent = "";
+                }
+                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+            }];
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
         let currentNodes = (0, exports.kix)(null, [""]);
