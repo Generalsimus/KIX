@@ -58,8 +58,8 @@ const abstractNodes = {
                         }
                         replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
                     }
-                    setTimeout(rerender);
                     window.addEventListener("popstate", rerender);
+                    rerender();
                 }] }, routeObjectNode);
         delete newRouteBoxNode.tagName;
         delete newRouteBoxNode.ifEmptyComponent;
@@ -88,9 +88,8 @@ const abstractNodes = {
             }
             replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
         };
-        setTimeout(createRouterNode);
         window.addEventListener("popstate", createRouterNode);
-        return currentNodes;
+        return [currentNodes, createRouterNode];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
@@ -116,7 +115,8 @@ const abstractNodes = {
         }
         else if (((_b = Object.getOwnPropertyDescriptor(component, 'prototype')) === null || _b === void 0 ? void 0 : _b.writable) !== false) {
             const props = registerProps(Object.assign({}, (objectNode.s || {})), objectNode.d);
-            return component(props);
+            const componentass = component(props);
+            return componentass;
         }
     },
     _D(objectNodeProperty, objectNode, createElementName, createElement) {
@@ -173,23 +173,24 @@ const abstractAttributes = {
         return this;
     },
     Insert(method, node) {
-        const parent = this.parentNode, HtmlNode = (0, exports.kix)(null, flatFunction(node, parent));
+        const parent = this.parentNode, htmlMarker = (0, exports.kix)(null, "");
         if (!parent)
             return;
         switch (method) {
             case "after":
-                const netNode = this.nextSibling;
-                if (netNode) {
-                    parent.insertBefore(HtmlNode, netNode);
-                    return HtmlNode;
+                const nextNode = this.nextSibling;
+                if (nextNode) {
+                    parent.insertBefore(htmlMarker, nextNode);
                 }
                 else {
-                    return parent.Append(HtmlNode);
+                    parent.appendChild(htmlMarker);
                 }
+                break;
             case "before":
-                parent.insertBefore(HtmlNode, this);
-                return HtmlNode;
+                parent.insertBefore(htmlMarker, this);
+                break;
         }
+        return htmlMarker.Replace(node);
     },
 };
 for (const key in abstractAttributes) {
@@ -318,34 +319,43 @@ function registerProps(props, registerProps) {
     }
     return props;
 }
-function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
-    while ((valuesIndex in values) || (nodeIndex in nodes)) {
-        value = values[valuesIndex];
-        node = nodes[nodeIndex];
+function replaceArrayNodes(currentNodes, replaceValues, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
+    replaceValues = replaceValues.length ? replaceValues : [""];
+    while ((valuesIndex in replaceValues) || (nodeIndex in currentNodes)) {
+        value = replaceValues[valuesIndex];
+        node = currentNodes[nodeIndex];
         if (value instanceof Array) {
-            nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
+            nodeIndex = replaceArrayNodes(currentNodes, value, returnNodes, 0, nodeIndex)[0];
+            valuesIndex++;
+            continue;
         }
-        else if (node) {
-            if (valuesIndex in values) {
-                const replacedNodes = node.Replace(value);
-                if (replacedNodes instanceof Array) {
-                    returnNodes.push(...replacedNodes);
-                }
-                else {
-                    returnNodes.push(replacedNodes);
-                }
+        else if (node instanceof Array) {
+            valuesIndex = replaceArrayNodes(node, replaceValues, returnNodes, valuesIndex, 0)[1];
+            nodeIndex++;
+            continue;
+        }
+        let replacedNodes = [];
+        if (node) {
+            if (valuesIndex in replaceValues) {
+                replacedNodes = node.Replace(value);
             }
             else {
                 node.Remove();
             }
-            nodeIndex++;
         }
         else {
-            returnNodes.push(returnNodes[returnNodes.length - 1].Insert("after", value));
+            replacedNodes = returnNodes[returnNodes.length - 1].Insert("after", value);
         }
+        if (replacedNodes instanceof Array) {
+            returnNodes.push(...replacedNodes);
+        }
+        else {
+            returnNodes.push(replacedNodes);
+        }
+        nodeIndex++;
         valuesIndex++;
     }
-    return nodeIndex;
+    return [nodeIndex, valuesIndex];
 }
 function propertyRegistry(registerFunction) {
     let currentNodes;
@@ -362,6 +372,6 @@ function propertyRegistry(registerFunction) {
         if (attribute) {
             return value;
         }
-        replaceArrayNodes((0, exports.kix)(parent, [""]), [value], (currentNodes = []));
+        currentNodes = (0, exports.kix)(parent, [value]);
     };
 }

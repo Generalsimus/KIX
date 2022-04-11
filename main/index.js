@@ -68,17 +68,19 @@ const abstractNodes = {
                         }
                         renderComponent = ""
                     }
+
+                    // console.log("🚀 --> file: index.js --> line 78 --> rerender --> renderComponent", renderComponent);
                     replaceArrayNodes(
                         currentNodes,
                         [renderComponent],
                         (currentNodes = [])
-                    )
+                    );
                 }
 
 
-
-                setTimeout(rerender);
                 window.addEventListener("popstate", rerender);
+
+                rerender()
             }],
             ...routeObjectNode,
         };
@@ -89,7 +91,12 @@ const abstractNodes = {
         return newRouteBoxNode
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
+        // const dddcompo = flatFunction(component);
+        // let htmlMarker = kix(null, JSON.stringify(dddcompo) + ":::::::::::");
+        // console.log("🚀 --> file: index.js --> line 97 --> router --> dddcompo", dddcompo, Object.keys(dddcompo));
+        // let htmlMarker = kix(null, [JSON.stringify(dddcompo) + ":::"]);
         let currentNodes = kix(null, [""]);
+        // console.log("🚀 --> file: index.js --> line 99 --> router --> currentNodes", currentNodes);
         const to = flatFunction(path),
             uniqValue = flatFunction(unique),
             componentValue = flatFunction(component),
@@ -118,16 +125,24 @@ const abstractNodes = {
                     routeNodes[routeRegExp] = preCurrentNodes;
                 }
 
+                // console.log("🚀 --> file: --> renderComponent",
+                //     routeRegExp.test(localPath),
+                //     currentNodes[0].parentNode,
+                //     currentNodes[0].parentElement,
+                //     renderComponent
+                // );
                 replaceArrayNodes(
                     currentNodes,
                     [renderComponent],
                     (currentNodes = preCurrentNodes)
                 );
             };
-        setTimeout(createRouterNode);
+        // setTimeout(createRouterNode)
+        // createRouterNode()
         window.addEventListener("popstate", createRouterNode);
 
-        return currentNodes
+        // console.log("🚀 --> file: index.js --> line 138 --> router --> currentNodes", currentNodes);
+        return [currentNodes, createRouterNode];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
 
@@ -156,8 +171,9 @@ const abstractNodes = {
         } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
 
             const props = registerProps({ ...(objectNode.s || {}) }, objectNode.d);
-
-            return component(props);
+            const componentass = component(props)
+            // console.log("🚀 --> file: index.js --> line 155 --> _F --> componentass", componentass);
+            return componentass;
         }
 
 
@@ -224,22 +240,23 @@ const abstractAttributes = {
     },
     Insert(method, node) {
         const parent = this.parentNode,
-            HtmlNode = kix(null, flatFunction(node, parent));
+            htmlMarker = kix(null, "");
 
         if (!parent) return;
         switch (method) {
             case "after":
-                const netNode = this.nextSibling;
-                if (netNode) {
-                    parent.insertBefore(HtmlNode, netNode);
-                    return HtmlNode;
+                const nextNode = this.nextSibling;
+                if (nextNode) {
+                    parent.insertBefore(htmlMarker, nextNode);
                 } else {
-                    return parent.Append(HtmlNode);
+                    parent.appendChild(htmlMarker);
                 }
+                break;
             case "before":
-                parent.insertBefore(HtmlNode, this);
-                return HtmlNode;
+                parent.insertBefore(htmlMarker, this);
+                break;
         }
+        return htmlMarker.Replace(node)
     },
 
 }
@@ -386,35 +403,39 @@ function registerProps(props, registerProps) {
 /*
 ანაცვლებს მასივურ ელემენტებს ახლით
 */
-
-function replaceArrayNodes(nodes, values, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
-
-    while ((valuesIndex in values) || (nodeIndex in nodes)) {
-        value = values[valuesIndex];
-        node = nodes[nodeIndex];
+function replaceArrayNodes(currentNodes, replaceValues, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
+    replaceValues = replaceValues.length ? replaceValues : [""];
+    while ((valuesIndex in replaceValues) || (nodeIndex in currentNodes)) {
+        value = replaceValues[valuesIndex];
+        node = currentNodes[nodeIndex];
         if (value instanceof Array) {
-            nodeIndex = replaceArrayNodes(nodes, (value.length ? value : [""]), returnNodes, 0, nodeIndex);
-        } else if (node) {
-
-
-            if (valuesIndex in values) {
-                const replacedNodes = node.Replace(value)
-
-                if (replacedNodes instanceof Array) {
-                    returnNodes.push(...replacedNodes)
-                } else {
-                    returnNodes.push(replacedNodes)
-                }
+            nodeIndex = replaceArrayNodes(currentNodes, value, returnNodes, 0, nodeIndex)[0];
+            valuesIndex++;
+            continue;
+        } else if (node instanceof Array) {
+            valuesIndex = replaceArrayNodes(node, replaceValues, returnNodes, valuesIndex, 0)[1];
+            nodeIndex++;
+            continue;
+        }
+        let replacedNodes = [];
+        if (node) {
+            if (valuesIndex in replaceValues) {
+                replacedNodes = node.Replace(value);
             } else {
                 node.Remove();
             }
-            nodeIndex++;
         } else {
-            returnNodes.push(returnNodes[returnNodes.length - 1].Insert("after", value));
+            replacedNodes = returnNodes[returnNodes.length - 1].Insert("after", value);
         }
+        if (replacedNodes instanceof Array) {
+            returnNodes.push(...replacedNodes)
+        } else {
+            returnNodes.push(replacedNodes)
+        }
+        nodeIndex++;
         valuesIndex++;
     }
-    return nodeIndex
+    return [nodeIndex, valuesIndex]
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -443,13 +464,8 @@ function propertyRegistry(registerFunction) {
         if (attribute) {
             return value;
         }
-
-        replaceArrayNodes(
-            kix(parent, [""]),
-            [value],
-            (currentNodes = [])
-        )
-        // return "";
+        // აუცილებელია ესე დარენდეერდეს რადგან მშობლის ჩაწოდება პირველადი რენდერისას აუცილებლობასწარმოადგენს
+        currentNodes = kix(parent, [value])
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////
