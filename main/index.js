@@ -30,14 +30,14 @@ const abstractNodes = {
         namedNode.e({
             click: function (e) {
                 e.preventDefault();
+                // TODO: ავტო სქროლის გათიშვა დაამატე. პს სჯობს ჯერ გაარკვიო სხვაგან როგორ ისქროლება
                 window.scrollTo(0, 0);
                 const state = {
                     routeTime: new Date().getTime()
                 }
 
-                const routeEvent = new CustomEvent('popstate');
-                history.pushState(state, document.title, this.getAttr("href"));
-                window.dispatchEvent(routeEvent);
+                window.history.pushState(state, document.title, this.getAttr("href"));
+                window.dispatchEvent(new CustomEvent('popstate'));
             },
         });
         return createElement(switchObjectNode, namedNode)
@@ -49,7 +49,7 @@ const abstractNodes = {
         const endMarker = kix(null, '');
         const children = routeObjectNode.routing;
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
-        return [startMarker, currentNodes, children, endMarker, () => {
+        const rerender = () => {
             let nextNode = startMarker
             let renderComponent = emptyComponent;
             while (nextNode = nextNode.nextSibling) {
@@ -71,56 +71,56 @@ const abstractNodes = {
                 [renderComponent],
                 (currentNodes = [])
             );
-        }]
+        }
+
+
+        return [currentNodes, startMarker, children, endMarker, rerender, () => (window.addEventListener("popstate", rerender))]
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
         let currentNodes = kix(null, [""]);
-        const to = flatFunction(path),
-            uniqValue = flatFunction(unique),
-            componentValue = flatFunction(component),
-            escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"],
-            toPath = (uniqValue ? [
-                escapeRegexp,
-                [/\((.*?)\)/g, "(?:$1)?"],
-                [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
-                [/\*\w+/g, "(.*?)"]
-            ] : [
-                escapeRegexp,
-                [/:[^\s/]+/g, "([\\w-]+)"]
-            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to),
-            routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i"),
-            routeNodes = {},
-            createRouterNode = () => {
-                const localPath = decodeURI(document.location.pathname);
-                const matchPath = localPath.match(routeRegExp) || [];
-                const preCurrentNodes = [];
+        let currentComponent;
+        let currentNodesCache;
+        const to = flatFunction(path);
+        const uniqValue = flatFunction(unique);
+        const componentValue = flatFunction(component);
+        const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
+        const toPath = (uniqValue ? [
+            escapeRegexp,
+            [/\((.*?)\)/g, "(?:$1)?"],
+            [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
+            [/\*\w+/g, "(.*?)"]
+        ] : [
+            escapeRegexp,
+            [/:[^\s/]+/g, "([\\w-]+)"]
+        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to);
+        const routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i");
+        const routeNode = () => {
+            const localPath = decodeURI(document.location.pathname);
+            const matchPath = localPath.match(routeRegExp) || [];
+            const preCurrentNodes = [];
 
-                to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
+            to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
 
-                let renderComponent = "";
-                if (routeRegExp.test(localPath)) {
-                    renderComponent = routeNodes[routeRegExp] || componentValue;
-                    routeNodes[routeRegExp] = preCurrentNodes;
-                }
 
-                // console.log("🚀 --> file: --> renderComponent",
-                //     routeRegExp.test(localPath),
-                //     currentNodes[0].parentNode,
-                //     currentNodes[0].parentElement,
-                //     renderComponent
-                // );
-                replaceArrayNodes(
-                    currentNodes,
-                    [renderComponent],
-                    (currentNodes = preCurrentNodes)
-                );
+            let renderComponent = "";
+            if (routeRegExp.test(localPath)) {
+                renderComponent = componentValue;
             };
-        // setTimeout(createRouterNode)
-        // createRouterNode()
-        window.addEventListener("popstate", createRouterNode);
+            if (renderComponent === componentValue) {
+                if (currentNodesCache && currentComponent === componentValue) return;
+                currentNodesCache = preCurrentNodes
+            };
+            currentComponent = renderComponent;
+            replaceArrayNodes(
+                currentNodes,
+                [renderComponent],
+                (currentNodes = preCurrentNodes)
+            );
+        };
 
-        // console.log("🚀 --> file: index.js --> line 138 --> router --> currentNodes", currentNodes);
-        return [currentNodes, createRouterNode];
+        window.addEventListener("popstate", routeNode);
+
+        return [currentNodes, routeNode];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
 

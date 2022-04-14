@@ -32,9 +32,8 @@ const abstractNodes = {
                 const state = {
                     routeTime: new Date().getTime()
                 };
-                const routeEvent = new CustomEvent('popstate');
-                history.pushState(state, document.title, this.getAttr("href"));
-                window.dispatchEvent(routeEvent);
+                window.history.pushState(state, document.title, this.getAttr("href"));
+                window.dispatchEvent(new CustomEvent('popstate'));
             },
         });
         return createElement(switchObjectNode, namedNode);
@@ -45,25 +44,32 @@ const abstractNodes = {
         const endMarker = (0, exports.kix)(null, '');
         const children = routeObjectNode.routing;
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
-        return [startMarker, currentNodes, children, endMarker, () => {
-                let nextNode = startMarker;
-                let renderComponent = emptyComponent;
-                while (nextNode = nextNode.nextSibling) {
-                    if (nextNode === endMarker)
-                        break;
-                    if (currentNodes.includes(nextNode) ||
-                        (nextNode.nodeType === Node.TEXT_NODE &&
-                            !nextNode.textContent.trim().length)) {
-                        continue;
-                    }
-                    renderComponent = "";
+        const rerender = () => {
+            let nextNode = startMarker;
+            let renderComponent = emptyComponent;
+            while (nextNode = nextNode.nextSibling) {
+                if (nextNode === endMarker)
+                    break;
+                if (currentNodes.includes(nextNode) ||
+                    (nextNode.nodeType === Node.TEXT_NODE &&
+                        !nextNode.textContent.trim().length)) {
+                    continue;
                 }
-                replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
-            }];
+                renderComponent = "";
+            }
+            replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+        };
+        return [currentNodes, startMarker, children, endMarker, rerender, () => (window.addEventListener("popstate", rerender))];
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
         let currentNodes = (0, exports.kix)(null, [""]);
-        const to = flatFunction(path), uniqValue = flatFunction(unique), componentValue = flatFunction(component), escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"], toPath = (uniqValue ? [
+        let currentComponent;
+        let currentNodesCache;
+        const to = flatFunction(path);
+        const uniqValue = flatFunction(unique);
+        const componentValue = flatFunction(component);
+        const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
+        const toPath = (uniqValue ? [
             escapeRegexp,
             [/\((.*?)\)/g, "(?:$1)?"],
             [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
@@ -71,20 +77,29 @@ const abstractNodes = {
         ] : [
             escapeRegexp,
             [/:[^\s/]+/g, "([\\w-]+)"]
-        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to), routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i"), routeNodes = {}, createRouterNode = () => {
+        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to);
+        const routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i");
+        const routeNode = () => {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(routeRegExp) || [];
             const preCurrentNodes = [];
             to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
             let renderComponent = "";
             if (routeRegExp.test(localPath)) {
-                renderComponent = routeNodes[routeRegExp] || componentValue;
-                routeNodes[routeRegExp] = preCurrentNodes;
+                renderComponent = componentValue;
             }
+            ;
+            if (renderComponent === componentValue) {
+                if (currentNodesCache && currentComponent === componentValue)
+                    return;
+                currentNodesCache = preCurrentNodes;
+            }
+            ;
+            currentComponent = renderComponent;
             replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
         };
-        window.addEventListener("popstate", createRouterNode);
-        return [currentNodes, createRouterNode];
+        window.addEventListener("popstate", routeNode);
+        return [currentNodes, routeNode];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
