@@ -7,6 +7,7 @@ import { App } from "./app";
 // TODO: ბილდი დაფიქსე მგონი ურევს
 // TODO: გადაამოწმე კარგად css ის remaper ი 
 // TODO: პორტ ჩექერი გადაამოწმე როგორ მუშაობს მგონი სხვა პორზე ვერ ხსნის
+// TODO: getSourcefile შიდაამატე მოდულების არ მოძებნი ერორი და რესოლვზე ყოველთვის ობიექტი დააბრუნებინე რო getsourcefileში შემოვიდესხოლმე
 App.start()
 // import path from "path";
 // import ts from "typescript";

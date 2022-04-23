@@ -1,8 +1,6 @@
 const type = (arg) => Object.prototype.toString.call(arg);
-
 const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE)
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-
 const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName)
 // TODO:svg Ns ის დეფაულთი და ასევე გენერირებული
 const abstractNodes = {
@@ -27,7 +25,7 @@ const abstractNodes = {
         const namedNode = createElementName("a")
         kix(namedNode, switchObjectNode[objectNodeProperty])
         delete switchObjectNode[objectNodeProperty];
-        namedNode.e({
+        abstractAttributes.e(namedNode, {
             click: function (e) {
                 e.preventDefault();
                 // TODO: ავტო სქროლის გათიშვა დაამატე. პს სჯობს ჯერ გაარკვიო სხვაგან როგორ ისქროლება
@@ -36,7 +34,7 @@ const abstractNodes = {
                     routeTime: new Date().getTime()
                 }
 
-                window.history.pushState(state, document.title, this.getAttr("href"));
+                window.history.pushState(state, document.title, this.getAttribute("href"));
                 window.dispatchEvent(new CustomEvent('popstate'));
             },
         });
@@ -44,47 +42,41 @@ const abstractNodes = {
 
     },
     routing(_, routeObjectNode) {
-        let currentNodes = kix(null, ['']);
-        const startMarker = kix(null, '');
-        const endMarker = kix(null, '');
         const children = routeObjectNode.routing;
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
+        const [startMarker, endMarker] = createMarker()
+        const [startRenderMarker, endRenderMarker, Render] = createMarker()
         const rerender = () => {
             let nextNode = startMarker
             let renderComponent = emptyComponent;
             while (nextNode = nextNode.nextSibling) {
                 if (nextNode === endMarker) break;
                 if (
-                    currentNodes.includes(nextNode) ||
-                    (
-                        nextNode.nodeType === Node.TEXT_NODE &&
-                        !nextNode.textContent.trim().length
-                    )
+                    nextNode.nodeType === Node.TEXT_NODE &&
+                    !nextNode.textContent.trim().length
                 ) {
                     continue
                 }
                 renderComponent = ""
             }
-
-            replaceArrayNodes(
-                currentNodes,
-                [renderComponent],
-                (currentNodes = [])
-            );
+            if (endRenderMarker.parentNode) {
+                Render(renderComponent)
+            };
+            return renderComponent
         }
+        window.addEventListener("popstate", rerender)
 
-
-        return [currentNodes, startMarker, children, endMarker, rerender, () => (window.addEventListener("popstate", rerender))]
+        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker]
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-        let currentNodes = kix(null, [""]);
         let currentComponent;
         let currentNodesCache;
-        const to = flatFunction(path);
+        const [startMarker, endMarker, Render, getChildren] = createMarker();
+        const toPath = flatFunction(path);
         const uniqValue = flatFunction(unique);
         const componentValue = flatFunction(component);
         const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
-        const toPath = (uniqValue ? [
+        const regExpString = (uniqValue ? [
             escapeRegexp,
             [/\((.*?)\)/g, "(?:$1)?"],
             [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
@@ -92,37 +84,39 @@ const abstractNodes = {
         ] : [
             escapeRegexp,
             [/:[^\s/]+/g, "([\\w-]+)"]
-        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to);
-        const routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i");
-        const routeNode = () => {
+        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), toPath);
+        const routeRegExp = new RegExp(uniqValue ? "^" + regExpString + "$" : regExpString, "i");
+        const getRouteNode = () => {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(routeRegExp) || [];
-            const preCurrentNodes = [];
+            toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
 
-            to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
-
-
-            let renderComponent = "";
+            let renderComponent;
             if (routeRegExp.test(localPath)) {
-                renderComponent = componentValue;
-            };
+                renderComponent = componentValue
+            }
             if (renderComponent === componentValue) {
-                if (currentNodesCache && currentComponent === componentValue) return;
-                currentNodesCache = preCurrentNodes
+                if (currentComponent === componentValue) {
+                    currentNodesCache = getChildren();
+                }
+                if (currentNodesCache &&
+                    currentComponent === componentValue
+                ) return
+            }
+            if (endMarker.parentNode) {
+                Render(renderComponent)
             };
             currentComponent = renderComponent;
-            replaceArrayNodes(
-                currentNodes,
-                [renderComponent],
-                (currentNodes = preCurrentNodes)
-            );
+
+            return renderComponent
         };
 
-        window.addEventListener("popstate", routeNode);
-
-        return [currentNodes, routeNode];
+        window.addEventListener("popstate", getRouteNode);
+        return [startMarker, getRouteNode, endMarker]
+        // return [currentNodes, routeNode];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
+
 
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
@@ -149,9 +143,9 @@ const abstractNodes = {
         } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
 
             const props = registerProps({ ...(objectNode.s || {}) }, objectNode.d);
-            const componentass = component(props)
-            // console.log("🚀 --> file: index.js --> line 155 --> _F --> componentass", componentass);
-            return componentass;
+            const result = component(props);
+
+            return result;
         }
 
 
@@ -170,75 +164,24 @@ const abstractNodes = {
 
     }
 }
-//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს
+//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს 
 
 const abstractAttributes = {
-    getAttr(a) {
-        return this.getAttribute(a);
-    },
-    setAttr(attribute, value) {
-        value = flatFunction(value, this, attribute)
-        abstractAttributes[attribute] ? this[attribute](value, attribute) : this.setAttribute(attribute, value);
-    },
-    Append(childNode) {
-        return kix(this, childNode);
-    },
-    e(eventsObject) {
+    e(node, eventsObject) {
         for (var eventNames in eventsObject) {
             for (var eventName of eventNames.split("_")) {
                 if (eventsObject[eventName] instanceof Function) {
-                    this.addEventListener(eventName, eventsObject[eventName].bind(this));
+                    node.addEventListener(eventName, eventsObject[eventName]);
                 }
             }
         }
-        return this;
-    },
-    Remove() {
-        const parentNode = this.parentNode;
-
-        parentNode && parentNode.removeChild(this);
-
-        return this;
-    },
-    Replace(replaceNode) {
-        let parent = this.parentNode
-
-        if (parent) {
-            replaceNode = kix(null, flatFunction(replaceNode, parent));
-
-            if (replaceNode instanceof Array) {
-
-                replaceArrayNodes([this], replaceNode, []);
-            } else {
-                parent?.replaceChild(replaceNode, this);
-            }
-            return replaceNode;
-        }
-        return this;
-    },
-    Insert(method, node) {
-        const parent = this.parentNode,
-            htmlMarker = kix(null, "");
-
-        if (!parent) return;
-        switch (method) {
-            case "after":
-                const nextNode = this.nextSibling;
-                if (nextNode) {
-                    parent.insertBefore(htmlMarker, nextNode);
-                } else {
-                    parent.appendChild(htmlMarker);
-                }
-                break;
-            case "before":
-                parent.insertBefore(htmlMarker, this);
-                break;
-        }
-        return htmlMarker.Replace(node)
-    },
-
+    }
 }
-for (const key in abstractAttributes) { (Node.prototype[key] = abstractAttributes[key]) }
+
+const setAttribute = (node, value, attributeName) => {
+    const abstraction = abstractAttributes[attributeName]
+    abstraction ? abstraction(node, value, attributeName) : node.setAttribute(attributeName, flatFunction(value, node, attributeName));
+}
 
 function createApp(createElementName) {
 
@@ -247,7 +190,7 @@ function createApp(createElementName) {
 
         for (const objectNodeProperty in objectNode) {
             if (elementNode) {
-                elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
+                setAttribute(elementNode, objectNode[objectNodeProperty], objectNodeProperty);
             } else {
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
                     const newNode = abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
@@ -334,10 +277,11 @@ export const useListener = (objectValue, propertyName, callback) => {
 function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
-            let value = obj?.[key]
+            let value = obj?.[key];
+
             if (obj?.hasOwnProperty(key)) {
                 const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                const defineRegistrations = descriptor?.set?._R_C || [];
+                const defineRegistrations = descriptor.set?._R_C || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
                     function set(setValue) {
@@ -381,41 +325,56 @@ function registerProps(props, registerProps) {
 /*
 ანაცვლებს მასივურ ელემენტებს ახლით
 */
-function replaceArrayNodes(currentNodes, replaceValues, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
-    replaceValues = replaceValues.length ? replaceValues : [""];
-    while ((valuesIndex in replaceValues) || (nodeIndex in currentNodes)) {
-        value = replaceValues[valuesIndex];
-        node = currentNodes[nodeIndex];
-        if (value instanceof Array) {
-            nodeIndex = replaceArrayNodes(currentNodes, value, returnNodes, 0, nodeIndex)[0];
-            valuesIndex++;
-            continue;
-        } else if (node instanceof Array) {
-            valuesIndex = replaceArrayNodes(node, replaceValues, returnNodes, valuesIndex, 0)[1];
-            nodeIndex++;
-            continue;
-        }
-        let replacedNodes = [];
-        if (node) {
-            if (valuesIndex in replaceValues) {
-                replacedNodes = node.Replace(value);
-            } else {
-                node.Remove();
+
+function createMarker() {
+    const startMarker = kix(null, "");
+    const endMarker = kix(null, "");
+    const replaceNodes = (sibling, replaceNode, currentNodes) => {
+
+        if (replaceNode instanceof Array) {
+            for (const childNode of replaceNode) {
+                sibling = replaceNodes(sibling, childNode, currentNodes)
             }
         } else {
-            replacedNodes = returnNodes[returnNodes.length - 1].Insert("after", value);
+            const parent = sibling.parentNode;
+            const replaceableNode = kix(null, flatFunction(replaceNode, parent));
+            if (replaceableNode instanceof Array) {
+                return replaceNodes(sibling, replaceableNode, currentNodes)
+            } else if (sibling === endMarker) {
+                parent.insertBefore(replaceableNode, endMarker);
+            } else {
+                parent.replaceChild(replaceableNode, sibling);
+                sibling = replaceableNode.nextSibling;
+            }
+            currentNodes.push(replaceableNode);
         }
-        if (replacedNodes instanceof Array) {
-            returnNodes.push(...replacedNodes)
-        } else {
-            returnNodes.push(replacedNodes)
-        }
-        nodeIndex++;
-        valuesIndex++;
+        return sibling;
     }
-    return [nodeIndex, valuesIndex]
-}
 
+    return [
+        startMarker,
+        endMarker,
+        (replaceNode) => {
+            const currentNodes = [];
+            const startIndex = startMarker.nextSibling;
+            let sibling = replaceNodes(startIndex, replaceNode, currentNodes);
+            const parent = sibling.parentNode;
+
+            while (sibling && sibling !== endMarker) {
+                const nextSibling = sibling.nextSibling;
+                parent.removeChild(sibling);
+                sibling = nextSibling;
+            }
+            return currentNodes
+        },
+        (currentNodes = [], sibling = startMarker) => {
+            while ((sibling = sibling.nextSibling) && sibling !== endMarker) {
+                currentNodes.push(sibling);
+            }
+            return currentNodes
+        }
+    ]
+}
 /////////////////////////////////////////////////////////////////////////////////////
 /*
 აკეთებს დინამიური ფროფერთების რეგისტრაციას
@@ -423,17 +382,13 @@ function replaceArrayNodes(currentNodes, replaceValues, returnNodes, valuesIndex
 function propertyRegistry(registerFunction) {
     let currentNodes;
     return (parent, attribute) => {
+        const [startMarker, endMarker, Render] = createMarker();
+
         const getRenderValue = registration((a) => registerFunction(a), (value) => {
             if (attribute) {
-
-                parent.setAttr(attribute, getRenderValue(parent, attribute));
+                setAttribute(parent, getRenderValue(parent, attribute), attribute);
             } else {
-                replaceArrayNodes(
-                    currentNodes,
-                    [getRenderValue(parent, attribute)],
-                    (currentNodes = [])
-                );
-
+                Render(getRenderValue(parent, attribute));
             }
         });
 
@@ -443,7 +398,7 @@ function propertyRegistry(registerFunction) {
             return value;
         }
         // აუცილებელია ესე დარენდეერდეს რადგან მშობლის ჩაწოდება პირველადი რენდერისას აუცილებლობასწარმოადგენს
-        currentNodes = kix(parent, [value])
+        return [startMarker, value, endMarker];
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////

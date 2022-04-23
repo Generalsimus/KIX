@@ -26,6 +26,7 @@ import { getSourceFileByPath } from "./getSourceFileByPath";
 import { watcherCallBack } from "./watcherCallBack";
 import { emitLobbyFiles } from "./emitLobbyFiles";
 import { diagnose } from "./diagnose";
+import { readFileWithExt } from "./readFile/readFileWithExt";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -90,6 +91,7 @@ export class createProgramHost {
   getSourceFile = getSourceFile
   getSourceFileByPath = getSourceFileByPath
   readFile = readFile
+  readFileWithExt = readFileWithExt
   getCurrentDirectory = getCurrentDirectory
   getDefaultLibLocation = () => this.defaultLibLocation
   getDefaultLibFileName = () => this.defaultLibFileName

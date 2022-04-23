@@ -1,9 +1,11 @@
 import ts from "typescript";
 import { createProgramHost } from ".";
 import { App } from "..";
-import { ModuleInfoType } from "../../utils/getModuleInfo";
+import { ModuleInfoType, rootWritersType } from "../../utils/getModuleInfo";
 import { rootWriter } from "../rootWriter";
 import fs from "fs"
+import path from "path";
+import { normalizeSlashes } from "../../utils/normalizeSlashes";
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
@@ -19,9 +21,8 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 this.moduleRootWriter.writeJsCode(sourceFile.fileName, content);
                 continue;
             }
+            // console.log("🚀 --> file: --> moduleInfo.rootWriters", fileName, moduleInfo.rootWriters);
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
-                // console.log({ content }) 
-                // console.log({ fileName, content });
 
                 if (fileName.endsWith('.map')) {
                     writer.writeSourceMap(sourceFile.fileName, content);
@@ -29,7 +30,9 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                     // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
                     writer.writeJsCode(sourceFile.fileName, content);
                 }
-            });
+            }
+                // , [moduleInfo.modulePath]
+            );
 
         }
     }
@@ -37,15 +40,24 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
 }
 
 
-const useRootWriterLoop = (rootWriters: ModuleInfoType["rootWriters"], writeCallback: (writer: rootWriter) => void) => {
+
+const useRootWriterLoop = (
+    rootWriters: ModuleInfoType["rootWriters"],
+    writeCallback: (writer: rootWriter) => void,
+    parentModulePath: string = "",
+    pathCache = new Set<string>()
+) => {
 
     for (const mainFileName in rootWriters) {
         const writer = rootWriters[mainFileName];
-        if (rootWriters === writer) continue;
+        const accessKey = parentModulePath + mainFileName;
+
+        if (rootWriters === writer || pathCache.has(accessKey)) continue;
+        pathCache.add(accessKey)
         if (writer instanceof rootWriter) {
             writeCallback(writer);
         } else {
-            useRootWriterLoop(writer, writeCallback);
+            useRootWriterLoop(writer, writeCallback, mainFileName, pathCache);
         }
     }
 }

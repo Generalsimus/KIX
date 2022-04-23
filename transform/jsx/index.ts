@@ -4,6 +4,7 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
+import { CallExpression } from "./utils/CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { visitFunctionDeclarationForJsxRegistration } from "./utils/visitFunctionDeclarationForJsxRegistration";
@@ -38,6 +39,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.FunctionDeclaration]: visitFunctionDeclarationForJsxRegistration,
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
+    [ts.SyntaxKind.CallExpression]: CallExpression
     // [ts.SyntaxKind.Identifier]: Identifier,
     // [ts.SyntaxKind.VariableStatement]: VariableStatement,
 

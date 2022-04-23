@@ -12,6 +12,7 @@ export const getConfigJson = (projectName: string) => {
                 "outDir": "./dist",
                 "allowJs": true,
                 "esModuleInterop": true,
+                "resolveJsonModule": true,
                 "forceConsistentCasingInFileNames": true,
                 "strict": true,
                 "skipLibCheck": true

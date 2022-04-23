@@ -103,6 +103,7 @@ const resolveName = (moduleName: string, containingFileModuleInfo: ModuleInfoTyp
     host.localFileWatcher.add(moduleInfo.modulePath)
 
 
+
     containingFileModuleInfo.moduleCollection[moduleName] = moduleInfo;
 
     return resolvedModule
@@ -119,15 +120,8 @@ export function resolveModuleNames(this: createProgramHost, moduleNames: string[
     const containingFileModuleInfo = getModuleInfo(containingFile)
     const resolvedModuleNames = containingFileModuleInfo.resolvedModuleNames || (containingFileModuleInfo.resolvedModuleNames = moduleNames.map(moduleName => {
 
-        // console.log("🚀 --> file:   moduleName", moduleName, resolveName(moduleName, containingFileModuleInfo, this)?.resolvedFileName);
-        // if
-        // const res = resolveName(moduleName, containingFileModuleInfo, this)
-        // if (!res) {
-
-        //     console.log({ moduleName, containingFile, res })
-        // }
         return resolveName(moduleName, containingFileModuleInfo, this)
-    }))
-    // console.log("🚀 --> file: resolveModuleNames.ts --> line 71 --> resolveModuleNames --> resolvedModuleNames", resolvedModuleNames);
+    }));
+
     return resolvedModuleNames
 }

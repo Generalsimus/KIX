@@ -97,12 +97,25 @@ declare global {
   }
   ///END JSX TYPE ////////////////////////////////////////////////////// 
 
+  declare module '*.svg' {
+    const Component: JSX.Element;
+    export default Component;
+    export const url: string;
+  }
 
+  declare module '*.scss' {
+    export default Text;
+  } 
+  declare module '*.sass' {
+    export default Text;
+  }
+  declare module '*.css' {
+    export default Text;
+  }
 
-}
-// // // HTMLElement
-// export { kix };
-// export * from "kix"
-// export { default as default } from "kix"
+  declare module "*" {
+    const url: string;
+    export default url;
+  }
 
-
+} 

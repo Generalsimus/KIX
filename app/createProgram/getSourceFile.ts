@@ -1,7 +1,11 @@
 import fs from "fs"
+import path from "path"
 import ts from "typescript"
 import { createProgramHost } from "."
 import { App } from ".."
+
+
+
 
 
 export function getSourceFile(this: createProgramHost, fileName: string, languageVersion: ts.ScriptTarget, onError?: ((message: string) => void) | undefined, shouldCreateNewSourceFile?: boolean | undefined): ts.SourceFile {
@@ -15,8 +19,11 @@ export function getSourceFile(this: createProgramHost, fileName: string, languag
 
     try {
 
-
-        sourceFile = ts.createSourceFile(fileName, this.readFile(fileName), languageVersion, true);
+        const { scriptKind, fileText } = this.readFileWithExt(fileName, path.extname(fileName))
+        // if (!fileText) {
+        //     throw new Error("Module not found")
+        // }
+        sourceFile = ts.createSourceFile(fileName, fileText || "", languageVersion, true, scriptKind);
 
         this.sourceFileCache.set(fileName, sourceFile)
         return sourceFile

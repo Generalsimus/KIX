@@ -3,11 +3,24 @@ import { CustomContextType } from "../.."
 import { callFunction } from "../../factoryCode/callFunction"
 import { getExpressionNames } from "./getExpressionNames"
 
-export const PropertyAccessExpressionOrElementAccessExpression = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression, visitor: ts.Visitor, context: CustomContextType) => {
+export const PropertyAccessExpressionOrElementAccessExpression = (
+    node: ts.PropertyAccessExpression | ts.ElementAccessExpression,
+    visitor: ts.Visitor,
+    context: CustomContextType
+) => {
     if (context.getJSXPropRegistrationIdentifier) {
+        // export var webSocketUrl = ({} as any).sdfsd.dsdf?. && ()
+        const expressionIdentifiers: ts.Expression[] = [];
+        const haveQuestionDotToken = getExpressionNames(node, expressionIdentifiers);
 
+        // context.JsxHaveQuestionDotToken = haveQuestionDotToken;
+        if (haveQuestionDotToken && node.parent) {
+            context.JsxHaveQuestionDotToken = node.parent
 
-        return visitor(callFunction(context.getJSXPropRegistrationIdentifier(), getExpressionNames(node)))
+        }
+
+        // // const nodes = haveQuestionDotToken
+        return visitor(callFunction(context.getJSXPropRegistrationIdentifier(), expressionIdentifiers))
     }
     return ts.visitEachChild(node, visitor, context)
 }

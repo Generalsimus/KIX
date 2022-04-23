@@ -12,6 +12,8 @@ export type CustomContextType = ts.TransformationContext & {
     getJSXPropRegistrationIdentifier?: () => ts.Identifier
     getVariableDeclarationStateNameIdentifier: () => ts.Identifier
     getVariableDeclarationNames: () => Record<string, string[]>
+    /* JSX ში მოთავხებული .? უსაფრთხოებისთვის როდესაც ხდება რეგისტრაცია და ასევესაჭიროა მისი გაშვებაც ნიმუში: ssss?.() */
+    JsxHaveQuestionDotToken?: ts.Node
 }
 
 export const getTransformer = () => {
@@ -22,7 +24,7 @@ export const getTransformer = () => {
 
         const visitor = (node: ts.Node): ts.Node => {
 
-            
+
             return ((transforms as any)[node.kind] || visitEachChild)(node, visitor, context)
         }
         return visitor as any

@@ -36,7 +36,7 @@ export const createError = (error: AlertErrorType) => {
                 e: {
                     click: () => {
                         GlobalErrorBodyTag = undefined;
-                        iframe.Remove();
+                        iframe.remove();
                     }
                 }
             },

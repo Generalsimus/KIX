@@ -25,51 +25,54 @@ const abstractNodes = {
         const namedNode = createElementName("a");
         (0, exports.kix)(namedNode, switchObjectNode[objectNodeProperty]);
         delete switchObjectNode[objectNodeProperty];
-        namedNode.e({
+        abstractAttributes.e(namedNode, {
             click: function (e) {
                 e.preventDefault();
                 window.scrollTo(0, 0);
                 const state = {
                     routeTime: new Date().getTime()
                 };
-                window.history.pushState(state, document.title, this.getAttr("href"));
+                window.history.pushState(state, document.title, this.getAttribute("href"));
                 window.dispatchEvent(new CustomEvent('popstate'));
             },
         });
         return createElement(switchObjectNode, namedNode);
     },
     routing(_, routeObjectNode) {
-        let currentNodes = (0, exports.kix)(null, ['']);
-        const startMarker = (0, exports.kix)(null, '');
-        const endMarker = (0, exports.kix)(null, '');
         const children = routeObjectNode.routing;
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
+        const [startMarker, endMarker] = createMarker();
+        const [startRenderMarker, endRenderMarker, Render] = createMarker();
         const rerender = () => {
             let nextNode = startMarker;
             let renderComponent = emptyComponent;
             while (nextNode = nextNode.nextSibling) {
                 if (nextNode === endMarker)
                     break;
-                if (currentNodes.includes(nextNode) ||
-                    (nextNode.nodeType === Node.TEXT_NODE &&
-                        !nextNode.textContent.trim().length)) {
+                if (nextNode.nodeType === Node.TEXT_NODE &&
+                    !nextNode.textContent.trim().length) {
                     continue;
                 }
                 renderComponent = "";
             }
-            replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = []));
+            if (endRenderMarker.parentNode) {
+                Render(renderComponent);
+            }
+            ;
+            return renderComponent;
         };
-        return [currentNodes, startMarker, children, endMarker, rerender, () => (window.addEventListener("popstate", rerender))];
+        window.addEventListener("popstate", rerender);
+        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker];
     },
     router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
-        let currentNodes = (0, exports.kix)(null, [""]);
         let currentComponent;
         let currentNodesCache;
-        const to = flatFunction(path);
+        const [startMarker, endMarker, Render, getChildren] = createMarker();
+        const toPath = flatFunction(path);
         const uniqValue = flatFunction(unique);
         const componentValue = flatFunction(component);
         const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
-        const toPath = (uniqValue ? [
+        const regExpString = (uniqValue ? [
             escapeRegexp,
             [/\((.*?)\)/g, "(?:$1)?"],
             [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
@@ -77,29 +80,33 @@ const abstractNodes = {
         ] : [
             escapeRegexp,
             [/:[^\s/]+/g, "([\\w-]+)"]
-        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), to);
-        const routeRegExp = new RegExp(uniqValue ? "^" + toPath + "$" : toPath, "i");
-        const routeNode = () => {
+        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), toPath);
+        const routeRegExp = new RegExp(uniqValue ? "^" + regExpString + "$" : regExpString, "i");
+        const getRouteNode = () => {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(routeRegExp) || [];
-            const preCurrentNodes = [];
-            to.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
-            let renderComponent = "";
+            toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
+            let renderComponent;
             if (routeRegExp.test(localPath)) {
                 renderComponent = componentValue;
             }
-            ;
             if (renderComponent === componentValue) {
-                if (currentNodesCache && currentComponent === componentValue)
+                if (currentComponent === componentValue) {
+                    currentNodesCache = getChildren();
+                }
+                if (currentNodesCache &&
+                    currentComponent === componentValue)
                     return;
-                currentNodesCache = preCurrentNodes;
+            }
+            if (endMarker.parentNode) {
+                Render(renderComponent);
             }
             ;
             currentComponent = renderComponent;
-            replaceArrayNodes(currentNodes, [renderComponent], (currentNodes = preCurrentNodes));
+            return renderComponent;
         };
-        window.addEventListener("popstate", routeNode);
-        return [currentNodes, routeNode];
+        window.addEventListener("popstate", getRouteNode);
+        return [startMarker, getRouteNode, endMarker];
     },
     _R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
@@ -125,8 +132,8 @@ const abstractNodes = {
         }
         else if (((_b = Object.getOwnPropertyDescriptor(component, 'prototype')) === null || _b === void 0 ? void 0 : _b.writable) !== false) {
             const props = registerProps(Object.assign({}, (objectNode.s || {})), objectNode.d);
-            const componentass = component(props);
-            return componentass;
+            const result = component(props);
+            return result;
         }
     },
     _D(objectNodeProperty, objectNode, createElementName, createElement) {
@@ -143,74 +150,25 @@ const abstractNodes = {
     }
 };
 const abstractAttributes = {
-    getAttr(a) {
-        return this.getAttribute(a);
-    },
-    setAttr(attribute, value) {
-        value = flatFunction(value, this, attribute);
-        abstractAttributes[attribute] ? this[attribute](value, attribute) : this.setAttribute(attribute, value);
-    },
-    Append(childNode) {
-        return (0, exports.kix)(this, childNode);
-    },
-    e(eventsObject) {
+    e(node, eventsObject) {
         for (var eventNames in eventsObject) {
             for (var eventName of eventNames.split("_")) {
                 if (eventsObject[eventName] instanceof Function) {
-                    this.addEventListener(eventName, eventsObject[eventName].bind(this));
+                    node.addEventListener(eventName, eventsObject[eventName]);
                 }
             }
         }
-        return this;
-    },
-    Remove() {
-        const parentNode = this.parentNode;
-        parentNode && parentNode.removeChild(this);
-        return this;
-    },
-    Replace(replaceNode) {
-        let parent = this.parentNode;
-        if (parent) {
-            replaceNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
-            if (replaceNode instanceof Array) {
-                replaceArrayNodes([this], replaceNode, []);
-            }
-            else {
-                parent === null || parent === void 0 ? void 0 : parent.replaceChild(replaceNode, this);
-            }
-            return replaceNode;
-        }
-        return this;
-    },
-    Insert(method, node) {
-        const parent = this.parentNode, htmlMarker = (0, exports.kix)(null, "");
-        if (!parent)
-            return;
-        switch (method) {
-            case "after":
-                const nextNode = this.nextSibling;
-                if (nextNode) {
-                    parent.insertBefore(htmlMarker, nextNode);
-                }
-                else {
-                    parent.appendChild(htmlMarker);
-                }
-                break;
-            case "before":
-                parent.insertBefore(htmlMarker, this);
-                break;
-        }
-        return htmlMarker.Replace(node);
-    },
+    }
 };
-for (const key in abstractAttributes) {
-    (Node.prototype[key] = abstractAttributes[key]);
-}
+const setAttribute = (node, value, attributeName) => {
+    const abstraction = abstractAttributes[attributeName];
+    abstraction ? abstraction(node, value, attributeName) : node.setAttribute(attributeName, flatFunction(value, node, attributeName));
+};
 function createApp(createElementName) {
     function createElement(objectNode, elementNode) {
         for (const objectNodeProperty in objectNode) {
             if (elementNode) {
-                elementNode.setAttr(objectNodeProperty, objectNode[objectNodeProperty]);
+                setAttribute(elementNode, objectNode[objectNodeProperty], objectNodeProperty);
             }
             else {
                 if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
@@ -296,7 +254,7 @@ function registration(registerFunction, onSet) {
             let value = obj === null || obj === void 0 ? void 0 : obj[key];
             if (obj === null || obj === void 0 ? void 0 : obj.hasOwnProperty(key)) {
                 const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                const defineRegistrations = ((_a = descriptor === null || descriptor === void 0 ? void 0 : descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
+                const defineRegistrations = ((_a = descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
                 if (defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
                     function set(setValue) {
@@ -329,59 +287,71 @@ function registerProps(props, registerProps) {
     }
     return props;
 }
-function replaceArrayNodes(currentNodes, replaceValues, returnNodes, valuesIndex = 0, nodeIndex = 0, value, node) {
-    replaceValues = replaceValues.length ? replaceValues : [""];
-    while ((valuesIndex in replaceValues) || (nodeIndex in currentNodes)) {
-        value = replaceValues[valuesIndex];
-        node = currentNodes[nodeIndex];
-        if (value instanceof Array) {
-            nodeIndex = replaceArrayNodes(currentNodes, value, returnNodes, 0, nodeIndex)[0];
-            valuesIndex++;
-            continue;
+function createMarker() {
+    const startMarker = (0, exports.kix)(null, "");
+    const endMarker = (0, exports.kix)(null, "");
+    const replaceNodes = (sibling, replaceNode, currentNodes) => {
+        if (replaceNode instanceof Array) {
+            for (const childNode of replaceNode) {
+                sibling = replaceNodes(sibling, childNode, currentNodes);
+            }
         }
-        else if (node instanceof Array) {
-            valuesIndex = replaceArrayNodes(node, replaceValues, returnNodes, valuesIndex, 0)[1];
-            nodeIndex++;
-            continue;
-        }
-        let replacedNodes = [];
-        if (node) {
-            if (valuesIndex in replaceValues) {
-                replacedNodes = node.Replace(value);
+        else {
+            const parent = sibling.parentNode;
+            const replaceableNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
+            if (replaceableNode instanceof Array) {
+                return replaceNodes(sibling, replaceableNode, currentNodes);
+            }
+            else if (sibling === endMarker) {
+                parent.insertBefore(replaceableNode, endMarker);
             }
             else {
-                node.Remove();
+                parent.replaceChild(replaceableNode, sibling);
+                sibling = replaceableNode.nextSibling;
             }
+            currentNodes.push(replaceableNode);
         }
-        else {
-            replacedNodes = returnNodes[returnNodes.length - 1].Insert("after", value);
+        return sibling;
+    };
+    return [
+        startMarker,
+        endMarker,
+        (replaceNode) => {
+            const currentNodes = [];
+            const startIndex = startMarker.nextSibling;
+            let sibling = replaceNodes(startIndex, replaceNode, currentNodes);
+            const parent = sibling.parentNode;
+            while (sibling && sibling !== endMarker) {
+                const nextSibling = sibling.nextSibling;
+                parent.removeChild(sibling);
+                sibling = nextSibling;
+            }
+            return currentNodes;
+        },
+        (currentNodes = [], sibling = startMarker) => {
+            while ((sibling = sibling.nextSibling) && sibling !== endMarker) {
+                currentNodes.push(sibling);
+            }
+            return currentNodes;
         }
-        if (replacedNodes instanceof Array) {
-            returnNodes.push(...replacedNodes);
-        }
-        else {
-            returnNodes.push(replacedNodes);
-        }
-        nodeIndex++;
-        valuesIndex++;
-    }
-    return [nodeIndex, valuesIndex];
+    ];
 }
 function propertyRegistry(registerFunction) {
     let currentNodes;
     return (parent, attribute) => {
+        const [startMarker, endMarker, Render] = createMarker();
         const getRenderValue = registration((a) => registerFunction(a), (value) => {
             if (attribute) {
-                parent.setAttr(attribute, getRenderValue(parent, attribute));
+                setAttribute(parent, getRenderValue(parent, attribute), attribute);
             }
             else {
-                replaceArrayNodes(currentNodes, [getRenderValue(parent, attribute)], (currentNodes = []));
+                Render(getRenderValue(parent, attribute));
             }
         });
         const value = getRenderValue();
         if (attribute) {
             return value;
         }
-        currentNodes = (0, exports.kix)(parent, [value]);
+        return [startMarker, value, endMarker];
     };
 }
