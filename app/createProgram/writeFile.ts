@@ -1,11 +1,8 @@
 import ts from "typescript";
 import { createProgramHost } from ".";
 import { App } from "..";
-import { ModuleInfoType, rootWritersType } from "../../utils/getModuleInfo";
+import { ModuleInfoType } from "../../utils/getModuleInfo";
 import { rootWriter } from "../rootWriter";
-import fs from "fs"
-import path from "path";
-import { normalizeSlashes } from "../../utils/normalizeSlashes";
 
 
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
@@ -21,18 +18,15 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 this.moduleRootWriter.writeJsCode(sourceFile.fileName, content);
                 continue;
             }
-            // console.log("🚀 --> file: --> moduleInfo.rootWriters", fileName, moduleInfo.rootWriters);
+            
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
 
                 if (fileName.endsWith('.map')) {
                     writer.writeSourceMap(sourceFile.fileName, content);
                 } else {
-                    // console.log("🚀 --> file: writeFile.ts --> line 9 --> writeFile --> content", content);
                     writer.writeJsCode(sourceFile.fileName, content);
                 }
-            }
-                // , [moduleInfo.modulePath]
-            );
+            });
 
         }
     }
