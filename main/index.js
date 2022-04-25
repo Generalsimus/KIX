@@ -1,7 +1,9 @@
+const routeParams = {};
 const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE)
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName)
+
 // TODO:svg Ns ის დეფაულთი და ასევე გენერირებული
 const abstractNodes = {
     svg(objectNodeProperty, objectNode, createElementName, createElement) {
@@ -89,6 +91,7 @@ const abstractNodes = {
         const getRouteNode = () => {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(routeRegExp) || [];
+
             toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
 
             let renderComponent;
@@ -241,7 +244,10 @@ export const kix = createApp(document.createElement.bind(document));
 export default kix;
 export const styleCssDom = kix(document.body, { style: "" });
 export class Component { render() { } }
-export var routeParams = {};
+export const Router = {
+    params: routeParams,
+    history: window.history
+}
 export const useListener = (objectValue, propertyName, callback) => {
     let closed = false;
     let callBackList = [];

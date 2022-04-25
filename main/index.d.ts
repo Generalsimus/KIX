@@ -32,7 +32,10 @@ export let Component = class Component { } as new <
 
 
 /// START EXPORT ROUTE PARAMS //////////////////////////////////////////////////
-export var routeParams: { readonly [key: string | number | symbol]: any } = {}
+export const Router: {
+  readonly params: { readonly [key: string]: string }
+  readonly history: typeof window.history
+}
 /// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////
 
 /// START PROPERTY LISTENER /////////////////////////////////////////
@@ -105,7 +108,7 @@ declare global {
 
   declare module '*.scss' {
     export default Text;
-  } 
+  }
   declare module '*.sass' {
     export default Text;
   }
