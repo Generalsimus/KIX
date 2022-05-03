@@ -8,14 +8,6 @@ export { kix };
 export default kix;
 
 
-export let Component = class Component { } as new <
-  Model extends {
-    [key: string]: any;
-  } = {}
-  >() => Model & {
-    children: any;
-    ____$$$$$$$$$$$Props: Model;
-  };
 
 
 /// START CLASS COMPONENT DECLARATION //////////////////////////////////////////

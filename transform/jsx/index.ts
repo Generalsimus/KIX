@@ -1,6 +1,6 @@
 // TransformersObjectType
 
-import ts from "typescript";
+import ts, { GeneratedIdentifierFlags, visitEachChild } from "typescript";
 import { CustomContextType } from "..";
 import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
@@ -39,8 +39,21 @@ export const jsxTransformers = {
     [ts.SyntaxKind.FunctionDeclaration]: visitFunctionDeclarationForJsxRegistration,
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
-    [ts.SyntaxKind.CallExpression]: CallExpression
-    // [ts.SyntaxKind.Identifier]: Identifier,
+    [ts.SyntaxKind.CallExpression]: CallExpression,
+    [ts.SyntaxKind.Identifier]: Identifier,
     // [ts.SyntaxKind.VariableStatement]: VariableStatement,
-
+    [ts.SyntaxKind.VariableStatement]: VariableStatement,
+    // [ts.SyntaxKind.BindingElement]: (node: ts.BindingElement, visitor: ts.Visitor, context: CustomContextType) => {
+    //     return node
+    //     return context.factory.getGeneratedNameForNode(node.name, GeneratedIdentifierFlags.AllowNameSubstitution);
+    // },
+    // [ts.SyntaxKind.VariableDeclaration]: (node: ts.VariableDeclaration, visitor: ts.Visitor, context: CustomContextType) => {
+    //     (node as any)["name"] = context.factory.getGeneratedNameForNode(node.name, GeneratedIdentifierFlags.AllowNameSubstitution);
+    //     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+    //         context.hoistVariableDeclaration(node.name);
+    //         // return undefined;
+    //       }
+    //       return visitEachChild(node, visitor, context);
+    // }
+    
 }

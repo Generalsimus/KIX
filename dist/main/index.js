@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useListener = exports.routeParams = exports.Component = exports.styleCssDom = exports.kix = void 0;
+exports.useListener = exports.Router = exports.Component = exports.styleCssDom = exports.kix = void 0;
+const routeParams = {};
 const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => ((tag === null || tag === void 0 ? void 0 : tag.__proto__.ELEMENT_NODE) === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
@@ -85,7 +86,7 @@ const abstractNodes = {
         const getRouteNode = () => {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(routeRegExp) || [];
-            toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (exports.routeParams[v] = matchPath[i]));
+            toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
             let renderComponent;
             if (routeRegExp.test(localPath)) {
                 renderComponent = componentValue;
@@ -214,7 +215,10 @@ class Component {
     render() { }
 }
 exports.Component = Component;
-exports.routeParams = {};
+exports.Router = {
+    params: routeParams,
+    history: window.history
+};
 const useListener = (objectValue, propertyName, callback) => {
     let closed = false;
     let callBackList = [];

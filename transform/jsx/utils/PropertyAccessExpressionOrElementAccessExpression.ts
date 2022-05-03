@@ -8,6 +8,7 @@ export const PropertyAccessExpressionOrElementAccessExpression = (
     visitor: ts.Visitor,
     context: CustomContextType
 ) => {
+    // context.hoistVariableDeclaration(node)
     if (context.getJSXPropRegistrationIdentifier) {
         // export var webSocketUrl = ({} as any).sdfsd.dsdf?. && ()
         const expressionIdentifiers: ts.Expression[] = [];
