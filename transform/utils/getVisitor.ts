@@ -1,44 +1,34 @@
 import ts from "typescript";
-import { TransformersObjectType } from "..";
+import { CustomContextType, TransformersObjectType } from "..";
 import { getVariableDeclarationNames } from "./getVariableDeclarationNames";
-import { visitEachChildPolyfill } from "./visitEachChild";
+const callbackBeforeCreate = () => { }
 
-export const getVisitor = (transforms: TransformersObjectType) => (context: ts.TransformationContext) => {
+export const getVisitor = (transforms: TransformersObjectType) => (
+    context: CustomContextType,
+) => {
+    const onSubstituteNode = context.onSubstituteNode;
+    context.enableSubstitution(ts.SyntaxKind.Block);
+    context.onSubstituteNode = (hint: ts.EmitHint, node: ts.Node) => {
 
-    // context.enableSubstitution(ts.SyntaxKind.VariableStatement);
-    // context.onSubstituteNode = (hint: ts.EmitHint, node: ts.Node) => {
-    //     // if (ts.isIdentifier(node)) {
+        const subNode = context.substituteNodesList.get(node);
+        // if (node.kind === ts.SyntaxKind.Block) {
+        //     console.log(node.pos)
+        // }
+        if (subNode) {
+            if (hint === ts.EmitHint.Expression || node.kind !== ts.SyntaxKind.Identifier) {
+                node = subNode();
+            }
+        }
+        return onSubstituteNode(hint, node);
+    }
 
-    //     //     console.log("🚀 --> file: isIdentifier", node.escapedText);
-    //     // }
-    //     // if (ts.isVariableStatement(node)) {
-    //     //     for (const variableDeclaration of node.declarationList.declarations) {
-
-    //     //         const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
-    //     //         console.log("🚀 --> file: getVisitor.ts --> line 12 --> getVisitor --> declarationNamesObject", declarationNamesObject);
-
-    //     //     }
-    //     //     return ts.createIdentifier(`sssssssss`);
-    //     // }
-    //     return node;
-    // }
-
-
-    // }
-    // if (hint === ts.EmitHint.IdentifierName) {
-
-    //     console.log("🚀 --> file: getVisitor.ts --> line 8 --> getVisitor --> node", node.);
-    // }
-    // return node;
-    // }
 
     const visitor = (node: ts.Node) => {
 
-
-
-        return (context as any).currentParentAstNode = ((transforms as any)[node.kind] || ts.visitEachChild)(node, visitor, context)
+        return ((transforms as any)[node.kind] || ts.visitEachChild)(node, visitor, context)
     }
 
-    return visitor
+
+    return visitor;
 
 }

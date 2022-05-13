@@ -12,7 +12,11 @@ TODO: ამ ფაილში არაზუსტია ExportDeclaration �
 */
 export const exportVisitor = (node: ts.Statement, context: CustomContextType) => {
     const factory = context.factory;
-    // console.log(ts.SyntaxKind[node.kind])
+
+
+    // console.log(node.getText());
+    // console.log(ts.SyntaxKind[node.kind]);
+
     switch (node.kind) {
         case ts.SyntaxKind.ExportAssignment:
             if (ts.isExportAssignment(node)) {

@@ -285,25 +285,26 @@ function registration(registerFunction, onSet) {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
             let value = obj?.[key];
 
-            if (obj?.hasOwnProperty(key)) {
-                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                const defineRegistrations = descriptor.set?._R_C || [];
-                if (defineRegistrations.indexOf(registerFunction) === -1) {
+            if (typeof obj === "object") {
+                const { set, configurable } = (Object.getOwnPropertyDescriptor(obj, key) || {});
+                const defineRegistrations = set?._R_C || [];
+                if (configurable !== false && defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
-                    function set(setValue) {
+                    function setter(setValue) {
                         value = setValue;
-                        descriptor.set && descriptor.set(value)
+                        (set && set(value));
                         onSet(value);
                     }
-                    set._R_C = defineRegistrations
+                    setter._R_C = defineRegistrations
                     Object.defineProperty(obj, key, {
                         enumerable: true,
                         configurable: true,
                         get() {
                             return value;
                         },
-                        set
+                        set: setter
                     })
+
                 }
             }
             return typeof value === "function" ? value.bind(obj) : value;

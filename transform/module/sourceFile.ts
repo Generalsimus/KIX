@@ -6,7 +6,7 @@ import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
-    // return node
+
     const moduleInfo = App.moduleThree.get(node.fileName)
 
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
@@ -16,31 +16,36 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     }
     let declarationStateNamesIdentifier: ts.Identifier | undefined
     context.getVariableDeclarationStateNameIdentifier = () => (declarationStateNamesIdentifier || (declarationStateNamesIdentifier = context.factory.createUniqueName("_S")))
-    context.getVariableDeclarationNames = () => ({})
-    context.variableDeclarationStatement = {
-        var: {},
-        const: {},
-        let: {},
+    context.variableDeclarationStatement = new Map();
+
+
+    let moduleBodyNode = moduleBody(
+        moduleInfo,
+        node.statements.flatMap((stateNode) => {
+
+
+            return exportVisitor(stateNode, context).flatMap((emitNode) => {
+                let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context);
+
+
+                return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
+            })
+        }),
+        context
+    );
+
+
+    const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
+
+    if (isJsxSupported && !moduleInfo.isNodeModule) {
+        moduleBodyNode = visitor(moduleBodyNode) as any
     }
 
-    const statements = [
-        moduleBody(
-            moduleInfo,
-            node.statements.flatMap((stateNode) => {
-                return exportVisitor(stateNode, context).flatMap((emitNode) => {
-                    let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context)
-                    if (node.languageVariant === ts.LanguageVariant.JSX) {
-                        newNode = visitor(newNode) as any
-                    }
 
-                    return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
-                })
-            }),
-            context
-        )
-    ]
+    const visitedSourceFile = context.factory.updateSourceFile(node, [moduleBodyNode])
 
-    return context.factory.updateSourceFile(node, statements)
+
+    return visitedSourceFile;
 }
 
 export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
@@ -54,7 +59,14 @@ export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, 
         ) {
             return true
         }
-    }))
+    })
+
+        // node.isDeclarationFile,
+        // node.referencedFiles,
+        // node.typeReferenceDirectives,
+        // node.hasNoDefaultLib,
+        // node.libReferenceDirectives
+    )
 
     return returnNode
 }

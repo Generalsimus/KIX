@@ -254,26 +254,25 @@ exports.useListener = useListener;
 function registration(registerFunction, onSet) {
     const getValue = () => (registerFunction(function () {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
-            var _a;
             let value = obj === null || obj === void 0 ? void 0 : obj[key];
-            if (obj === null || obj === void 0 ? void 0 : obj.hasOwnProperty(key)) {
-                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                const defineRegistrations = ((_a = descriptor.set) === null || _a === void 0 ? void 0 : _a._R_C) || [];
-                if (defineRegistrations.indexOf(registerFunction) === -1) {
+            if (typeof obj === "object") {
+                const { set, configurable } = (Object.getOwnPropertyDescriptor(obj, key) || {});
+                const defineRegistrations = (set === null || set === void 0 ? void 0 : set._R_C) || [];
+                if (configurable !== false && defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
-                    function set(setValue) {
+                    function setter(setValue) {
                         value = setValue;
-                        descriptor.set && descriptor.set(value);
+                        (set && set(value));
                         onSet(value);
                     }
-                    set._R_C = defineRegistrations;
+                    setter._R_C = defineRegistrations;
                     Object.defineProperty(obj, key, {
                         enumerable: true,
                         configurable: true,
                         get() {
                             return value;
                         },
-                        set
+                        set: setter
                     });
                 }
             }

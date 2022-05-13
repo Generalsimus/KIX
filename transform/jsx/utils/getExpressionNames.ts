@@ -13,8 +13,11 @@ export const getExpressionNames = (
         if (node.questionDotToken) {
             haveQuestionDotToken = true
         }
-        haveQuestionDotToken = getExpressionNames(node.expression, expressionIdentifiers, haveQuestionDotToken) || haveQuestionDotToken 
-        expressionIdentifiers.push(stringLiteral(node.name.getText()))
+        haveQuestionDotToken = getExpressionNames(node.expression, expressionIdentifiers, haveQuestionDotToken) || haveQuestionDotToken
+        if (ts.isIdentifier(node.name)) {
+            // console.log("🚀 --> file: getExpressionNames.ts --> line 18 --> node.name", node.name);
+            expressionIdentifiers.push(stringLiteral(ts.idText(node.name)))
+        }
     } else if (ts.isElementAccessExpression(node)) {
         if (node.questionDotToken) {
             haveQuestionDotToken = true
