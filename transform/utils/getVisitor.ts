@@ -7,7 +7,8 @@ export const getVisitor = (transforms: TransformersObjectType) => (
     context: CustomContextType,
 ) => {
     const onSubstituteNode = context.onSubstituteNode;
-    context.enableSubstitution(ts.SyntaxKind.Block);
+    // context.enableSubstitution(ts.SyntaxKind.FunctionDeclaration);
+    // context.enableSubstitution(ts.SyntaxKind.ArrowFunction);
     context.onSubstituteNode = (hint: ts.EmitHint, node: ts.Node) => {
 
         const subNode = context.substituteNodesList.get(node);

@@ -20,16 +20,16 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
 
     identifiersState.substituteIdentifiers.set(node, () => {
 
-      return callFunction(
+      return identifiersState.valueChanged ? callFunction(
         JSXPropRegistrationIdentifier,
         [
           context.getVariableDeclarationStateNameIdentifier(),
           stringLiteral(getKeyAccessIdentifierName(identifiersState.identifiersIndex, identifierName))
         ]
-      )
+      ) : node
     });
 
-    updateSubstitutions(identifierName, identifiersState, context);
+    // updateSubstitutions(identifierName, identifiersState, context);
   }
 
   return node

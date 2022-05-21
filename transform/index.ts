@@ -2,32 +2,42 @@ import ts, { visitEachChild, visitIterationBody } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { jsxTransformers } from "./jsx";
+import { BlockVariableStatementReplaceType } from "./jsx/utils/updateSubstitutions/VariableStatement";
 import { moduleTransformerAfter, moduleTransformerBefore } from "./module";
-import { initSubstitutionTransformData, substituteBlockTransformerAfterVisit, substituteBlockTransformerBeforeVisit, } from "./substitute-blocks";
+import { initSubstitutionTransformData } from "./substitute-blocks";
 import { getVisitor } from "./utils/getVisitor";
 
 
+export type BlockNodeType = ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression;
+
 export type VariableDeclarationNodeType = {
-    declarationStatement: ts.VariableStatement,
-    declaration: ts.VariableDeclaration,
+    variableStatements: ts.VariableStatement,
+    variableDeclaration: ts.VariableDeclaration,
 }
 
-export type VariableDeclarationStatementItemType<
-    D = VariableDeclarationNodeType
-    // P = (ts.VariableStatement | ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression),
-    // D = ts.VariableDeclaration
-    > = {
-        identifiersIndex: number,
-        substituteIdentifiers: Map<ts.Node, () => ts.Node>
-        isJsxIdentifier: boolean,
-        valueChanged: boolean,
-        declarationNode?: D
-    }
-// type DeclarationType = Map<string, ts.Node>
-// ts.VariableStatement | ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression
-// type StatementStateData = Record<ts.NodeFlags, DeclarationType>
-// type DeclarationFlagKeys = ts.NodeFlags.None | ts.NodeFlags.Const | ts.NodeFlags.Let;
-// type FlagsStateCache = Pick<StatementStateData, DeclarationFlagKeys> & Partial<Omit<StatementStateData, DeclarationFlagKeys>>
+export type VariableDeclarationStatementItemType = {
+    identifiersIndex: number,
+    identifierName: string,
+    isJsxIdentifier: boolean,
+    valueChanged: boolean,
+    variableDeclaration?: VariableDeclarationNodeType
+    blockNode?: BlockNodeType,
+    substituteIdentifiers: Map<ts.Node, () => ts.Node>
+    getEqualNode: (node: ts.Expression | string) => ts.Expression
+};
+
+export type SubstituteVariableStatementDataType = Map<ts.VariableStatement, {
+    replaceDeclarations: Map<ts.VariableDeclaration, Set<VariableDeclarationStatementItemType>>
+}>
+
+
+/*
+
+დეკლარაციის ტიპში ვინახავთ დეკლარაცია და დეკლარაციიის ბლოკის ნოდზე მოსახდენ ცვლილებებს
+ლობი გავაკეთოთ და ცვლადების სთეითები შიგნით ვამატოთ
+ასევე გავაკეთოთ ერთი ბლოკების შესანახი სადაც იქნება ბლოკში შესატანი ცვლილებების სია
+
+*/
 
 export type CustomContextType = ts.TransformationContext & {
     currentModuleInfo: ModuleInfoType
@@ -36,10 +46,23 @@ export type CustomContextType = ts.TransformationContext & {
     getVariableDeclarationStateNameIdentifier: () => ts.Identifier
     /* JSX ში მოთავხებული .? უსაფრთხოებისთვის როდესაც ხდება რეგისტრაცია და ასევესაჭიროა მისი გაშვებაც ნიმუში: ssss?.() */
     JsxHaveQuestionDotToken?: ts.Node
-    currentParentAstNode?: ts.Node
-    substituteBlockNodes: Map<ts.Node, () => ts.Node[]>,
+    // substituteDeclaration:  Map<ts.VariableDeclaration, VariableDeclarationNodeType>,
+    // ცვლადის სახელების სთეითმენთი
+    variableIdentifiersNameStatement: Map<string, VariableDeclarationStatementItemType>
+    // ბლოკის ჩასანაცვლებელი ნოდების სია
+    // substituteBlockLobby: Map<ts.VariableStatement, {
+
+    // }>,
+    substituteBlockLobby: Set<VariableDeclarationStatementItemType>,
+    // substituteBlockLobby: Map<ts.VariableStatement, VariableDeclarationNodeType>,
+
+    // substituteBlockData: Map<ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression, {
+    //     variableStatements: Set<ts.VariableStatement>
+    // }>
     substituteNodesList: Map<ts.Node, () => ts.Node>
-    variableDeclarationStatement: Map<string, VariableDeclarationStatementItemType>
+    substituteNodesData: SubstituteVariableStatementDataType & Map<BlockNodeType, {
+        variableStatementsData: SubstituteVariableStatementDataType
+    }>
 }
 
 export type TransformersObjectType = Partial<
@@ -51,10 +74,8 @@ export type TransformersObjectType = Partial<
 export const getTransformer = () => {
     const transformsBefore = concatTransformers(
         initSubstitutionTransformData,
-        substituteBlockTransformerBeforeVisit,
         moduleTransformerBefore,
         jsxTransformers,
-        substituteBlockTransformerAfterVisit,
     );
     const transformsAfter = concatTransformers(moduleTransformerAfter)
 
