@@ -2,7 +2,7 @@ import ts, { visitEachChild } from "typescript";
 import { CustomContextType, VariableDeclarationNodeType } from "..";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { createVariableWithIdentifierKey, getVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
-import { updateSubstitutions } from "./utils/updateSubstitutions";
+// import { updateSubstitutions } from "./utils/updateSubstitutions";
 
 export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visitor, context: CustomContextType) => {
 
@@ -40,7 +40,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
             context.substituteBlockLobby.add(identifiersState);
             // declarationState.addAfterDeclarationsIdentifiers.set(declarationIdentifierName, variableDeclaration);
 
-            updateSubstitutions(declarationIdentifierName, identifiersState, context);
+            // updateSubstitutions(declarationIdentifierName, identifiersState, context);
         }
     }
 

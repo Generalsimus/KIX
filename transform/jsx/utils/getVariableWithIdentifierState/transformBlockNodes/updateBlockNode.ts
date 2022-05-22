@@ -4,7 +4,7 @@ import { getBlockNodeData } from "../utils/getBlockNodeData";
 import { updateStatementsList } from "./updateStatementsList";
 
 export const updateBlockNode = (
-    blockNode: ts.ConciseBody,
+    blockNode: ts.ConciseBody | ts.Statement,
     substituteBlockData: ReturnType<typeof getBlockNodeData>,
     context: CustomContextType,
 ) => {

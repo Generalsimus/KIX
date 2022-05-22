@@ -1,21 +1,18 @@
 // TransformersObjectType
 
-import ts, { GeneratedIdentifierFlags, visitEachChild } from "typescript";
+import ts, { } from "typescript";
 import { CustomContextType } from "..";
-import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { BinaryExpression } from "./BinaryExpression";
 import { Identifier } from "./Identifier";
+// import { IfStatement } from "./IfStatement";
 import { jsxToObject } from "./jsxToObject";
 import { CallExpression } from "./utils/CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
-import { createSubstituteBlockVisitor } from "./utils/createSubstituteBlockVisitor";
 import { jsxVariableManagerFunctionBlockVisitor } from "./utils/jsxVariableManagerFunctionBlockVisitor";
 import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
-import { visitFunctionForJsxRegistration } from "./utils/visitFunctionForJsxRegistration";
+import { createSubstituteBlockVisitor, substituteBlockNodeVisitor } from "./utils/substituteBlockVisitors";
 import { VariableStatement } from "./VariableStatement";
-
-
 
 
 
@@ -58,6 +55,9 @@ export const jsxTransformers = {
     [ts.SyntaxKind.FunctionDeclaration]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
     // [ts.SyntaxKind.FunctionDeclaration]: visitFunctionForJsxRegistration,
     [ts.SyntaxKind.FunctionExpression]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
+    // [ts.SyntaxKind.IfStatement]: createSubstituteBlockVisitor(childVisitor),
+    [ts.SyntaxKind.IfStatement]: substituteBlockNodeVisitor,
+    [ts.SyntaxKind.SwitchStatement]: substituteBlockNodeVisitor,
     // [ts.SyntaxKind.FunctionExpression]: visitFunctionForJsxRegistration,
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,

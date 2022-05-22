@@ -19,14 +19,13 @@ export const updateSubstituteData = (
 
         replaceDeclarationsData.add(identifiersState);
         const substituteBlockData = getBlockNodeData(context, blockNode);
-        console.log("🚀 --> file: updateSubstituteData.ts --> line 22 --> substituteBlockData", substituteBlockData);
+        
         substituteBlockData.variableStatementsData.set(variableDeclaration.variableStatements, variableStatementData);
         context.enableSubstitution(blockNode.kind);
 
         substituteIdentifiers.set(blockNode, () => {
 
-            console.log("EEEEEEEEEEEEEEE", ts.SyntaxKind[blockNode.kind]);
-
+            
             return (transformBlockNodes as any)[blockNode.kind]?.(blockNode, context, substituteBlockData) || blockNode
         })
 

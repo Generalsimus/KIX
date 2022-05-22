@@ -4,7 +4,7 @@ import { NumberToUniqueString } from "../../../utils/numberToUniqueString";
 import { callFunction } from "../../factoryCode/callFunction";
 import { stringLiteral } from "../../factoryCode/stringLiteral";
 import { getVariableWithIdentifierKey } from "../utils/getVariableWithIdentifierKey";
-import { updateSubstitutions } from "../utils/updateSubstitutions";
+// import { updateSubstitutions } from "../utils/updateSubstitutions";
 
 
 export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: CustomContextType) => {

@@ -4,7 +4,7 @@ import { CustomContextType } from "../../../..";
 import { getBlockNodeData } from "../utils/getBlockNodeData";
 
 export const updateStatementsList = (
-    statements: ts.NodeArray<ts.Statement> | ts.Expression[],
+    statements: ts.NodeArray<ts.Statement> | (ts.Expression | ts.Statement)[],
     context: CustomContextType,
     substituteBlockData: ReturnType<typeof getBlockNodeData>
 ) => {

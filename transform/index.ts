@@ -2,13 +2,13 @@ import ts, { visitEachChild, visitIterationBody } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { jsxTransformers } from "./jsx";
-import { BlockVariableStatementReplaceType } from "./jsx/utils/updateSubstitutions/VariableStatement";
+// import { BlockVariableStatementReplaceType } from "./jsx/utils/updateSubstitutions/VariableStatement";
 import { moduleTransformerAfter, moduleTransformerBefore } from "./module";
-import { initSubstitutionTransformData } from "./substitute-blocks";
+// import { initSubstitutionTransformData } from "./substitute-blocks";
 import { getVisitor } from "./utils/getVisitor";
 
 
-export type BlockNodeType = ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression;
+export type BlockNodeType = ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression | ts.IfStatement | ts.SwitchStatement;
 
 export type VariableDeclarationNodeType = {
     variableStatements: ts.VariableStatement,
@@ -68,12 +68,11 @@ export type CustomContextType = ts.TransformationContext & {
 export type TransformersObjectType = Partial<
     typeof jsxTransformers &
     typeof moduleTransformerBefore &
-    typeof moduleTransformerAfter &
-    typeof initSubstitutionTransformData
+    typeof moduleTransformerAfter
 >
 export const getTransformer = () => {
     const transformsBefore = concatTransformers(
-        initSubstitutionTransformData,
+        // initSubstitutionTransformData,
         moduleTransformerBefore,
         jsxTransformers,
     );

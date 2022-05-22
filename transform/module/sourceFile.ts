@@ -18,7 +18,8 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     context.getVariableDeclarationStateNameIdentifier = () => (declarationStateNamesIdentifier || (declarationStateNamesIdentifier = context.factory.createUniqueName("_S")))
     context.variableIdentifiersNameStatement = new Map();
     context.substituteNodesData = new Map();
-
+    context.substituteNodesList = new Map();
+    
  
 
     let moduleBodyNode = moduleBody(

@@ -4,7 +4,7 @@ import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { getKeyAccessIdentifierName } from "./Identifier";
 import { getVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
-import { updateSubstitutions } from "./utils/updateSubstitutions";
+// import { updateSubstitutions } from "./utils/updateSubstitutions";
 
 export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
     const visitedNode = ts.visitEachChild(node, visitor, context);
@@ -33,7 +33,7 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
                 ]
             );
         });
-        updateSubstitutions(identifierName, identifiersState, context);
+        // updateSubstitutions(identifierName, identifiersState, context);
     }
 
     return visitedNode

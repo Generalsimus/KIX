@@ -4,7 +4,7 @@ import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
 import { getKeyAccessIdentifierName } from "../Identifier";
 import { getVariableWithIdentifierKey } from "./getVariableWithIdentifierKey";
-import { updateSubstitutions } from "./updateSubstitutions";
+// import { updateSubstitutions } from "./updateSubstitutions";
 
 export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
 
@@ -16,7 +16,10 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
 
         const identifiersState = getVariableWithIdentifierKey(identifierName, context);
         identifiersState.valueChanged = true;
+        // console.log("🚀 --> file: PostfixPostfix-UnaryExpression.ts --> visitedNode1", identifiersState.identifierName);
+        context.enableSubstitution(visitedNode.kind)
         identifiersState.substituteIdentifiers.set(visitedNode, () => {
+            
 
             let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
             if (ts.isPrefixUnaryExpression(visitedNode)) {
@@ -30,7 +33,7 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
                     visitedNode.operator,
                 )
             }
-            // return context.factory.createIdentifier("zzzz")
+            
             return nodeToken(
                 [
                     propertyAccessExpression(
@@ -44,12 +47,10 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
                 ]
             );
         });
-
-
-
-        updateSubstitutions(identifierName, identifiersState, context);
+        
+        
     }
 
-    // return context.factory.createIdentifier("zzzz")
+    
     return visitedNode
 }
