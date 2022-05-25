@@ -5,9 +5,9 @@ export const getReplaceDeclarationsData = (
     substituteBlockData: ReturnType<typeof getVariableStatementData>,
     variableDeclaration: ts.VariableDeclaration
 ) => {
-    let replaceDeclarationsData = substituteBlockData.replaceDeclarations.get(variableDeclaration)
+    let replaceDeclarationsData = substituteBlockData.addAfterVariableDeclaration.get(variableDeclaration)
     if (!replaceDeclarationsData) {
-        substituteBlockData.replaceDeclarations.set(variableDeclaration, replaceDeclarationsData = new Set());
+        substituteBlockData.addAfterVariableDeclaration.set(variableDeclaration, replaceDeclarationsData = new Set());
     }
     return replaceDeclarationsData
 }

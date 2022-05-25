@@ -8,26 +8,40 @@ import { moduleTransformerAfter, moduleTransformerBefore } from "./module";
 import { getVisitor } from "./utils/getVisitor";
 
 
-export type BlockNodeType = ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression | ts.IfStatement | ts.SwitchStatement;
+export type BlockNodeType = ts.ArrowFunction |
+    ts.FunctionDeclaration |
+    ts.FunctionExpression |
+    ts.IfStatement |
+    ts.SwitchStatement |
+    ts.TryStatement |
+    ts.MethodDeclaration |
+    ts.ClassStaticBlockDeclaration;
 
 export type VariableDeclarationNodeType = {
     variableStatements: ts.VariableStatement,
-    variableDeclaration: ts.VariableDeclaration,
+    variableDeclaration: ts.VariableDeclaration
 }
-
+export type ParameterDeclarationNodeType = {
+    variableStatements: ts.ParameterDeclaration,
+}
+export type variableDeclarationType = VariableDeclarationNodeType | ParameterDeclarationNodeType
 export type VariableDeclarationStatementItemType = {
     identifiersIndex: number,
     identifierName: string,
     isJsxIdentifier: boolean,
     valueChanged: boolean,
-    variableDeclaration?: VariableDeclarationNodeType
+    variableDeclaration?: variableDeclarationType,
     blockNode?: BlockNodeType,
     substituteIdentifiers: Map<ts.Node, () => ts.Node>
     getEqualNode: (node: ts.Expression | string) => ts.Expression
 };
 
-export type SubstituteVariableStatementDataType = Map<ts.VariableStatement, {
-    replaceDeclarations: Map<ts.VariableDeclaration, Set<VariableDeclarationStatementItemType>>
+export type VariableDeclarationStatementItemListType = Set<VariableDeclarationStatementItemType>
+
+export type SubstituteVariableStatementDataType = Map<VariableDeclarationNodeType["variableStatements"], {
+    addAfterVariableDeclaration: Map<ts.VariableDeclaration, VariableDeclarationStatementItemListType>
+}> & Map<ParameterDeclarationNodeType["variableStatements"], {
+    addAfterParameterDeclaration: VariableDeclarationStatementItemListType
 }>
 
 
@@ -60,9 +74,7 @@ export type CustomContextType = ts.TransformationContext & {
     //     variableStatements: Set<ts.VariableStatement>
     // }>
     substituteNodesList: Map<ts.Node, () => ts.Node>
-    substituteNodesData: SubstituteVariableStatementDataType & Map<BlockNodeType, {
-        variableStatementsData: SubstituteVariableStatementDataType
-    }>
+    substituteNodesData: SubstituteVariableStatementDataType & Map<BlockNodeType, SubstituteVariableStatementDataType>
 }
 
 export type TransformersObjectType = Partial<

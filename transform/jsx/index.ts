@@ -2,12 +2,15 @@
 
 import ts, { } from "typescript";
 import { CustomContextType } from "..";
+import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { BinaryExpression } from "./BinaryExpression";
 import { Identifier } from "./Identifier";
 // import { IfStatement } from "./IfStatement";
 import { jsxToObject } from "./jsxToObject";
+import { ParameterDeclaration } from "./ParameterDeclaration";
 import { CallExpression } from "./utils/CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
+import { createVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
 import { jsxVariableManagerFunctionBlockVisitor } from "./utils/jsxVariableManagerFunctionBlockVisitor";
 import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
@@ -58,6 +61,9 @@ export const jsxTransformers = {
     // [ts.SyntaxKind.IfStatement]: createSubstituteBlockVisitor(childVisitor),
     [ts.SyntaxKind.IfStatement]: substituteBlockNodeVisitor,
     [ts.SyntaxKind.SwitchStatement]: substituteBlockNodeVisitor,
+    [ts.SyntaxKind.MethodDeclaration]: substituteBlockNodeVisitor,
+    [ts.SyntaxKind.ClassStaticBlockDeclaration]: substituteBlockNodeVisitor,
+    [ts.SyntaxKind.Parameter]: ParameterDeclaration,
     // [ts.SyntaxKind.FunctionExpression]: visitFunctionForJsxRegistration,
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
     [ts.SyntaxKind.ElementAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,
