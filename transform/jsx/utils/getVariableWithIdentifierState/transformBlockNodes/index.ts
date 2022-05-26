@@ -3,6 +3,7 @@ import { CustomContextType } from "../../../..";
 import { getBlockNodeData } from "../utils/getBlockNodeData";
 import { updateArrowFunction } from "./updateArrowFunction";
 import { updateClassStaticBlockDeclaration } from "./updateClassStaticBlockDeclaration";
+import { updateForStatement } from "./updateForStatement";
 import { updateFunctionDeclaration } from "./updateFunctionDeclaration";
 import { updateFunctionExpression } from "./updateFunctionExpression";
 import { updateIfStatement } from "./updateIfStatement";
@@ -25,7 +26,8 @@ type BlockNodeTransforms = TransformBlockNodeType<ts.ArrowFunction> |
     TransformBlockNodeType<ts.SwitchStatement> |
     TransformBlockNodeType<ts.TryStatement> |
     TransformBlockNodeType<ts.MethodDeclaration> |
-    TransformBlockNodeType<ts.ClassStaticBlockDeclaration>
+    TransformBlockNodeType<ts.ClassStaticBlockDeclaration> |
+    TransformBlockNodeType<ts.ForStatement>
 
 export const transformBlockNodes: Partial<Record<ts.SyntaxKind, BlockNodeTransforms>> = {
     [ts.SyntaxKind.ArrowFunction]: updateArrowFunction,
@@ -35,7 +37,8 @@ export const transformBlockNodes: Partial<Record<ts.SyntaxKind, BlockNodeTransfo
     [ts.SyntaxKind.SwitchStatement]: updateSwitchStatement,
     [ts.SyntaxKind.TryStatement]: updateTryStatement,
     [ts.SyntaxKind.MethodDeclaration]: updateMethodDeclaration,
-    [ts.SyntaxKind.ClassStaticBlockDeclaration]: updateClassStaticBlockDeclaration
+    [ts.SyntaxKind.ClassStaticBlockDeclaration]: updateClassStaticBlockDeclaration,
+    [ts.SyntaxKind.ForStatement]: updateForStatement
 
 
 }

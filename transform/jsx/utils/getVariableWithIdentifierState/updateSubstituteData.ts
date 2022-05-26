@@ -17,6 +17,7 @@ export const updateSubstituteData = (
     if (isJsxIdentifier && valueChanged && variableDeclaration && blockNode) {
         // let declaration = variableDeclaration;
         const substituteBlockData = getBlockNodeData(context, blockNode);
+
         switch (variableDeclaration.variableStatements.kind) {
             case ts.SyntaxKind.VariableStatement:
                 variableDeclaration = variableDeclaration as VariableDeclarationNodeType
@@ -41,7 +42,7 @@ export const updateSubstituteData = (
         substituteIdentifiers.set(blockNode, () => {
 
 
-            return (transformBlockNodes as any)[blockNode.kind]?.(blockNode, context, substituteBlockData) || blockNode
+            return (transformBlockNodes as any)[blockNode!.kind]?.(blockNode, context, substituteBlockData) || blockNode
         })
 
     }
