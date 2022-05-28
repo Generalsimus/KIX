@@ -4,6 +4,7 @@ import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
 import { getKeyAccessIdentifierName } from "../Identifier";
 import { getVariableWithIdentifierKey } from "./getVariableWithIdentifierKey";
+import { getBlockNodeData } from "./getVariableWithIdentifierState/utils/getBlockNodeData";
 // import { updateSubstitutions } from "./updateSubstitutions";
 
 export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
@@ -19,38 +20,43 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
         // console.log("🚀 --> file: PostfixPostfix-UnaryExpression.ts --> visitedNode1", identifiersState.identifierName);
         context.enableSubstitution(visitedNode.kind)
         identifiersState.substituteIdentifiers.set(visitedNode, () => {
-            
+            const { blockNode } = identifiersState
+            if (blockNode) {
+                const blockNodeData = getBlockNodeData(context, blockNode);
+                let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
+                if (ts.isPrefixUnaryExpression(visitedNode)) {
+                    operandNode = context.factory.createPrefixUnaryExpression(
+                        visitedNode.operator,
+                        visitedNode.operand,
+                    )
+                } else {
+                    operandNode = context.factory.createPostfixUnaryExpression(
+                        visitedNode.operand,
+                        visitedNode.operator,
+                    )
+                }
 
-            let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
-            if (ts.isPrefixUnaryExpression(visitedNode)) {
-                operandNode = context.factory.createPrefixUnaryExpression(
-                    visitedNode.operator,
-                    visitedNode.operand,
-                )
-            } else {
-                operandNode = context.factory.createPostfixUnaryExpression(
-                    visitedNode.operand,
-                    visitedNode.operator,
-                )
+                return nodeToken(
+                    [
+                        propertyAccessExpression(
+                            [
+                                blockNodeData.blockStateIdentifierName,
+                                getKeyAccessIdentifierName(identifiersState.identifiersIndex, identifierName)
+                            ],
+                            "createPropertyAccessExpression"
+                        ),
+                        context.factory.createParenthesizedExpression(operandNode)
+                    ]
+                );
             }
-            
-            return nodeToken(
-                [
-                    propertyAccessExpression(
-                        [
-                            context.getVariableDeclarationStateNameIdentifier(),
-                            getKeyAccessIdentifierName(identifiersState.identifiersIndex, identifierName)
-                        ],
-                        "createPropertyAccessExpression"
-                    ),
-                    context.factory.createParenthesizedExpression(operandNode)
-                ]
-            );
+
+
+            return visitedNode
         });
-        
-        
+
+
     }
 
-    
+
     return visitedNode
 }

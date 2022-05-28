@@ -1,7 +1,6 @@
 import ts from "typescript";
-import { BlockNodeType, CustomContextType, ParameterDeclarationNodeType, VariableDeclarationNodeType, VariableDeclarationStatementItemType } from "../../..";
+import { CustomContextType, ParameterDeclarationNodeType, VariableDeclarationNodeType, VariableDeclarationStatementItemType } from "../../..";
 import { transformBlockNodes } from "./transformBlockNodes";
-import { updateIdentifierDeclaration } from "./updateIdentifierDeclaration";
 import { getBlockNodeData } from "./utils/getBlockNodeData";
 import { getParameterDeclarationData } from "./utils/getParameterDeclarationData";
 import { getReplaceDeclarationsData } from "./utils/getReplaceDeclarationsData";
@@ -26,7 +25,7 @@ export const updateSubstituteData = (
                 const replaceDeclarationsData = getReplaceDeclarationsData(variableStatementData, variableDeclaration.variableDeclaration);
                 replaceDeclarationsData.add(identifiersState);
 
-                substituteBlockData.set(variableDeclaration.variableStatements, variableStatementData);
+                substituteBlockData.data.set(variableDeclaration.variableStatements, variableStatementData);
                 break;
             case ts.SyntaxKind.Parameter:
                 variableDeclaration = variableDeclaration as ParameterDeclarationNodeType
@@ -34,16 +33,25 @@ export const updateSubstituteData = (
 
                 parameterDeclarationData.addAfterParameterDeclaration.add(identifiersState)
 
-                substituteBlockData.set(variableDeclaration.variableStatements, parameterDeclarationData);
+                substituteBlockData.data.set(variableDeclaration.variableStatements, parameterDeclarationData);
                 break;
         }
 
         context.enableSubstitution(blockNode.kind);
+        console.log("🚀 AAAAA", ts.SyntaxKind[blockNode!.kind]);
         substituteIdentifiers.set(blockNode, () => {
-
-
+            console.log("🚀 BBBBB", ts.SyntaxKind[blockNode!.kind]);
+ 
             return (transformBlockNodes as any)[blockNode!.kind]?.(blockNode, context, substituteBlockData) || blockNode
         })
+
+        const { substituteNodesList } = context
+        substituteIdentifiers.forEach((substitute, key) => {
+            console.log("🚀 CCCCC", ts.SyntaxKind[key!.kind]);
+            substituteNodesList.set(key, substitute);
+        });
+
+
 
     }
 

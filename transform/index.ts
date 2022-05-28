@@ -74,7 +74,10 @@ export type CustomContextType = ts.TransformationContext & {
     //     variableStatements: Set<ts.VariableStatement>
     // }>
     substituteNodesList: Map<ts.Node, () => ts.Node>
-    substituteNodesData: SubstituteVariableStatementDataType & Map<BlockNodeType, SubstituteVariableStatementDataType>
+    substituteNodesData: SubstituteVariableStatementDataType & Map<BlockNodeType, {
+        data: SubstituteVariableStatementDataType,
+        blockStateIdentifierName: ts.Identifier
+    }>
 }
 
 export type TransformersObjectType = Partial<

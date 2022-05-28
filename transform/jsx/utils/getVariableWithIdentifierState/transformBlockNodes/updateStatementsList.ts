@@ -1,6 +1,8 @@
 import ts from "typescript";
 import { transformNodes } from ".";
 import { CustomContextType } from "../../../..";
+import { createObject } from "../../../../factoryCode/createObject";
+import { variableStatement } from "../../../../factoryCode/variableStatement";
 import { getBlockNodeData } from "../utils/getBlockNodeData";
 
 export const updateStatementsList = (
@@ -8,7 +10,14 @@ export const updateStatementsList = (
     context: CustomContextType,
     substituteBlockData: ReturnType<typeof getBlockNodeData>
 ) => {
-    const newStatements: (ts.Statement)[] = [];
+    const newStatements: (ts.Statement)[] = [
+        variableStatement([
+            [
+                substituteBlockData.blockStateIdentifierName,
+                createObject([])
+            ]
+        ])
+    ];
     // transformNodes.
     for (const node of statements) {
         // newStatements.push(node as any);

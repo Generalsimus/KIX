@@ -13,6 +13,8 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
         const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
 
         for (const declarationIdentifierName in declarationNamesObject) {
+            
+
             const identifiersState = createVariableWithIdentifierKey(declarationIdentifierName, context);
 
 

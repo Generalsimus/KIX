@@ -3,7 +3,7 @@ import { CustomContextType } from "../../../..";
 import { getBlockNodeData } from "../utils/getBlockNodeData";
 
 export const updateVariableStatement = (node: ts.VariableStatement, context: CustomContextType, substituteBlockData: ReturnType<typeof getBlockNodeData>) => {
-    const variableStatementsData = substituteBlockData.get(node);
+    const variableStatementsData = substituteBlockData.data.get(node);
     if (variableStatementsData) {
         const updatedStatements: ts.Node[] = []
 

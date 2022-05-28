@@ -320,8 +320,8 @@ function registration(registerFunction, onSet) {
 */
 function registerProps(props, registerProps) {
     for (const attrKey in (registerProps || {})) {
-        const getValue = registration(registerProps[attrKey], () => { 
-        console.log("🚀 --> file: index.js --> line 324 --> getValue --> attrKey", attrKey);
+        const getValue = registration(registerProps[attrKey], () => {
+            // console.log("🚀 --> file: index.js --> line 324 --> getValue --> attrKey", attrKey);
             props[attrKey] = getValue();
         });
         props[attrKey] = getValue()

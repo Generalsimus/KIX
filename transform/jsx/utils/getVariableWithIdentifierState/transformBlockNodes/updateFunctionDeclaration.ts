@@ -4,7 +4,8 @@ import { getBlockNodeData } from "../utils/getBlockNodeData";
 import { updateBlockNode } from "./updateBlockNode";
 
 export const updateFunctionDeclaration = (node: ts.FunctionDeclaration, context: CustomContextType, substituteBlockData: ReturnType<typeof getBlockNodeData>) => {
-// console.log("🚀 --> file: updateFunctionDeclaration.ts --> line 7 --> updateFunctionDeclaration --> substituteBlockData", substituteBlockData);
+    // console.log("🚀 --> file: updateFunctionDeclaration.ts --> line 7 --> updateFunctionDeclaration --> substituteBlockData", substituteBlockData);
+
 
 
 

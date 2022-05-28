@@ -5,6 +5,7 @@ import { nodeToken } from "../../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../../factoryCode/propertyAccessExpression";
 import { getKeyAccessIdentifierName } from "../../Identifier";
 import { updateSubstituteData } from "./updateSubstituteData";
+import { getBlockNodeData } from "./utils/getBlockNodeData";
 
 let JSX_IDENTIFIERS_KEY_INDEX_CACHE = 0;
 
@@ -13,6 +14,7 @@ export const getVariableWithIdentifierState = (context: CustomContextType, ident
     let isJsxIdentifier: boolean = false;
     let variableDeclaration: VariableDeclarationStatementItemType["variableDeclaration"];
     let blockNode: VariableDeclarationStatementItemType["blockNode"];
+
 
     const identifiersState: VariableDeclarationStatementItemType = {
         identifiersIndex: ++JSX_IDENTIFIERS_KEY_INDEX_CACHE,
@@ -34,10 +36,7 @@ export const getVariableWithIdentifierState = (context: CustomContextType, ident
         set variableDeclaration(newValue: VariableDeclarationStatementItemType["variableDeclaration"]) {
             variableDeclaration = newValue;
             updateSubstituteData(context, this);
-            this.substituteIdentifiers.forEach((substitute, key) => {
-                console.log("KIND", ts.SyntaxKind[key.kind]);
-                context.substituteNodesList.set(key, substitute);
-            });
+
         },
         get variableDeclaration() {
             return variableDeclaration
@@ -45,26 +44,27 @@ export const getVariableWithIdentifierState = (context: CustomContextType, ident
         set blockNode(newValue: VariableDeclarationStatementItemType["blockNode"]) {
             blockNode = newValue;
             updateSubstituteData(context, this);
-            this.substituteIdentifiers.forEach((substitute, key) => {
-                console.log("KIND", ts.SyntaxKind[key.kind]);
-                context.substituteNodesList.set(key, substitute);
-            });
-
+            
         },
         get blockNode() {
             return blockNode
         },
         getEqualNode(node: ts.Expression | string) {
-            return nodeToken([
-                propertyAccessExpression(
-                    [
-                        context.getVariableDeclarationStateNameIdentifier(),
-                        getKeyAccessIdentifierName(this.identifiersIndex, this.identifierName)
-                    ],
-                    "createPropertyAccessExpression"
-                ),
-                identifier(node)
-            ])
+            if (blockNode) {
+                const blockNodeData = getBlockNodeData(context, blockNode)
+                return nodeToken([
+                    propertyAccessExpression(
+                        [
+                            blockNodeData.blockStateIdentifierName,
+                            getKeyAccessIdentifierName(this.identifiersIndex, this.identifierName)
+                        ],
+                        "createPropertyAccessExpression"
+                    ),
+                    identifier(node)
+                ])
+
+            }
+            return context.factory.createIdentifier("UNKNOWN_IDENTIFIER_BLOCK_NODE")
         }
     };
     return identifiersState

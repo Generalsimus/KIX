@@ -9,6 +9,8 @@ export const getVisitor = (transforms: TransformersObjectType) => (
     const onSubstituteNode = context.onSubstituteNode;
     // context.enableSubstitution(ts.SyntaxKind.FunctionDeclaration);
     // context.enableSubstitution(ts.SyntaxKind.ArrowFunction);
+    // context.enableSubstitution(ts.SyntaxKind.IfStatement);
+
     context.onSubstituteNode = (hint: ts.EmitHint, node: ts.Node) => {
 
         const subNode = context.substituteNodesList.get(node);
@@ -17,6 +19,7 @@ export const getVisitor = (transforms: TransformersObjectType) => (
         // }
         if (subNode) {
             if (hint === ts.EmitHint.Expression || node.kind !== ts.SyntaxKind.Identifier) {
+
                 node = subNode();
             }
         }
@@ -24,8 +27,8 @@ export const getVisitor = (transforms: TransformersObjectType) => (
     }
 
 
-    const visitor = (node: ts.Node) => {
-
+    const visitor = (node: ts.Node): ts.Node => {
+        // console.log("QQQQQ", ts.SyntaxKind[node.kind]);
         return ((transforms as any)[node.kind] || ts.visitEachChild)(node, visitor, context)
     }
 
