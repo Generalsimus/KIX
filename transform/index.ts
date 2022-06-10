@@ -88,7 +88,7 @@ export type TransformersObjectType = Partial<
 export const getTransformer = () => {
     const transformsBefore = concatTransformers(
         // initSubstitutionTransformData,
-        moduleTransformerBefore,
+        moduleTransformerBefore as any,
         jsxTransformers,
     );
     const transformsAfter = concatTransformers(moduleTransformerAfter)

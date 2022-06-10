@@ -2,11 +2,11 @@ import ts from "typescript"
 import { CustomContextType } from "../.."
 
 export const visitFunctionForJsxRegistration = (node: ts.Node, visitor: ts.Visitor, context: CustomContextType) => {
-    const OldRegistrations = context.getJSXPropRegistrationIdentifier
-    context.getJSXPropRegistrationIdentifier = undefined
+    const OldRegistrations = context.getJSXPropRegistrationIdentifier;
+    context.getJSXPropRegistrationIdentifier = undefined;
 
-    const newNode = ts.visitEachChild(node, visitor, context)
+    const visitedNode = ts.visitEachChild(node, visitor, context);
 
-    context.getJSXPropRegistrationIdentifier = OldRegistrations
-    return newNode
+    context.getJSXPropRegistrationIdentifier = OldRegistrations;
+    return visitedNode
 }

@@ -2,6 +2,7 @@
 
 import ts, { visitEachChild } from "typescript";
 import { CustomContextType, VariableDeclarationStatementItemType } from "..";
+import { NotUndefined } from "../../utility-types";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { BinaryExpression } from "./BinaryExpression";
 import { Identifier } from "./Identifier";
@@ -9,6 +10,9 @@ import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
 import { ParameterDeclaration } from "./ParameterDeclaration";
 import { CallExpression } from "./utils/CallExpression";
+import { createJsxBlockVariableRegistration } from "./utils/createJsxBlockVariableRegistration";
+import { updateIfStatement } from "./utils/createJsxBlockVariableRegistration/updateIfStatement";
+import { updateSwitchStatement } from "./utils/createJsxBlockVariableRegistration/updateSwitchStatement";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { createVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
 import { jsxVariableManagerFunctionBlockVisitor } from "./utils/jsxVariableManagerFunctionBlockVisitor";
@@ -17,51 +21,71 @@ import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/Prope
 import { createSubstituteBlockVisitor, substituteBlockNodeVisitor } from "./utils/substituteBlockVisitors";
 import { VariableStatement } from "./VariableStatement";
 
-type declarationTypes = {
+export type VariableStatementDeclarationType = {
     node: ts.VariableStatement
-    declaration: ts.VariableDeclaration
-} | {
-    node: ts.VariableStatement
+    // declaration: ts.VariableDeclaration
 }
+export type ParameterDeclarationType = {
+    node: ts.ParameterDeclaration
+    // declaration: ts.VariableDeclaration
+}
+export type declarationTypes = VariableStatementDeclarationType | ParameterDeclarationType
 export type DeclarationIdentifiersStateType = {
+    name: string,
     indexId: number,
     isJsx: boolean,
     isChanged: boolean,
-    substituteIdentifiers: Map<ts.Identifier, () => ts.Node>,
-    declaration?: declarationTypes
+    // Map<ts.Identifier | ts.BinaryExpression | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, () => ts.Node> & 
+    substituteIdentifiers: PreCustomContextType["substituteNodesList"],
+    declaration?: declarationTypes & Pick<PreCustomContextType, "getBlockVariableStateUniqueIdentifier">
 }
-type replaceVariableDeclarationsData = Map<ts.VariableStatement, Map<ts.VariableDeclaration, DeclarationIdentifiersStateType>>
-type replaceParameterDeclarationsData = Map<ts.VariableDeclaration, Set<DeclarationIdentifiersStateType>>
+const getUniqueString = () => {
 
-type replaceBlockNodesDataType = replaceVariableDeclarationsData & replaceParameterDeclarationsData
+}
+// export type BlockNodeTypes = ts.IfStatement | ts.SwitchStatement
+// type replaceVariableDeclarationsData = Map<ts.VariableStatement, Map<ts.VariableDeclaration, DeclarationIdentifiersStateType>>
+// type replaceParameterDeclarationsData = Map<ts.VariableDeclaration, Set<DeclarationIdentifiersStateType>>
+export type replaceBlockNodesValueType = Record<string, Set<DeclarationIdentifiersStateType>>
+// Record<string, [DeclarationIdentifiersStateType, NotUndefined<DeclarationIdentifiersStateType["declaration"]>]>
+export type replaceBlockNodesType = Map<
+    VariableStatementDeclarationType["node"] | ParameterDeclarationType["node"],
+    replaceBlockNodesValueType
+// Record<string, DeclarationIdentifiersStateType>
+>
+
+// & Map<
+//     ParameterDeclarationType["node"],
+//     Map<string, DeclarationIdentifiersStateType<ParameterDeclarationType>>
+// >
+// Map<
+//     VariableStatementDeclarationType["node"],
+//     Map<string, DeclarationIdentifiersStateType<VariableStatementDeclarationType>>
+// > |
+// Map<
+//     ParameterDeclarationType["node"],
+//     Map<string, DeclarationIdentifiersStateType<ParameterDeclarationType>>
+// >
 
 export type PreCustomContextType = CustomContextType & {
     // substituteIdentifiersStates: Map<string, VariableDeclarationStatementItemType>
     // declarations: Record<ts.NodeFlags.Const | ts.NodeFlags.Let | ts.NodeFlags.None, ts.VariableStatement | ts.ParameterDeclaration>
     // blockKind: ts.SyntaxKind.ArrowFunction | ts.SyntaxKind.FunctionDeclaration | ts.FunctionExpression
-    usedIdentifiers: Map<string, DeclarationIdentifiersStateType>
+
+    // usedBlockIdentifiers: Map<string, DeclarationIdentifiersStateType>
+    usedIdentifiersWithDeclaration: Map<string, DeclarationIdentifiersStateType>
     // declarationWaitingLobby: Map<string, VariableDeclarationStatementItemType>
-    replaceBlockNodes: replaceBlockNodesDataType
+    replaceBlockNodes: replaceBlockNodesType
+    // & replaceBlockNodesType<ParameterDeclarationType>
+    getBlockVariableStateUniqueIdentifier: () => ts.Identifier
+    substituteNodesList: Map<ts.Node, () => ts.Node>
     // blockDeclarationsState: {
     //     // declarations: Record<ts.NodeFlags.Const | ts.NodeFlags.Let | ts.NodeFlags.None, ts.VariableStatement | ts.ParameterDeclaration>
     //     replaceBlockNode: replaceVariableDeclarationsData | replaceParameterDeclarationsData
     // }
-}
-const JsxBlockVariableRegistration = (
-    node: ts.Node,
-    visitor: ts.Visitor,
-    context: PreCustomContextType
-) => {
-    const { usedIdentifiers, replaceBlockNodes } = context
-    const usedIdentifiersCache = context.usedIdentifiers
-    const replaceBlockNodesCache = context.replaceBlockNodes
-    context.usedIdentifiers = new Map();
-    context.replaceBlockNodes = new Map();
-    const visitedNode = visitor(node);
-    context.usedIdentifiers = usedIdentifiersCache;
-    context.replaceBlockNodes = replaceBlockNodesCache;
-
-    return visitedNode;
+} & {
+    usedIdentifiers: Map<string, DeclarationIdentifiersStateType>
+    getBlockVariableStateUniqueIdentifier: () => ts.Identifier
+    substituteNodesList: Map<ts.Node, () => ts.Node>
 }
 
 
@@ -96,8 +120,10 @@ export const jsxTransformers = {
     
     
     */
-    [ts.SyntaxKind.ArrowFunction]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
-    [ts.SyntaxKind.IfStatement]: JsxBlockVariableRegistration,
+    // [ts.SyntaxKind.ArrowFunction]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
+    // ts.IfStatement | ts.SwitchStatement
+    // [ts.SyntaxKind.IfStatement]: createJsxBlockVariableRegistration<ts.IfStatement>(updateIfStatement),
+    // [ts.SyntaxKind.SwitchStatement]: createJsxBlockVariableRegistration<ts.SwitchStatement>(updateSwitchStatement),
     // [ts.SyntaxKind.ArrowFunction]: visitFunctionForJsxRegistration,
     // [ts.SyntaxKind.FunctionDeclaration]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
     // [ts.SyntaxKind.FunctionDeclaration]: visitFunctionForJsxRegistration,

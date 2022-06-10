@@ -13,6 +13,7 @@ export const getVisitor = (transforms: TransformersObjectType) => (
 
     context.onSubstituteNode = (hint: ts.EmitHint, node: ts.Node) => {
 
+        // console.log("🚀 --> file: getVisitor.ts --> line 17 -->  context.substituteNodesList",  context.substituteNodesList);
         const subNode = context.substituteNodesList.get(node);
         // if (node.kind === ts.SyntaxKind.Block) {
         //     console.log(node.pos)
@@ -29,6 +30,7 @@ export const getVisitor = (transforms: TransformersObjectType) => (
 
     const visitor = (node: ts.Node): ts.Node => {
         // console.log("QQQQQ", ts.SyntaxKind[node.kind]);
+        // return node
         return ((transforms as any)[node.kind] || ts.visitEachChild)(node, visitor, context)
     }
 

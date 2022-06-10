@@ -2,10 +2,11 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { App } from "../../app";
 import { moduleBody } from "../factoryCode/moduleBody";
+import { PreCustomContextType } from "../jsx";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
 
-export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
+export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: PreCustomContextType) => {
 
     const moduleInfo = App.moduleThree.get(node.fileName)
 
@@ -19,8 +20,12 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     context.variableIdentifiersNameStatement = new Map();
     context.substituteNodesData = new Map();
     context.substituteNodesList = new Map();
-    
- 
+    context.usedIdentifiers = new Map();
+    context.replaceBlockNodes = new Map();
+
+
+    // substituteNodesList
+
 
     let moduleBodyNode = moduleBody(
         moduleInfo,
@@ -30,7 +35,7 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
             return exportVisitor(stateNode, context).flatMap((emitNode) => {
                 let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context);
 
-
+                // return [ts.createIdentifier("")]
                 return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
             })
         }),
@@ -42,6 +47,7 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
 
     if (isJsxSupported && !moduleInfo.isNodeModule) {
         moduleBodyNode = visitor(moduleBodyNode) as any
+        // console.log("🚀 --> file: sourceFile.ts --> line 54 --> visitSourceFileBefore --> n", node.);
     }
 
 
