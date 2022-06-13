@@ -9,7 +9,7 @@ export const moduleBody = (moduleInfo: ModuleInfoType, statements: ts.Statement[
     return ts.factory.createExpressionStatement(callFunction(App.uniqAccessKey + "_MODULE", [
         ts.factory.createNumericLiteral(moduleInfo.moduleIndex),
         arrowFunction(
-            ["exports", context.getVariableDeclarationStateNameIdentifier(), "module"],
+            ["exports", "module"],
             statements
         )
     ]))

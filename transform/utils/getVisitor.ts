@@ -19,7 +19,8 @@ export const getVisitor = (transforms: TransformersObjectType) => (
         //     console.log(node.pos)
         // }
         if (subNode) {
-            if (hint === ts.EmitHint.Expression || node.kind !== ts.SyntaxKind.Identifier) {
+            // console.log("🚀 --> file: getVisitor.ts --> line 22 --> subNode", ts.EmitHint[hint], node);
+            if (hint === ts.EmitHint.Expression || hint === ts.EmitHint.Unspecified || node.kind !== ts.SyntaxKind.Identifier) {
 
                 node = subNode();
             }

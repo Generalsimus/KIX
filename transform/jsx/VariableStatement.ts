@@ -1,35 +1,51 @@
 import ts, { visitEachChild } from "typescript";
-import { PreCustomContextType } from ".";
-import { CustomContextType, VariableDeclarationNodeType } from "..";
+import { CustomContextType } from "..";
+import { NumberToUniqueString } from "../../utils/numberToUniqueString";
+import { identifier } from "../factoryCode/identifier";
+import { nodeToken } from "../factoryCode/nodeToken";
+import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { addInBlockTransformerIfNeeded, getIdentifierState } from "./utils/getIdentifierState";
-import { createVariableWithIdentifierKey, getVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
+import { getIdentifierState } from "./utils/getIdentifierState";
 // import { updateSubstitutions } from "./utils/updateSubstitutions";
 
-export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visitor, context: PreCustomContextType) => {
+export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visitor, context: CustomContextType) => {
 
-    const visitedVariableDeclaration = visitEachChild(node, visitor, context);
-
-
-    for (const variableDeclaration of node.declarationList.declarations) {
+    const visitedVariableStatement = visitEachChild(node, visitor, context);
+    const returnValue: ts.Node[] = [];
+    for (const variableDeclaration of visitedVariableStatement.declarationList.declarations) {
         const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
+
+        returnValue.push(context.factory.updateVariableStatement(
+            visitedVariableStatement,
+            visitedVariableStatement.modifiers,
+            context.factory.updateVariableDeclarationList(visitedVariableStatement.declarationList, [variableDeclaration])
+        ));
 
         for (const declarationIdentifierName in declarationNamesObject) {
             const identifierState = getIdentifierState(declarationIdentifierName, context);
-            console.log("🚀 --> file: --> context.getBlockVariableStateUniqueIdentifier", context.getBlockVariableStateUniqueIdentifier);
+            const { getBlockVariableStateUniqueIdentifier } = context
+            const declarationMarker = context.factory.createIdentifier("Marker");
+            returnValue.push(declarationMarker);
+            identifierState.substituteIdentifiers.set(declarationMarker, () => {
+                return context.factory.createExpressionStatement(nodeToken([
+                    propertyAccessExpression(
+                        [
+                            getBlockVariableStateUniqueIdentifier(),
+                            NumberToUniqueString(identifierState.indexId)
+                        ],
+                        "createPropertyAccessExpression"
+                    ),
+                    identifier(declarationIdentifierName)
+                ]));
 
-            identifierState.declaration = {
-                node: visitedVariableDeclaration,
-                getBlockVariableStateUniqueIdentifier: context.getBlockVariableStateUniqueIdentifier,
-                // declaration: variableDeclarations
-            }
-            // addInBlockTransformerIfNeeded(identifierState, context);
+            });
+
 
         }
     }
 
 
-    return [visitedVariableDeclaration, context.factory.createIdentifier("სს")]
+    return returnValue
 }
 
 

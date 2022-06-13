@@ -1,14 +1,12 @@
 import ts from "typescript";
-import { PreCustomContextType } from ".";
-import { CustomContextType, VariableDeclarationStatementItemType } from "..";
+import { CustomContextType } from "..";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { getKeyAccessIdentifierName } from "./Identifier";
 import { getIdentifierState } from "./utils/getIdentifierState";
-import { getVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
 // import { updateSubstitutions } from "./utils/updateSubstitutions";
 
-export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor, context: PreCustomContextType) => {
+export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
     const visitedNode = ts.visitEachChild(node, visitor, context);
     if (ts.isIdentifier(visitedNode.left)) {
 
@@ -22,7 +20,7 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
                 [
                     propertyAccessExpression(
                         [
-                            context.getVariableDeclarationStateNameIdentifier(),
+                            identifierState.getBlockVariableStateUniqueIdentifier!(),
                             getKeyAccessIdentifierName(identifierState.indexId, identifierName)
                         ],
                         "createPropertyAccessExpression"

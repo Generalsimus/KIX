@@ -1,94 +1,50 @@
 // TransformersObjectType
 
-import ts, { visitEachChild } from "typescript";
-import { CustomContextType, VariableDeclarationStatementItemType } from "..";
-import { NotUndefined } from "../../utility-types";
-import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
+import ts from "typescript";
+import { CustomContextType } from "..";
 import { BinaryExpression } from "./BinaryExpression";
 import { Identifier } from "./Identifier";
 // import { IfStatement } from "./IfStatement";
 import { jsxToObject } from "./jsxToObject";
-import { ParameterDeclaration } from "./ParameterDeclaration";
 import { CallExpression } from "./utils/CallExpression";
-import { createJsxBlockVariableRegistration } from "./utils/createJsxBlockVariableRegistration";
-import { updateIfStatement } from "./utils/createJsxBlockVariableRegistration/updateIfStatement";
-import { updateSwitchStatement } from "./utils/createJsxBlockVariableRegistration/updateSwitchStatement";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
-import { createVariableWithIdentifierKey } from "./utils/getVariableWithIdentifierKey";
-import { jsxVariableManagerFunctionBlockVisitor } from "./utils/jsxVariableManagerFunctionBlockVisitor";
 import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
-import { createSubstituteBlockVisitor, substituteBlockNodeVisitor } from "./utils/substituteBlockVisitors";
 import { VariableStatement } from "./VariableStatement";
 
-export type VariableStatementDeclarationType = {
-    node: ts.VariableStatement
-    // declaration: ts.VariableDeclaration
+
+
+export const createLowLevelBlockVisitor = <N extends ts.Node>(nodeVisitor: (node: N, nodeVisitor: ts.Visitor, context: CustomContextType) => N) => {
+    return (node: N, visitor: ts.Visitor, context: CustomContextType) => {
+        const usedIdentifiersCache = context.usedIdentifiers || new Map();
+        context.usedIdentifiers = new Map();
+        let uniqueBlockStateIdentifiers: ReturnType<CustomContextType["getBlockVariableStateUniqueIdentifier"]>
+        context.getBlockVariableStateUniqueIdentifier = () => {
+            return uniqueBlockStateIdentifiers || (uniqueBlockStateIdentifiers = context.factory.createUniqueName("_"))
+        };
+        const visitedNode = nodeVisitor(node, visitor, context);
+
+
+        context.usedIdentifiers.forEach((value, key) => {
+            const cachedIdentifierState = usedIdentifiersCache.get(key);
+            if (cachedIdentifierState && !value.isDeclared) {
+                value.indexId = cachedIdentifierState.indexId
+                cachedIdentifierState.isJsx = value.isJsx || cachedIdentifierState.isJsx
+                cachedIdentifierState.isChanged = value.isChanged || cachedIdentifierState.isChanged
+
+                value.substituteIdentifiers.forEach((value, key) => {
+                    cachedIdentifierState.substituteIdentifiers.set(key, value);
+                });
+            } else {
+                usedIdentifiersCache.set(key, value);
+            }
+        });
+
+
+        context.usedIdentifiers = usedIdentifiersCache;
+        return visitedNode;
+    }
 }
-export type ParameterDeclarationType = {
-    node: ts.ParameterDeclaration
-    // declaration: ts.VariableDeclaration
-}
-export type declarationTypes = VariableStatementDeclarationType | ParameterDeclarationType
-export type DeclarationIdentifiersStateType = {
-    name: string,
-    indexId: number,
-    isJsx: boolean,
-    isChanged: boolean,
-    // Map<ts.Identifier | ts.BinaryExpression | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, () => ts.Node> & 
-    substituteIdentifiers: PreCustomContextType["substituteNodesList"],
-    declaration?: declarationTypes & Pick<PreCustomContextType, "getBlockVariableStateUniqueIdentifier">
-}
-const getUniqueString = () => {
-
-}
-// export type BlockNodeTypes = ts.IfStatement | ts.SwitchStatement
-// type replaceVariableDeclarationsData = Map<ts.VariableStatement, Map<ts.VariableDeclaration, DeclarationIdentifiersStateType>>
-// type replaceParameterDeclarationsData = Map<ts.VariableDeclaration, Set<DeclarationIdentifiersStateType>>
-export type replaceBlockNodesValueType = Record<string, Set<DeclarationIdentifiersStateType>>
-// Record<string, [DeclarationIdentifiersStateType, NotUndefined<DeclarationIdentifiersStateType["declaration"]>]>
-export type replaceBlockNodesType = Map<
-    VariableStatementDeclarationType["node"] | ParameterDeclarationType["node"],
-    replaceBlockNodesValueType
-// Record<string, DeclarationIdentifiersStateType>
->
-
-// & Map<
-//     ParameterDeclarationType["node"],
-//     Map<string, DeclarationIdentifiersStateType<ParameterDeclarationType>>
-// >
-// Map<
-//     VariableStatementDeclarationType["node"],
-//     Map<string, DeclarationIdentifiersStateType<VariableStatementDeclarationType>>
-// > |
-// Map<
-//     ParameterDeclarationType["node"],
-//     Map<string, DeclarationIdentifiersStateType<ParameterDeclarationType>>
-// >
-
-export type PreCustomContextType = CustomContextType & {
-    // substituteIdentifiersStates: Map<string, VariableDeclarationStatementItemType>
-    // declarations: Record<ts.NodeFlags.Const | ts.NodeFlags.Let | ts.NodeFlags.None, ts.VariableStatement | ts.ParameterDeclaration>
-    // blockKind: ts.SyntaxKind.ArrowFunction | ts.SyntaxKind.FunctionDeclaration | ts.FunctionExpression
-
-    // usedBlockIdentifiers: Map<string, DeclarationIdentifiersStateType>
-    usedIdentifiersWithDeclaration: Map<string, DeclarationIdentifiersStateType>
-    // declarationWaitingLobby: Map<string, VariableDeclarationStatementItemType>
-    replaceBlockNodes: replaceBlockNodesType
-    // & replaceBlockNodesType<ParameterDeclarationType>
-    getBlockVariableStateUniqueIdentifier: () => ts.Identifier
-    substituteNodesList: Map<ts.Node, () => ts.Node>
-    // blockDeclarationsState: {
-    //     // declarations: Record<ts.NodeFlags.Const | ts.NodeFlags.Let | ts.NodeFlags.None, ts.VariableStatement | ts.ParameterDeclaration>
-    //     replaceBlockNode: replaceVariableDeclarationsData | replaceParameterDeclarationsData
-    // }
-} & {
-    usedIdentifiers: Map<string, DeclarationIdentifiersStateType>
-    getBlockVariableStateUniqueIdentifier: () => ts.Identifier
-    substituteNodesList: Map<ts.Node, () => ts.Node>
-}
-
-
 
 
 export const jsxTransformers = {
@@ -116,10 +72,14 @@ export const jsxTransformers = {
         )
         return childrenNode
     },
-    /*
-    
-    
-    */
+
+    [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.SwitchStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.ForStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.ArrowFunction]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.FunctionDeclaration]: createLowLevelBlockVisitor(ts.visitEachChild),
+    [ts.SyntaxKind.FunctionExpression]: createLowLevelBlockVisitor(ts.visitEachChild),
     // [ts.SyntaxKind.ArrowFunction]: createSubstituteBlockVisitor(jsxVariableManagerFunctionBlockVisitor),
     // ts.IfStatement | ts.SwitchStatement
     // [ts.SyntaxKind.IfStatement]: createJsxBlockVariableRegistration<ts.IfStatement>(updateIfStatement),
