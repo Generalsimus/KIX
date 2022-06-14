@@ -45,12 +45,13 @@ import { getVisitor } from "./utils/getVisitor";
 // }>
 export type IdentifiersStateType = {
     // name: string,
-    indexId: number,
+    // indexId: number,
     isJsx: boolean,
     isChanged: boolean,
-    isDeclared: boolean,
+    declaredFlag: ts.NodeFlags | undefined,
     // getBlockVariableStateUniqueIdentifier?: CustomContextType["getBlockVariableStateUniqueIdentifier"],
-    substituteIdentifiers: CustomContextType["substituteNodesList"],
+    substituteCallback: (indexId: number, declarationIdentifier: ts.Identifier) => void,
+    // substituteIdentifiers: CustomContextType["substituteNodesList"],
     // declarationMarker?: ts.Identifier
 }
 export type CustomContextType = ts.TransformationContext & {
@@ -63,6 +64,7 @@ export type CustomContextType = ts.TransformationContext & {
 
     usedIdentifiers: Map<string, IdentifiersStateType>
     getBlockVariableStateUniqueIdentifier: () => ts.Identifier
+    getGlobalVariableStateUniqueIdentifier: () => ts.Identifier
     substituteNodesList: Map<ts.Node, () => ts.Node>
 
 }

@@ -17,37 +17,41 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
 
         identifierState.isChanged = true;
         context.enableSubstitution(visitedNode.kind);
-        const { getBlockVariableStateUniqueIdentifier } = context
-        identifierState.substituteIdentifiers.set(visitedNode, () => {
-            let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
+        // const { getBlockVariableStateUniqueIdentifier } = context
+        const { substituteCallback } = identifierState
+        identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+            context.substituteNodesList.set(visitedNode, () => {
+                let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
 
+                if (ts.isPrefixUnaryExpression(visitedNode)) {
+                    operandNode = context.factory.createPrefixUnaryExpression(
+                        visitedNode.operator,
+                        visitedNode.operand,
+                    );
+                } else {
+                    operandNode = context.factory.createPostfixUnaryExpression(
+                        visitedNode.operand,
+                        visitedNode.operator,
+                    );
+                }
 
-            if (ts.isPrefixUnaryExpression(visitedNode)) {
-                operandNode = context.factory.createPrefixUnaryExpression(
-                    visitedNode.operator,
-                    visitedNode.operand,
+                return nodeToken(
+                    [
+                        propertyAccessExpression(
+                            [
+                                declarationIdentifier,
+                                getKeyAccessIdentifierName(indexId, identifierName)
+                            ],
+                            "createPropertyAccessExpression"
+                        ),
+                        context.factory.createParenthesizedExpression(operandNode)
+                    ]
                 );
-            } else {
-                operandNode = context.factory.createPostfixUnaryExpression(
-                    visitedNode.operand,
-                    visitedNode.operator,
-                );
-            }
 
-            return nodeToken(
-                [
-                    propertyAccessExpression(
-                        [
-                            getBlockVariableStateUniqueIdentifier(),
-                            getKeyAccessIdentifierName(identifierState.indexId, identifierName)
-                        ],
-                        "createPropertyAccessExpression"
-                    ),
-                    context.factory.createParenthesizedExpression(operandNode)
-                ]
-            );
+            });
+            substituteCallback(indexId, declarationIdentifier);
+        }
 
-        });
 
 
 

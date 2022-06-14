@@ -20,25 +20,34 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
             visitedVariableStatement.modifiers,
             context.factory.updateVariableDeclarationList(visitedVariableStatement.declarationList, [variableDeclaration])
         ));
-
+        visitedVariableStatement.declarationList.flags
+        // export enum NodeFlags {
+        //     None = 0,
+        //     Let = 1,
+        //     Const = 2,
         for (const declarationIdentifierName in declarationNamesObject) {
             const identifierState = getIdentifierState(declarationIdentifierName, context);
-            const { getBlockVariableStateUniqueIdentifier } = context
+            // const { getBlockVariableStateUniqueIdentifier } = context
             const declarationMarker = context.factory.createIdentifier("Marker");
             returnValue.push(declarationMarker);
-            identifierState.substituteIdentifiers.set(declarationMarker, () => {
-                return context.factory.createExpressionStatement(nodeToken([
-                    propertyAccessExpression(
-                        [
-                            getBlockVariableStateUniqueIdentifier(),
-                            NumberToUniqueString(identifierState.indexId)
-                        ],
-                        "createPropertyAccessExpression"
-                    ),
-                    identifier(declarationIdentifierName)
-                ]));
+            identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;
+            const { substituteCallback } = identifierState
+            identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+                context.substituteNodesList.set(declarationMarker, () => {
+                    return context.factory.createExpressionStatement(nodeToken([
+                        propertyAccessExpression(
+                            [
+                                declarationIdentifier,
+                                NumberToUniqueString(indexId)
+                            ],
+                            "createPropertyAccessExpression"
+                        ),
+                        identifier(declarationIdentifierName)
+                    ]));
 
-            });
+                });
+                substituteCallback(indexId, declarationIdentifier);
+            }
 
 
         }
@@ -47,5 +56,4 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
 
     return returnValue
 }
-
 

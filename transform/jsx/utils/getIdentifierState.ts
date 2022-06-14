@@ -8,28 +8,27 @@ import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpres
 let JSX_IDENTIFIERS_KEY_INDEX_CACHE = 0;
 export const getIdentifierState = (identifierName: string, context: CustomContextType): IdentifiersStateType => {
     let identifierState = context.usedIdentifiers.get(identifierName);
-    let isJsx = false;
-    let isChanged = false;
-    let isDeclared: IdentifiersStateType["isDeclared"]
-    let substituteIdentifiers: IdentifiersStateType["substituteIdentifiers"] = new Map();
+
 
     if (!identifierState) {
+        let substituteCallback: IdentifiersStateType["substituteCallback"] = () => { }
+        const { getBlockVariableStateUniqueIdentifier, getGlobalVariableStateUniqueIdentifier } = context
+        const indexId = ++JSX_IDENTIFIERS_KEY_INDEX_CACHE
         context.usedIdentifiers.set(identifierName, (identifierState = {
-            indexId: ++JSX_IDENTIFIERS_KEY_INDEX_CACHE,
             isJsx: false,
             isChanged: false,
-            isDeclared: false,
-            get substituteIdentifiers() {
-                if (isJsx && isChanged && isDeclared) {
-                    if (substituteIdentifiers.size) {
-                        substituteIdentifiers.forEach((value, key) => {
-                            context.substituteNodesList.set(key, value);
-                        });
-                    }
-                    return context.substituteNodesList
-                }
-                return substituteIdentifiers
+            declaredFlag: undefined,
+            get substituteCallback() {
+                return substituteCallback
             },
+            set substituteCallback(newValue) {
+                if (this.isJsx && this.isChanged && this.declaredFlag !== undefined) {
+                    newValue(indexId, this.declaredFlag === ts.NodeFlags.None ? getGlobalVariableStateUniqueIdentifier() : getBlockVariableStateUniqueIdentifier());
+                    substituteCallback = () => { }
+                } else {
+                    substituteCallback = newValue
+                }
+            }
 
         }));
     }
@@ -39,14 +38,3 @@ export const getIdentifierState = (identifierName: string, context: CustomContex
 
 
 
-
-// export const updateSubstituteIdentifiers = (
-//     substituteIdentifiers: IdentifiersStateType["substituteIdentifiers"],
-//     context: CustomContextType
-// ) => {
-
-//     substituteIdentifiers.forEach((value, key) => {
-//         context.substituteNodesList.set(key, value);
-//     });
-
-// }

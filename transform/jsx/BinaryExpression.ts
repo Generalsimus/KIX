@@ -14,27 +14,33 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
         const identifierState = getIdentifierState(identifierName, context);
 
         identifierState.isChanged = true;
-        identifierState.substituteIdentifiers.set(visitedNode, () => {
+        const { getBlockVariableStateUniqueIdentifier } = context
+        const { substituteCallback } = identifierState
+        identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
 
-            return nodeToken(
-                [
-                    propertyAccessExpression(
-                        [
-                            identifierState.getBlockVariableStateUniqueIdentifier!(),
-                            getKeyAccessIdentifierName(identifierState.indexId, identifierName)
-                        ],
-                        "createPropertyAccessExpression"
-                    ),
-                    context.factory.createParenthesizedExpression(
-                        context.factory.createBinaryExpression(
-                            visitedNode.left,
-                            visitedNode.operatorToken,
-                            visitedNode.right,
+            context.substituteNodesList.set(visitedNode, () => {
+
+                return nodeToken(
+                    [
+                        propertyAccessExpression(
+                            [
+                                declarationIdentifier,
+                                getKeyAccessIdentifierName(indexId, identifierName)
+                            ],
+                            "createPropertyAccessExpression"
+                        ),
+                        context.factory.createParenthesizedExpression(
+                            context.factory.createBinaryExpression(
+                                visitedNode.left,
+                                visitedNode.operatorToken,
+                                visitedNode.right,
+                            )
                         )
-                    )
-                ]
-            );
-        });
+                    ]
+                );
+            });
+            substituteCallback(indexId, declarationIdentifier);
+        }
 
 
     }

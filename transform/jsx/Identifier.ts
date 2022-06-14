@@ -15,21 +15,23 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
 
     const identifierName = ts.idText(node);
     const identifierState = getIdentifierState(identifierName, context);
-    // const changeableIdentifierState = isChangeableIdentifierState(identifierState);
-    // const substitutionsMap = changeableIdentifierState ? context.substituteNodesList : identifierState.substituteIdentifiers;
-    // : CustomContextType['substituteNodesList'] | DeclarationIdentifiersStateType["substituteIdentifiers"] 
+    
 
-    identifierState.isJsx = true;
-    const { getBlockVariableStateUniqueIdentifier } = context
-    identifierState.substituteIdentifiers.set(node, () => {
-      return callFunction(
-        JSXPropRegistrationIdentifier,
-        [
-          getBlockVariableStateUniqueIdentifier(),
-          stringLiteral(getKeyAccessIdentifierName(identifierState.indexId, identifierName))
-        ]
-      )
-    });
+    identifierState.isJsx = true; 
+    const { substituteCallback } = identifierState
+    identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+
+      context.substituteNodesList.set(node, () => {
+        return callFunction(
+          JSXPropRegistrationIdentifier,
+          [
+            declarationIdentifier,
+            stringLiteral(getKeyAccessIdentifierName(indexId, identifierName))
+          ]
+        )
+      });
+      substituteCallback(indexId, declarationIdentifier)
+    }
 
   }
 

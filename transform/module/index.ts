@@ -1,13 +1,11 @@
 // TransformersObjectType
 
 import ts from "typescript";
-import { createLowLevelBlockVisitor } from "../jsx";
 import { visitSourceFileBefore, visitSourceFilesAfter } from "./sourceFile";
 
 
 export const moduleTransformerBefore = {
-    [ts.SyntaxKind.SourceFile]: createLowLevelBlockVisitor(visitSourceFileBefore)
-    //  visitSourceFileBefore,
+    [ts.SyntaxKind.SourceFile]: visitSourceFileBefore,
 }
 
 export const moduleTransformerAfter = {
