@@ -43,6 +43,7 @@ import { getVisitor } from "./utils/getVisitor";
 // }> & Map<ParameterDeclarationNodeType["variableStatements"], {
 //     addAfterParameterDeclaration: VariableDeclarationStatementItemListType
 // }>
+export type VisitEachType = <N extends ts.Node>(node: N, nodeVisitor: ts.Visitor, context: CustomContextType) => N
 export type IdentifiersStateType = {
     // name: string,
     // indexId: number,
@@ -63,8 +64,8 @@ export type CustomContextType = ts.TransformationContext & {
     JsxHaveQuestionDotToken?: ts.Node
 
     usedIdentifiers: Map<string, IdentifiersStateType>
-    getBlockVariableStateUniqueIdentifier: () => ts.Identifier
-    getGlobalVariableStateUniqueIdentifier: () => ts.Identifier
+    getVariableUniqueIdentifier: (flag: ts.NodeFlags) => ts.Identifier
+    // getGlobalVariableStateUniqueIdentifier: () => ts.Identifier
     substituteNodesList: Map<ts.Node, () => ts.Node>
 
 }

@@ -1,18 +1,10 @@
-import ts, { visitEachChild } from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "..";
-import { NumberToUniqueString } from "../../utils/numberToUniqueString";
-import { createObject, createObjectArgsType } from "../factoryCode/createObject";
-import { identifier } from "../factoryCode/identifier";
-import { nodeToken } from "../factoryCode/nodeToken";
-import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
-import { variableStatement } from "../factoryCode/variableStatement";
-import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { createBlockVisitor } from "./utils/createBlockVisitor";
-import { createBlockNodeDeclarationUpdate } from "./utils/createBlockVisitorDeclaration";
-import { getIdentifierState } from "./utils/getIdentifierState";
+import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 
-export const ArrowFunction = createBlockVisitor(createBlockNodeDeclarationUpdate(
-    (visitedNode: ts.ArrowFunction, declarationNode, context) => {
+export const ArrowFunction = createGlobalBlockNodesVisitor(
+    (visitedNode: ts.ArrowFunction, declarationVariableNode, context) => {
+
         return context.factory.updateArrowFunction(
             visitedNode,
             visitedNode.modifiers,
@@ -21,11 +13,11 @@ export const ArrowFunction = createBlockVisitor(createBlockNodeDeclarationUpdate
             visitedNode.type,
             visitedNode.equalsGreaterThanToken,
             ConciseBodyToMultiLineBlock(visitedNode.body, context, [
-                declarationNode,
+                declarationVariableNode,
             ]),
         )
     }
-))
+)
 
 const ConciseBodyToMultiLineBlock = (body: ts.ConciseBody, context: CustomContextType, addStatement: ts.Statement[] = []) => {
     if (ts.isBlock(body)) {

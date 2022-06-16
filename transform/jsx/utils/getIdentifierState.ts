@@ -12,7 +12,7 @@ export const getIdentifierState = (identifierName: string, context: CustomContex
 
     if (!identifierState) {
         let substituteCallback: IdentifiersStateType["substituteCallback"] = () => { }
-        const { getBlockVariableStateUniqueIdentifier, getGlobalVariableStateUniqueIdentifier } = context
+        const { getVariableUniqueIdentifier } = context
         const indexId = ++JSX_IDENTIFIERS_KEY_INDEX_CACHE
         context.usedIdentifiers.set(identifierName, (identifierState = {
             isJsx: false,
@@ -23,7 +23,7 @@ export const getIdentifierState = (identifierName: string, context: CustomContex
             },
             set substituteCallback(newValue) {
                 if (this.isJsx && this.isChanged && this.declaredFlag !== undefined) {
-                    newValue(indexId, this.declaredFlag === ts.NodeFlags.None ? getGlobalVariableStateUniqueIdentifier() : getBlockVariableStateUniqueIdentifier());
+                    newValue(indexId, getVariableUniqueIdentifier(this.declaredFlag));
                     substituteCallback = () => { }
                 } else {
                     substituteCallback = newValue

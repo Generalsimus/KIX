@@ -5,11 +5,11 @@ import { identifier } from "../factoryCode/identifier";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { createBlockVisitor } from "./utils/createBlockVisitor";
-import { createBlockNodeDeclarationUpdate } from "./utils/createBlockVisitorDeclaration";
+import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 import { getIdentifierState } from "./utils/getIdentifierState";
 
 
-const FunctionDeclarationVisitor = createBlockVisitor(createBlockNodeDeclarationUpdate(
+const FunctionDeclarationVisitor = createGlobalBlockNodesVisitor(
     (visitedNode: ts.FunctionDeclaration, declarationNode, context) => {
         return context.factory.updateFunctionDeclaration(
             visitedNode,
@@ -29,7 +29,8 @@ const FunctionDeclarationVisitor = createBlockVisitor(createBlockNodeDeclaration
             ),
         )
     }
-))
+)
+
 export const FunctionDeclaration = (node: ts.FunctionDeclaration, visitor: ts.Visitor, context: CustomContextType) => {
     const returnValue: ts.Node[] = [
         FunctionDeclarationVisitor(node, visitor, context)

@@ -1,10 +1,10 @@
 import ts from "typescript";
 import { createBlockVisitor } from "./utils/createBlockVisitor";
-import { createBlockNodeDeclarationUpdate } from "./utils/createBlockVisitorDeclaration";
+import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 
 
 
-export const FunctionExpression = createBlockVisitor(createBlockNodeDeclarationUpdate(
+export const FunctionExpression = createGlobalBlockNodesVisitor(
     (visitedNode: ts.FunctionExpression, declarationNode, context) => {
         return context.factory.updateFunctionExpression(
             visitedNode,
@@ -24,4 +24,4 @@ export const FunctionExpression = createBlockVisitor(createBlockNodeDeclarationU
 
         )
     }
-))
+)

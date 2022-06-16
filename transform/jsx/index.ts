@@ -1,15 +1,17 @@
+import { IfStatement } from './IfStatement';
 // TransformersObjectType
 
 import ts from "typescript";
 import { CustomContextType } from "..";
 import { ArrowFunction } from "./ArrowFunction";
 import { BinaryExpression } from "./BinaryExpression";
+// import { Block } from "./Block";
 import { FunctionDeclaration } from "./FunctionDeclaration";
 import { FunctionExpression } from "./FunctionExpression";
 import { Identifier } from "./Identifier";
 // import { IfStatement } from "./IfStatement";
 import { jsxToObject } from "./jsxToObject";
-import { CallExpression } from "./utils/CallExpression";
+import { CallExpression } from "./CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
@@ -79,10 +81,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.ArrowFunction]: ArrowFunction,
     [ts.SyntaxKind.FunctionExpression]: FunctionExpression,
     [ts.SyntaxKind.FunctionDeclaration]: FunctionDeclaration,
-    [ts.SyntaxKind.Block]: (node: ts.Block, visitor: ts.Visitor, context: CustomContextType) => {
-        console.log("🚀 --> file: index.ts --> line 83 --> node", node);
-        return node
-    },
+    [ts.SyntaxKind.IfStatement]: IfStatement,
 
     // [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
     // [ts.SyntaxKind.CaseClause]: createLowLevelBlockVisitor(ts.visitEachChild),

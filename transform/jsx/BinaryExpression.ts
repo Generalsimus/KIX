@@ -14,7 +14,6 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
         const identifierState = getIdentifierState(identifierName, context);
 
         identifierState.isChanged = true;
-        const { getBlockVariableStateUniqueIdentifier } = context
         const { substituteCallback } = identifierState
         identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
 

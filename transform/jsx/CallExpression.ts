@@ -1,6 +1,6 @@
 import ts from "typescript";
-import { CustomContextType } from "../..";
-import { callChainFunction } from "../../factoryCode/callChainFunction";
+import { CustomContextType } from "..";
+import { callChainFunction } from "../factoryCode/callChainFunction";
 
 export const CallExpression = (
     node: ts.CallExpression,
