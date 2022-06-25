@@ -7,16 +7,16 @@ export type VariableStateType = {
     globalScopeIdentifiers?: ReturnType<CustomContextType["getVariableUniqueIdentifier"]>
 
 }
-export const createBlockVisitor = <N extends ts.Node>(
+export const createBlockVisitor = <N extends ts.Node, R = N>(
     nodeVisitor: (
         node: N,
         nodeVisitor: ts.Visitor,
         context: CustomContextType,
         variableState: VariableStateType
-    ) => N,
+    ) => R,
     isGlobalBlock = false
 ) => {
-    return (node: N, visitor: ts.Visitor, context: CustomContextType): N => {
+    return (node: N, visitor: ts.Visitor, context: CustomContextType) => {
         const usedIdentifiersCache = context.usedIdentifiers || new Map();
         context.usedIdentifiers = new Map();
         const getVariableUniqueIdentifierCache = context.getVariableUniqueIdentifier

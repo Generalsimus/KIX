@@ -2,7 +2,7 @@ import ts, { visitEachChild } from "typescript";
 import { CustomContextType } from "../..";
 import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
-import { getKeyAccessIdentifierName } from "../Identifier";
+// import { getKeyAccessIdentifierName } from "../Identifier";
 import { getIdentifierState } from "./getIdentifierState";
 // import { updateSubstitutions } from "./updateSubstitutions";
 
@@ -19,7 +19,7 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
         context.enableSubstitution(visitedNode.kind);
         // const { getBlockVariableStateUniqueIdentifier } = context
         const { substituteCallback } = identifierState
-        identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
             context.substituteNodesList.set(visitedNode, () => {
                 let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
 
@@ -40,7 +40,7 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
                         propertyAccessExpression(
                             [
                                 declarationIdentifier,
-                                getKeyAccessIdentifierName(indexId, identifierName)
+                                indexIdToUniqueString
                             ],
                             "createPropertyAccessExpression"
                         ),
@@ -49,7 +49,7 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
                 );
 
             });
-            substituteCallback(indexId, declarationIdentifier);
+            substituteCallback(indexIdToUniqueString, declarationIdentifier);
         }
 
 

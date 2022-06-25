@@ -32,13 +32,13 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
             returnValue.push(declarationMarker);
             identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;
             const { substituteCallback } = identifierState
-            identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+            identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
                 context.substituteNodesList.set(declarationMarker, () => {
                     return context.factory.createExpressionStatement(nodeToken([
                         propertyAccessExpression(
                             [
                                 declarationIdentifier,
-                                NumberToUniqueString(indexId)
+                                indexIdToUniqueString
                             ],
                             "createPropertyAccessExpression"
                         ),
@@ -46,7 +46,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
                     ]));
 
                 });
-                substituteCallback(indexId, declarationIdentifier);
+                substituteCallback(indexIdToUniqueString, declarationIdentifier);
             }
 
 

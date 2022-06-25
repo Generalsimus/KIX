@@ -42,14 +42,14 @@ export const FunctionDeclaration = (node: ts.FunctionDeclaration, visitor: ts.Vi
         const declarationMarker = context.factory.createIdentifier("Marker");
         returnValue.push(declarationMarker);
         const { substituteCallback } = identifierState
-        identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {
             context.substituteNodesList.set(declarationMarker, () => {
 
                 return context.factory.createExpressionStatement(nodeToken([
                     propertyAccessExpression(
                         [
                             declarationIdentifier,
-                            NumberToUniqueString(indexId)
+                            indexIdToUniqueString
                         ],
                         "createPropertyAccessExpression"
                     ),
@@ -57,7 +57,7 @@ export const FunctionDeclaration = (node: ts.FunctionDeclaration, visitor: ts.Vi
                 ]));
             });
 
-            substituteCallback(indexId, declarationIdentifier)
+            substituteCallback(indexIdToUniqueString, declarationIdentifier)
         }
     }
 

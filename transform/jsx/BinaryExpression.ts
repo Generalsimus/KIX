@@ -2,20 +2,37 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
-import { getKeyAccessIdentifierName } from "./Identifier";
+// import { getKeyAccessIdentifierName } from "./Identifier";
 import { getIdentifierState } from "./utils/getIdentifierState";
-// import { updateSubstitutions } from "./utils/updateSubstitutions";
 
+const AssignmentTokensList = [
+    ts.SyntaxKind.EqualsToken,
+    ts.SyntaxKind.AsteriskEqualsToken,
+    ts.SyntaxKind.AsteriskAsteriskEqualsToken,
+    ts.SyntaxKind.SlashEqualsToken,
+    ts.SyntaxKind.PercentEqualsToken,
+    ts.SyntaxKind.PlusEqualsToken,
+    ts.SyntaxKind.MinusEqualsToken,
+    ts.SyntaxKind.LessThanLessThanEqualsToken,
+    ts.SyntaxKind.GreaterThanGreaterThanEqualsToken,
+    ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken,
+    ts.SyntaxKind.AmpersandEqualsToken,
+    ts.SyntaxKind.CaretEqualsToken,
+    ts.SyntaxKind.BarEqualsToken,
+    ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+    ts.SyntaxKind.BarBarEqualsToken,
+    ts.SyntaxKind.QuestionQuestionEqualsToken,
+]
 export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
     const visitedNode = ts.visitEachChild(node, visitor, context);
-    if (ts.isIdentifier(visitedNode.left)) {
+    if (ts.isIdentifier(visitedNode.left) && AssignmentTokensList.includes(visitedNode.operatorToken.kind)) {
 
         const identifierName = ts.idText(visitedNode.left);
         const identifierState = getIdentifierState(identifierName, context);
 
         identifierState.isChanged = true;
         const { substituteCallback } = identifierState
-        identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
+        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {
 
             context.substituteNodesList.set(visitedNode, () => {
 
@@ -24,7 +41,7 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
                         propertyAccessExpression(
                             [
                                 declarationIdentifier,
-                                getKeyAccessIdentifierName(indexId, identifierName)
+                                indexIdToUniqueString
                             ],
                             "createPropertyAccessExpression"
                         ),
@@ -38,7 +55,7 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
                     ]
                 );
             });
-            substituteCallback(indexId, declarationIdentifier);
+            substituteCallback(indexIdToUniqueString, declarationIdentifier);
         }
 
 

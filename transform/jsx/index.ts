@@ -16,6 +16,13 @@ import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { VariableStatement } from "./VariableStatement";
+import { SwitchStatement } from './SwitchStatement';
+import { ForStatement } from './ForStatement';
+import { ForInStatement } from './ForInStatement';
+import { ForOfStatement } from './ForOfStatement';
+import { MethodDeclaration } from './MethodDeclaration';
+import { ClassStaticBlockDeclaration } from './ClassStaticBlockDeclaration';
+import { TryStatement } from './TryStatement';
 
 
 
@@ -82,7 +89,14 @@ export const jsxTransformers = {
     [ts.SyntaxKind.FunctionExpression]: FunctionExpression,
     [ts.SyntaxKind.FunctionDeclaration]: FunctionDeclaration,
     [ts.SyntaxKind.IfStatement]: IfStatement,
-
+    [ts.SyntaxKind.SwitchStatement]: SwitchStatement,
+    [ts.SyntaxKind.ForStatement]: ForStatement,
+    [ts.SyntaxKind.ForInStatement]: ForInStatement,
+    [ts.SyntaxKind.ForOfStatement]: ForOfStatement,
+    [ts.SyntaxKind.MethodDeclaration]: MethodDeclaration,
+    [ts.SyntaxKind.ClassStaticBlockDeclaration]: ClassStaticBlockDeclaration,
+    [ts.SyntaxKind.TryStatement]: TryStatement,
+    
     // [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
     // [ts.SyntaxKind.CaseClause]: createLowLevelBlockVisitor(ts.visitEachChild),
     // 

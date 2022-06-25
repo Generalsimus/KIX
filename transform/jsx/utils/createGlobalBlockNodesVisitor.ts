@@ -8,7 +8,7 @@ import { getVariableDeclarationNames } from "../../utils/getVariableDeclarationN
 import { createBlockVisitor, VariableStateType } from "./createBlockVisitor"
 import { getIdentifierState } from "./getIdentifierState"
 
-export const createGlobalBlockNodesVisitor = <N extends ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration>(
+export const createGlobalBlockNodesVisitor = <N extends ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration>(
     updateNode: (Node: N, declaration: ts.VariableStatement, context: CustomContextType) => N
 ) => createBlockVisitor((
     node: N,
@@ -24,9 +24,9 @@ export const createGlobalBlockNodesVisitor = <N extends ts.FunctionExpression | 
             const identifierState = getIdentifierState(declarationIdentifierName, context);
             identifierState.declaredFlag = ts.NodeFlags.None
             const { substituteCallback } = identifierState
-            identifierState.substituteCallback = (indexId: number, declarationIdentifier: ts.Identifier) => {
-                declarationProperties.push([NumberToUniqueString(indexId), identifier(declarationIdentifierName)]);
-                substituteCallback(indexId, declarationIdentifier);
+            identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+                declarationProperties.push([indexIdToUniqueString, identifier(declarationIdentifierName)]);
+                substituteCallback(indexIdToUniqueString, declarationIdentifier);
             }
 
         }
