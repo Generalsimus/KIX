@@ -41,7 +41,7 @@ export const createForInOfVisitor = <N extends ts.ForInStatement | ts.ForOfState
                     }
                 }
             }
-            console.log("🚀 --> file: ForInStatement.ts --> line 40 --> propertyDeclaration", propertyDeclaration.length);
+            // console.log("🚀 --> file: ForInStatement.ts --> line 40 --> propertyDeclaration", propertyDeclaration.length);
             if (variableState.blockScopeIdentifiers) {
                 let blockNode: ts.Statement = visitedNode.statement
                 const variableStateDeclaration = variableStatement([

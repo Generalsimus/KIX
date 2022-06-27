@@ -1,4 +1,4 @@
-import ts, { visitEachChild, visitIterationBody } from "typescript";
+import ts, {   visitIterationBody } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { jsxTransformers } from "./jsx";

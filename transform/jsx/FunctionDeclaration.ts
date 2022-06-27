@@ -39,7 +39,7 @@ export const FunctionDeclaration = (node: ts.FunctionDeclaration, visitor: ts.Vi
         const declarationIdentifierName = ts.idText(node.name)
         const identifierState = getIdentifierState(declarationIdentifierName, context);
         identifierState.declaredFlag = ts.NodeFlags.None;
-        const declarationMarker = context.factory.createIdentifier("Marker");
+        const declarationMarker = context.factory.createIdentifier("");
         returnValue.push(declarationMarker);
         const { substituteCallback } = identifierState
         identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {

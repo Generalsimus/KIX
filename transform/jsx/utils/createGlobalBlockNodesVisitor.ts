@@ -1,4 +1,4 @@
-import ts, { visitEachChild } from "typescript"
+import ts  from "typescript"
 import { CustomContextType } from "../.."
 import { NumberToUniqueString } from "../../../utils/numberToUniqueString"
 import { createObject, createObjectArgsType } from "../../factoryCode/createObject"
@@ -32,7 +32,10 @@ export const createGlobalBlockNodesVisitor = <N extends ts.FunctionExpression | 
         }
 
     }
-    const visitedNode = visitEachChild(node, visitor, context);
+    const OldRegistrations = context.getJSXPropRegistrationIdentifier
+    context.getJSXPropRegistrationIdentifier = undefined
+    const visitedNode = ts.visitEachChild(node, visitor, context);
+    context.getJSXPropRegistrationIdentifier = OldRegistrations
 
     if (variableState.globalScopeIdentifiers) {
         return updateNode(

@@ -18,7 +18,7 @@ export const ParameterDeclaration = (node: ts.ParameterDeclaration, visitor: ts.
 
         // context.substituteBlockLobby.add(identifiersState);
     }
-    console.log("🚀 --> file: index.ts --> line 68 --> declarationNamesObject", declarationNamesObject);
+    // console.log("🚀 --> file: index.ts --> line 68 --> declarationNamesObject", declarationNamesObject);
     // createVariableWithIdentifierKey
     return node
 }

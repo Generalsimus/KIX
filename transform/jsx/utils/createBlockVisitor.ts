@@ -36,6 +36,7 @@ export const createBlockVisitor = <N extends ts.Node, R = N>(
             }
             return variableState.blockScopeIdentifiers ||= context.factory.createUniqueName("_");
         };
+       
         const visitedNode = nodeVisitor(node, visitor, context, variableState);
 
         context.getVariableUniqueIdentifier = getVariableUniqueIdentifierCache;

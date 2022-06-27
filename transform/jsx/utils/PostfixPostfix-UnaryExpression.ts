@@ -1,4 +1,4 @@
-import ts, { visitEachChild } from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "../..";
 import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
@@ -8,7 +8,7 @@ import { getIdentifierState } from "./getIdentifierState";
 
 export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
 
-    const visitedNode = visitEachChild(node, visitor, context);
+    const visitedNode = ts.visitEachChild(node, visitor, context);
 
     if (ts.isIdentifier(visitedNode.operand)) {
         const identifierName = ts.idText(visitedNode.operand);

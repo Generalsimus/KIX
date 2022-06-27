@@ -96,7 +96,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.MethodDeclaration]: MethodDeclaration,
     [ts.SyntaxKind.ClassStaticBlockDeclaration]: ClassStaticBlockDeclaration,
     [ts.SyntaxKind.TryStatement]: TryStatement,
-    
+
     // [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
     // [ts.SyntaxKind.CaseClause]: createLowLevelBlockVisitor(ts.visitEachChild),
     // 
