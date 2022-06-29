@@ -1,6 +1,5 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { NumberToUniqueString } from "../../utils/numberToUniqueString";
 import { createObject } from "../factoryCode/createObject";
 import { identifier } from "../factoryCode/identifier";
 import { nodeToken } from "../factoryCode/nodeToken";
@@ -9,7 +8,6 @@ import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 import { getIdentifierState } from "./utils/getIdentifierState";
-import { getIndexId } from "./utils/getIndexId";
 
 type NodeArgType = {
     initializer: ts.ForStatement['initializer'],

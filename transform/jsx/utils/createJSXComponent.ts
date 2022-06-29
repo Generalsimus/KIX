@@ -60,42 +60,5 @@ export const createJSXComponent = (
 
     // const componentRegistryIdentifier = context.factory.createUniqueName("RC")
 
-    return createObject(propsObjectNodesForFactoryCode)
-
-    useJsxPropRegistration(
-        createObject(propsObjectNodesForFactoryCode),
-        visitor,
-        context,
-        (node, isJSXregistererNode) => {
-            // const createComponentNode = ts.isIdentifier(tagName) ? callFunction : callFunction;
-            // console.log("🚀 --> file: createJSXComponent.ts --> line 38 --> tagName", ts.SyntaxKind[tagName.kind]);
-            // console.log("🚀 --> file: createJSXComponent.ts --> line 41 --> ExpressionNames", ExpressionNames);
-            // let componentCallNameNode: ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.JsxTagNameExpression = tagName;
-            // if (ts.isPropertyAccessExpression(tagName)) {
-            //     const ExpressionNames = getExpressionNames(tagName)
-            //     ExpressionNames[0] = callFunction(ExpressionNames[0], [], "createNewExpression")
-            //     componentCallNameNode = propertyAccessExpression(ExpressionNames)
-            // } 
-            /* 
-            <Component/>>
-            ({_C:(R)=>{}})
-            */
-            /* */
-            // {
-            //     _C: Component,
-
-            // }
-            // * /
-            // W((_R_1) => (_R_1(ss, "i") + 2000))("WWW")
-
-            // (Wee("O","i")("WEE"),)/
-            // "createCallExpression" | "createNewExpression"
-            return createObject([
-                ["_C", tagName],
-                ["R",
-                    node
-                ]
-            ])
-        }
-    )
+    return createObject(propsObjectNodesForFactoryCode);
 }

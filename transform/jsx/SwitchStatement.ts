@@ -1,6 +1,6 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor } from "./utils/createBlockVisitor";
 // console.log("🚀 --> file: createBlockVisitor.ts --> line 40 --> return --> visitor", ts.SyntaxKind[node.kind], visitor);
 const CaseBlockVisitor = createBlockVisitor<ts.SwitchStatement["caseBlock"]>((
     node,

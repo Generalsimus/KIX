@@ -32,7 +32,7 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
 
         identifierState.isChanged = true;
         const { substituteCallback } = identifierState
-        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {
+        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
 
             context.substituteNodesList.set(visitedNode, () => {
 

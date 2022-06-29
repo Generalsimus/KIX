@@ -40,9 +40,13 @@ export const jsxToObject = (
     forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
         const attributeNameString = ts.idText(attributeName)
         if (/^(on+[A-Z])/.test(attributeNameString)) {
-
-            eventObjectNodeProperties.push([attributeNameString.replace(/^on/, "").toLowerCase(), attributeValueNode])
+            // attributeValueNode = visitor(attributeValueNode) as ts.Expression
+            eventObjectNodeProperties.push([
+                attributeNameString.replace(/^on/, "").toLowerCase(),
+                visitor(attributeValueNode) as ts.Expression
+            ])
         } else if (attributeNameString === "e") {
+            attributeValueNode = visitor(attributeValueNode) as ts.Expression
             if (ts.isObjectLiteralExpression(attributeValueNode)) {
                 eventObjectNodeProperties.push(...attributeValueNode.properties)
             } else {
@@ -70,6 +74,7 @@ export const jsxToObject = (
     */
 
     if (eventObjectNodeProperties.length) {
+
         objectNodeProperties.push(["e", createObject(eventObjectNodeProperties)])
     }
     if (dynamicObjectNodeProperties.length) {

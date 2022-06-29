@@ -1,10 +1,8 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { NumberToUniqueString } from "../../utils/numberToUniqueString";
 import { identifier } from "../factoryCode/identifier";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
-import { createBlockVisitor } from "./utils/createBlockVisitor";
 import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 import { getIdentifierState } from "./utils/getIdentifierState";
 

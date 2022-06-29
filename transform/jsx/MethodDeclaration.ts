@@ -1,6 +1,4 @@
 import ts from "typescript";
-import { CustomContextType } from "..";
-import { VariableStateType } from "./utils/createBlockVisitor";
 import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 
 
