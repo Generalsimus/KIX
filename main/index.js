@@ -20,7 +20,7 @@ const abstractNodes = {
         }
 
     },
-    switch(objectNodeProperty, objectNode, createElementName, createElement) {
+    "route-link"(objectNodeProperty, objectNode, createElementName, createElement) {
         let switchObjectNode = {
             ...objectNode
         };
@@ -43,8 +43,8 @@ const abstractNodes = {
         return createElement(switchObjectNode, namedNode)
 
     },
-    routing(_, routeObjectNode) {
-        const children = routeObjectNode.routing;
+    "route-block"(objectNodeProperty, routeObjectNode) {
+        const children = routeObjectNode[objectNodeProperty];
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
         const [startMarker, endMarker] = createMarker()
         const [startRenderMarker, endRenderMarker, Render] = createMarker()
@@ -66,17 +66,20 @@ const abstractNodes = {
             };
             return renderComponent
         }
-        window.addEventListener("popstate", rerender)
 
-        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker]
+
+        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker, () => {
+            window.addEventListener("popstate", rerender);
+        }]
     },
-    router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
+    "route-switch"(objectNodeProperty, routeObjectNode, createElementName, createElement) {
         let currentComponent;
         let currentNodesCache;
+        const { path, unique, component } = routeObjectNode
         const [startMarker, endMarker, Render, getChildren] = createMarker();
         const toPath = flatFunction(path);
         const uniqValue = flatFunction(unique);
-        const componentValue = flatFunction(component);
+        const componentValue = flatFunction(component || routeObjectNode[objectNodeProperty]);
         const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
         const regExpString = (uniqValue ? [
             escapeRegexp,
