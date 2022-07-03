@@ -20,6 +20,14 @@ export let Component = class Component { } as new <
 >() => Model & AbstractComponent<Model>;
 /// END CLASS COMPONENT DECLARATION ////////////////////////////////////////////
 
+type JSXElementConstructor<P> = ((props: P) => any) | (typeof Component<P>);
+
+export type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> =
+  T extends JSXElementConstructor<infer P>
+  ? P
+  : T extends keyof JSX.IntrinsicElements
+  ? JSX.IntrinsicElements[T]
+  : {};
 
 
 /// START EXPORT ROUTE PARAMS //////////////////////////////////////////////////
@@ -40,16 +48,7 @@ export interface ListenerReturnType<T extends string, U extends Record<any, any>
 export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////
 
-type JSXElementConstructor<P> =
-  | ((props: P) => any)
-  | (typeof Component<P>);
 
-export type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> =
-  T extends JSXElementConstructor<infer P>
-  ? P
-  : T extends keyof JSX.IntrinsicElements
-  ? JSX.IntrinsicElements[T]
-  : {};
 declare global {
 
   /// START KIX MODULE //////////////////////////////////////////////////
