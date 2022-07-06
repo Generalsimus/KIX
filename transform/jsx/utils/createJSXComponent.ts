@@ -24,7 +24,7 @@ export const createJSXComponent = (
     )
 
     const propsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = [
-        ["_F", tagName],
+        ["$F", tagName],
         ["c", childrenNode]
     ]
 

@@ -27,7 +27,7 @@ const abstractNodes = {
         const namedNode = createElementName("a")
         kix(namedNode, switchObjectNode[objectNodeProperty])
         delete switchObjectNode[objectNodeProperty];
-        abstractAttributes.e(namedNode, {
+        abstractAttributes.$E(namedNode, {
             click: function (e) {
                 e.preventDefault();
                 // TODO: ავტო სქროლის გათიშვა დაამატე. პს სჯობს ჯერ გაარკვიო სხვაგან როგორ ისქროლება
@@ -121,13 +121,13 @@ const abstractNodes = {
         return [startMarker, getRouteNode, endMarker]
         // return [currentNodes, routeNode];
     },
-    _R(objectNodeProperty, objectNode, createElementName, createElement) {
+    $R(objectNodeProperty, objectNode, createElementName, createElement) {
 
 
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
-    _F(objectNodeProperty, objectNode, createElementName, createElement) {
-        const component = objectNode._F
+    $F(objectNodeProperty, objectNode, createElementName, createElement) {
+        const component = objectNode[objectNodeProperty]
         if (!(component instanceof Function)) return;
 
         if (component.prototype?.render) {
@@ -156,7 +156,7 @@ const abstractNodes = {
 
 
     },
-    _D(objectNodeProperty, objectNode, createElementName, createElement) {
+    $D(objectNodeProperty, objectNode, createElementName, createElement) {
         let node
         for (const attributeName in objectNode) {
             if (node) {
@@ -173,7 +173,7 @@ const abstractNodes = {
 //TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს 
 
 const abstractAttributes = {
-    e(node, eventsObject) {
+    $E(node, eventsObject) {
         for (var eventNames in eventsObject) {
             for (var eventName of eventNames.split("_")) {
                 if (eventsObject[eventName] instanceof Function) {
@@ -252,7 +252,8 @@ export const Router = {
     history: window.history
 }
 export const useListener = (objectValue, propertyName, callback) => {
-    let closed = false;
+    // let closed = false;
+    let opened = true;
     let callBackList = [];
     const listenerService = {
         addCallback(callback) {
@@ -266,21 +267,22 @@ export const useListener = (objectValue, propertyName, callback) => {
             return listenerService
         },
         close() {
-            closed = true;
+            opened = false;
         },
         open() {
-            closed = false;
+            opened = true;
         }
     }
     const registerFunction = (r) => (r(objectValue, propertyName));
     ((registration(registerFunction, (value) => {
-        if (closed) return;
-        for (const callback of callBackList) {
-            callback(value, propertyName)
+        if (opened) {
+            for (const callback of callBackList) {
+                callback(value, propertyName, objectValue)
+            }
         }
     }))());
 
-    return listenerService.addCallback(callback)
+    return listenerService.addCallback(callback);
 };
 /////////////////////////////////////
 function registration(registerFunction, onSet) {

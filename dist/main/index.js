@@ -21,7 +21,7 @@ const abstractNodes = {
             }
         };
     },
-    switch(objectNodeProperty, objectNode, createElementName, createElement) {
+    "route-link"(objectNodeProperty, objectNode, createElementName, createElement) {
         let switchObjectNode = Object.assign({}, objectNode);
         const namedNode = createElementName("a");
         (0, exports.kix)(namedNode, switchObjectNode[objectNodeProperty]);
@@ -39,8 +39,8 @@ const abstractNodes = {
         });
         return createElement(switchObjectNode, namedNode);
     },
-    routing(_, routeObjectNode) {
-        const children = routeObjectNode.routing;
+    "route-block"(objectNodeProperty, routeObjectNode) {
+        const children = routeObjectNode[objectNodeProperty];
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
         const [startMarker, endMarker] = createMarker();
         const [startRenderMarker, endRenderMarker, Render] = createMarker();
@@ -62,16 +62,18 @@ const abstractNodes = {
             ;
             return renderComponent;
         };
-        window.addEventListener("popstate", rerender);
-        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker];
+        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker, () => {
+                window.addEventListener("popstate", rerender);
+            }];
     },
-    router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
+    "route-switch"(objectNodeProperty, routeObjectNode, createElementName, createElement) {
         let currentComponent;
         let currentNodesCache;
+        const { path, unique, component } = routeObjectNode;
         const [startMarker, endMarker, Render, getChildren] = createMarker();
         const toPath = flatFunction(path);
         const uniqValue = flatFunction(unique);
-        const componentValue = flatFunction(component);
+        const componentValue = flatFunction(component || routeObjectNode[objectNodeProperty]);
         const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
         const regExpString = (uniqValue ? [
             escapeRegexp,
@@ -109,12 +111,12 @@ const abstractNodes = {
         window.addEventListener("popstate", getRouteNode);
         return [startMarker, getRouteNode, endMarker];
     },
-    _R(objectNodeProperty, objectNode, createElementName, createElement) {
+    $R(objectNodeProperty, objectNode, createElementName, createElement) {
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
-    _F(objectNodeProperty, objectNode, createElementName, createElement) {
+    $F(objectNodeProperty, objectNode, createElementName, createElement) {
         var _a, _b;
-        const component = objectNode._F;
+        const component = objectNode[objectNodeProperty];
         if (!(component instanceof Function))
             return;
         if ((_a = component.prototype) === null || _a === void 0 ? void 0 : _a.render) {
@@ -137,7 +139,7 @@ const abstractNodes = {
             return result;
         }
     },
-    _D(objectNodeProperty, objectNode, createElementName, createElement) {
+    $D(objectNodeProperty, objectNode, createElementName, createElement) {
         let node;
         for (const attributeName in objectNode) {
             if (node) {
@@ -151,7 +153,7 @@ const abstractNodes = {
     }
 };
 const abstractAttributes = {
-    e(node, eventsObject) {
+    $E(node, eventsObject) {
         for (var eventNames in eventsObject) {
             for (var eventName of eventNames.split("_")) {
                 if (eventsObject[eventName] instanceof Function) {

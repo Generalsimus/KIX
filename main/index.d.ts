@@ -38,7 +38,7 @@ export const Router: {
 /// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////
 
 /// START PROPERTY LISTENER /////////////////////////////////////////
-export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T) => any;
+export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T, object: U) => any;
 export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
   addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
   removeCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
@@ -86,7 +86,7 @@ declare global {
           this: HTMLElements[TagName],
           event: HTMLElementEventMap[EventName]
         ) => any;
-      }> & Record<string, any>;
+      }> & Record<string, any | ((element: HTMLElements[TagName]) => any)>;
   }
 
 
