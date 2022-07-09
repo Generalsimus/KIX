@@ -75,7 +75,7 @@ declare global {
 
   type JSXHtmlElementsList = {
     [TagName in keyof HTMLElements]: Partial<{
-      e: Partial<{
+      $E: Partial<{
         [EventName in keyof HTMLElementEventMap]: (
           this: HTMLElements[TagName],
           event: HTMLElementEventMap[EventName]
@@ -86,7 +86,7 @@ declare global {
           this: HTMLElements[TagName],
           event: HTMLElementEventMap[EventName]
         ) => any;
-      }> & Record<string, any | ((element: HTMLElements[TagName]) => any)>;
+      }> & Record<string, ((element: HTMLElements[TagName]) => any)> | Record<string, any>
   }
 
 

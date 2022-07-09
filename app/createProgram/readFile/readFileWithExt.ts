@@ -7,15 +7,14 @@ import { createUrlLoader } from "./createUrlLoader";
 
 
 
-
-
 export function readFileWithExt(this: createProgramHost, fileName: string, extName: string): {
     scriptKind?: ts.ScriptKind,
     fileText?: string,
 } {
 
-    // console.log("🚀 --> file: readFileWithExt.ts --> line 18 --> readFileWithExt --> extName", extName);
-    switch (extName) {
+
+
+    switch (extName.toLowerCase()) {
         case ".svg":
             const fileText1 = fs.readFileSync(fileName, "utf8");
             return {
@@ -33,16 +32,31 @@ export function readFileWithExt(this: createProgramHost, fileName: string, extNa
                 fileText: fileText2 && createCssString(fileName, fileText2, this)
             };
         case ".ts":
-        case ".tsx":
-        case ".js":
-        case ".jsx":
-        case ".json":
             return {
-                scriptKind: undefined,
+                scriptKind: ts.ScriptKind.TS,
                 fileText: fs.readFileSync(fileName, "utf8")
             };
+        case ".tsx":
+            return {
+                scriptKind: ts.ScriptKind.TSX,
+                fileText: fs.readFileSync(fileName, "utf8")
+            };
+        case ".js":
+            return {
+                scriptKind: ts.ScriptKind.JS,
+                fileText: fs.readFileSync(fileName, "utf8")
+            };
+        case ".jsx":
+            return {
+                scriptKind: ts.ScriptKind.JSX,
+                fileText: fs.readFileSync(fileName, "utf8")
+            };
+        case ".json":
+            return {
+                scriptKind: ts.ScriptKind.JS,
+                fileText: `export default ${fs.readFileSync(fileName, "utf8")}`
+            };
         default:
-
             return {
                 scriptKind: ts.ScriptKind.JS,
                 fileText: createUrlLoader(fileName)

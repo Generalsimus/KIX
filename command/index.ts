@@ -20,7 +20,7 @@ export const readCommandsAndRun = async () => {
                 stdio: 'inherit'
             }).on("close", () => {
                 runCommands()
-            })
+            });
 
         } else {
             runCommands()

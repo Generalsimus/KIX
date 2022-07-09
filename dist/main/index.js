@@ -26,7 +26,7 @@ const abstractNodes = {
         const namedNode = createElementName("a");
         (0, exports.kix)(namedNode, switchObjectNode[objectNodeProperty]);
         delete switchObjectNode[objectNodeProperty];
-        abstractAttributes.e(namedNode, {
+        abstractAttributes.$E(namedNode, {
             click: function (e) {
                 e.preventDefault();
                 window.scrollTo(0, 0);
@@ -222,7 +222,7 @@ exports.Router = {
     history: window.history
 };
 const useListener = (objectValue, propertyName, callback) => {
-    let closed = false;
+    let opened = true;
     let callBackList = [];
     const listenerService = {
         addCallback(callback) {
@@ -236,18 +236,18 @@ const useListener = (objectValue, propertyName, callback) => {
             return listenerService;
         },
         close() {
-            closed = true;
+            opened = false;
         },
         open() {
-            closed = false;
+            opened = true;
         }
     };
     const registerFunction = (r) => (r(objectValue, propertyName));
     ((registration(registerFunction, (value) => {
-        if (closed)
-            return;
-        for (const callback of callBackList) {
-            callback(value, propertyName);
+        if (opened) {
+            for (const callback of callBackList) {
+                callback(value, propertyName, objectValue);
+            }
         }
     }))());
     return listenerService.addCallback(callback);

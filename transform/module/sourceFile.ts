@@ -4,6 +4,7 @@ import { App } from "../../app";
 import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
+// import { nodeToExportJson } from "./utils/nodeToExportJson";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
 
@@ -23,13 +24,11 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     // context.replaceBlockNodes = new Map();
 
 
-    // substituteNodesList
-
 
     let moduleBodyNode = moduleBody(
         moduleInfo,
         node.statements.flatMap((stateNode) => {
-
+           
 
             return exportVisitor(stateNode, context).flatMap((emitNode) => {
                 let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context);
@@ -45,14 +44,14 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
 
     if (isJsxSupported && !moduleInfo.isNodeModule) {
-        moduleBodyNode = visitor(moduleBodyNode) as any
+        moduleBodyNode = visitor(moduleBodyNode) as ts.ExpressionStatement
         // console.log("🚀 --> file: sourceFile.ts --> line 54 --> visitSourceFileBefore --> n", node.);
     }
 
 
     const visitedSourceFile = context.factory.updateSourceFile(node, [moduleBodyNode])
 
- 
+
     return visitedSourceFile;
 }
 

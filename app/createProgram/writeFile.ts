@@ -8,7 +8,7 @@ import { rootWriter } from "../rootWriter";
 export function writeFile(this: createProgramHost, fileName: string, content: string, writeByteOrderMark: boolean, onError?: (message: string) => void, sourceFiles?: readonly ts.SourceFile[]) {
 
     if (!sourceFiles) return;
-    if (/\.((jsx?)|(map))$/i.test(fileName)) {
+    if (/\.((jsx?)|(map)|(json))$/i.test(fileName)) {
         for (const sourceFile of sourceFiles) {
             const moduleInfo: ModuleInfoType | undefined = App.moduleThree.get(sourceFile.fileName);
 
@@ -18,7 +18,7 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
                 this.moduleRootWriter.writeJsCode(sourceFile.fileName, content);
                 continue;
             }
-            
+
             useRootWriterLoop(moduleInfo.rootWriters, (writer) => {
 
                 if (fileName.endsWith('.map')) {
