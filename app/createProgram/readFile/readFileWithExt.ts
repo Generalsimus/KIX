@@ -54,7 +54,7 @@ export function readFileWithExt(this: createProgramHost, fileName: string, extNa
         case ".json":
             return {
                 scriptKind: ts.ScriptKind.JS,
-                fileText: `export default ${fs.readFileSync(fileName, "utf8")}`
+                fileText: `export default ${fs.readFileSync(fileName, "utf8").trim() || "{}"}`
             };
         default:
             return {

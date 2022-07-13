@@ -24,7 +24,7 @@ const AssignmentTokensList = [
     ts.SyntaxKind.QuestionQuestionEqualsToken,
 ]
 export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
-    const visitedNode = ts.visitEachChild(node, visitor, context);
+    let visitedNode = ts.visitEachChild(node, visitor, context);
     if (ts.isIdentifier(visitedNode.left) && AssignmentTokensList.includes(visitedNode.operatorToken.kind)) {
 
         const identifierName = ts.idText(visitedNode.left);
@@ -32,7 +32,15 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
 
         identifierState.isChanged = true;
         const { substituteCallback } = identifierState
+        // visitedNode = context.factory.updateBinaryExpression(
+        //     visitedNode,
+        //     visitedNode.left,
+        //     visitedNode.operatorToken,
+        //     context.factory.createParenthesizedExpression(visitedNode.right),
+        // )
+
         identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+            
 
             context.substituteNodesList.set(visitedNode, () => {
 

@@ -1,4 +1,4 @@
-import ts, {   visitIterationBody } from "typescript";
+import ts, { visitIterationBody } from "typescript";
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { jsxTransformers } from "./jsx";
@@ -39,13 +39,13 @@ export const getTransformer = () => {
     );
     const transformsAfter = concatTransformers(moduleTransformerAfter)
 
-
+    // const { onSubstituteNode } = context
     return {
         before: [
-            getVisitor(transformsBefore) as any
+            getVisitor(transformsBefore, true) as any
         ],
         after: [
-            getVisitor(transformsAfter) as any
+            getVisitor(transformsAfter, false) as any
         ]
     }
 

@@ -23,6 +23,9 @@ import { TryStatement } from './TryStatement';
 
 
 export const jsxTransformers = {
+    [ts.SyntaxKind.AsExpression]: (node: ts.AsExpression, visitor: ts.Visitor, context: CustomContextType) => {
+        return node.expression
+    },
     [ts.SyntaxKind.JsxElement]: (node: ts.JsxElement, visitor: ts.Visitor, context: CustomContextType) => {
 
         const {
