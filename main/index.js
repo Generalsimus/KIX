@@ -148,7 +148,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
 
-            const props = registerProps({ ...(objectNode.s || {}) }, objectNode.d);
+            const props = registerProps({ children: objectNode.c, ...(objectNode.s || {}) }, objectNode.d);
             const result = component(props);
 
             return result;
@@ -393,7 +393,7 @@ function createMarker() {
 აკეთებს დინამიური ფროფერთების რეგისტრაციას
 */
 function propertyRegistry(registerFunction) {
-    let currentNodes;
+ 
     return (parent, attribute) => {
         const [startMarker, endMarker, Render] = createMarker();
 

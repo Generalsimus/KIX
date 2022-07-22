@@ -27,11 +27,12 @@ export const buildProd = async () => {
     ]);
 
 
-    
+
 
     const ignoreUrlPaths = ["/"];
-    
+
     for (const [fileUrlPath, getFileContent] of App.requestsThreshold.entries()) {
+
         if (!ignoreUrlPaths.includes(fileUrlPath) && !fileUrlPath.endsWith(".map")) {
             const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent());
             const fileFullPath = path.join(outputDir, fileUrlPath);

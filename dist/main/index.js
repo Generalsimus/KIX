@@ -134,7 +134,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         }
         else if (((_b = Object.getOwnPropertyDescriptor(component, 'prototype')) === null || _b === void 0 ? void 0 : _b.writable) !== false) {
-            const props = registerProps(Object.assign({}, (objectNode.s || {})), objectNode.d);
+            const props = registerProps(Object.assign({ children: objectNode.c }, (objectNode.s || {})), objectNode.d);
             const result = component(props);
             return result;
         }
@@ -342,7 +342,6 @@ function createMarker() {
     ];
 }
 function propertyRegistry(registerFunction) {
-    let currentNodes;
     return (parent, attribute) => {
         const [startMarker, endMarker, Render] = createMarker();
         const getRenderValue = registration((a) => registerFunction(a), (value) => {

@@ -4,6 +4,7 @@ import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVis
 
 export const MethodDeclaration = createGlobalBlockNodesVisitor(
     (visitedNode: ts.MethodDeclaration, declarationNode, context) => {
+        
         return context.factory.updateMethodDeclaration(
             visitedNode,
             visitedNode.decorators,
@@ -14,7 +15,13 @@ export const MethodDeclaration = createGlobalBlockNodesVisitor(
             visitedNode.typeParameters,
             visitedNode.parameters,
             visitedNode.type,
-            visitedNode.body,
+            visitedNode.body && context.factory.updateBlock(
+                visitedNode.body,
+                [
+                    declarationNode,
+                    ...visitedNode.body.statements
+                ]
+            ), 
         );
     }
 )

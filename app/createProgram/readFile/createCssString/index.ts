@@ -21,7 +21,7 @@ export const createCssString = (
   } else {
 
     return `import kix, { styleCssDom } from "kix";
-    export default kix(styleCssDom, \`${styleToString}"\`);
+    export default kix(styleCssDom, \`${styleToString}\`);
     `;
   }
 };

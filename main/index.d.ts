@@ -104,9 +104,8 @@ declare global {
   }
 
   namespace JSX {
-    interface ElementClass {
-      render: () => any;
-    }
+    type EL<Props = {}> = (props: Props & { children?: any }) => any;
+    type ElementClass = Component
     interface ElementAttributesProperty {
       ____$$$$$$$$$$$Props: Omit<this, "____$$$$$$$$$$$Props">;
     }
