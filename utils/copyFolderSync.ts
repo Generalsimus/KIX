@@ -24,7 +24,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
             copyFolderSync(path.join(from, element), path.join(to, element), ignorePaths);
         })
         if (!fs.readdirSync(to).length) {
-            fs.rmdirSync(to, {
+            fs.rmSync(to, {
                 recursive: true
             })
         }

@@ -1,6 +1,6 @@
 
 import chokidar, { FSWatcher } from "chokidar";
-import path from "node:path/win32";
+import path from "path/win32";
 
 type eventNameType = 'all' | 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir' | 'error' | 'ready'
 type AddWatcherType = { event?: eventNameType, filePath?: string, callBack?: (eventName: eventNameType, filePath: string) => void }

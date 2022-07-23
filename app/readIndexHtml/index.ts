@@ -16,6 +16,10 @@ export function readIndexHtml() {
   const createHostProgram = () => {
     App.requestsThreshold.clear();
     const rootNames = readJsDomHtml(indexHTMLPath)
+    const defaultModuleRootNames = App.devMode ? [
+      App.injectPaths.kix,
+      App.injectPaths.codeController
+    ] : [App.injectPaths.kix]
     const hostProgram = new createProgramHost(
       rootNames,
       {
@@ -42,10 +46,7 @@ export function readIndexHtml() {
         suppressOutputPathCheck: true,
       },
       App.devMode,
-      [
-        App.injectPaths.kix,
-        App.injectPaths.codeController
-      ]
+      defaultModuleRootNames
     )
     hostProgram.watcher.createWatcher({
       filePath: indexHTMLPath,

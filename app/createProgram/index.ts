@@ -62,9 +62,8 @@ export class createProgramHost {
     // console.log("🚀 --> file: index.ts --> line 75 --> createProgramHost --> constructor --> options", options);
     this.moduleRootNamesSet = new Set<string>(fixRootNames(this, defaultModuleRootNames, { isNodeModule: true }));
     useRootFileWriter(this.rootNames = fixRootNames(this, rootNames), this)
-    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, [App.injectPaths.codeController], true)
-
-
+    this.moduleRootWriter = new rootWriter(path.join(App.runDirName, App.nodeModulesUrlPath), this, defaultModuleRootNames, true)
+    // App.injectPaths.codeController
 
 
     this.startBuildProcess();

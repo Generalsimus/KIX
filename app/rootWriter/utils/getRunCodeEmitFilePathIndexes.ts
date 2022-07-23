@@ -14,6 +14,6 @@ export const getRunCodeEmitFilePathIndexes = (pathsOrIndexes: (string | number)[
 
         }
     }
-    
+
     return indexes.join("\n")
 }
