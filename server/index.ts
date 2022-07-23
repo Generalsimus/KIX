@@ -43,11 +43,13 @@ export class Server {
     }
     clientSendDiagnostic(client: WebSocket, diagnostic: ts.Diagnostic) {
         const diagnose = { ...diagnostic, file: undefined, relatedInformation: undefined };
+
+        const { file: SourceFile } = diagnostic;
         client.send(JSON.stringify({
             action: "ALERT_ERROR",
             data: {
-                fileText: diagnostic.file?.getText(),
-                filePath: diagnostic.file?.fileName && filePathToUrl(diagnostic.file.fileName),
+                fileText: SourceFile?.text,
+                filePath: SourceFile?.fileName && filePathToUrl(SourceFile.fileName),
                 ...diagnose
             }
         }))

@@ -14,14 +14,18 @@ export const readCommandsAndRun = async () => {
             devMode: argv._.includes("start"),
             parsedArgs: argv,
         })
+        const creatingNewApp = argv._.includes("new")
+        // console.log({
+        //     realModuleDirName: App.realModuleDirName,
+        //     runDirName: App.runDirName,
+        //     isChildPath: !isChildPath(App.realModuleDirName, App.runDirName)
+        // })
 
-
-        if (!isChildPath(App.realModuleDirName, App.runDirName)) {
-            
-            spawn('npm', ["exec", "kix@latest", ...process.argv.slice(2)], {
+        if (!isChildPath(App.realModuleDirName, App.runDirName) && !creatingNewApp) {
+            spawn('npm', ["exec", "kix", ...process.argv.slice(2)], {
                 shell: true,
                 stdio: 'inherit'
-            }).on("error", () => {
+            }).on("close", () => {
                 runCommands()
             });
 
