@@ -6,7 +6,6 @@ import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
-    // return node
     const moduleInfo = App.moduleThree.get(node.fileName)
 
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
@@ -14,47 +13,42 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     if (moduleInfo) {
         context.currentModuleInfo = moduleInfo
     }
-    let declarationStateNamesIdentifier: ts.Identifier | undefined
-    context.getVariableDeclarationStateNameIdentifier = () => (declarationStateNamesIdentifier || (declarationStateNamesIdentifier = context.factory.createUniqueName("_S")))
-    context.getVariableDeclarationNames = () => ({})
-    context.variableDeclarationStatement = {
-        var: {},
-        const: {},
-        let: {},
-    }
 
-    const statements = [
-        moduleBody(
-            moduleInfo,
-            node.statements.flatMap((stateNode) => {
-                return exportVisitor(stateNode, context).flatMap((emitNode) => {
-                    let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context)
-                    if (node.languageVariant === ts.LanguageVariant.JSX) {
-                        newNode = visitor(newNode) as any
-                    }
+    context.substituteNodesList = new Map();
+    context.usedIdentifiers = new Map();
 
-                    return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
-                })
-            }),
-            context
-        )
-    ]
 
-    return context.factory.updateSourceFile(node, statements)
+    const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
+    const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
+
+ 
+    const visitedSourceFile = context.factory.updateSourceFile(
+        node,
+        node.statements.flatMap((stateNode) => {
+            if (needsToVisit) {
+                stateNode = visitor(stateNode) as ts.Statement
+            }
+            return exportVisitor(stateNode, context).flatMap((emitNode) => {
+                let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context);
+
+                return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
+            })
+        })
+    )
+
+    return visitedSourceFile;
 }
 
 export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
-    // return node
-    const returnNode = context.factory.updateSourceFile(node, node.statements.filter((stateNode) => {
-        if (
-            ts.isExpressionStatement(stateNode) &&
-            ts.isCallExpression(stateNode.expression) &&
-            ts.isIdentifier(stateNode.expression.expression) &&
-            ts.idText(stateNode.expression.expression) === (App.uniqAccessKey + "_MODULE")
-        ) {
-            return true
-        }
-    }))
-
-    return returnNode
+    const moduleInfo = App.moduleThree.get(node.fileName);
+    const statements = [...node.statements];
+    /* REMOVE __esModule = true */
+    statements.splice(1, 1);
+    if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
+    return context.factory.updateSourceFile(
+        node,
+        [
+            moduleBody(moduleInfo, statements)
+        ]
+    );
 }

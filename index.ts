@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { App } from "./app";
-// TODO: ავტორელოადი გაქ დასამატებელი სოკეტისთვის
+import { Component } from "./main"; 
 // TODO: ბილდზე კოდის კონტროლერების ფაილები ამოიღე
 // TODO: ბილდზე ვაჩერის ლოგი არ უნდა ილოგებოდეს
 // TODO: css ის მოდულების არსებობა გადაამოწმე
@@ -8,7 +8,15 @@ import { App } from "./app";
 // TODO: გადაამოწმე კარგად css ის remaper ი 
 // TODO: პორტ ჩექერი გადაამოწმე როგორ მუშაობს მგონი სხვა პორზე ვერ ხსნის
 // TODO: getSourcefile შიდაამატე მოდულების არ მოძებნი ერორი და რესოლვზე ყოველთვის ობიექტი დააბრუნებინე რო getsourcefileში შემოვიდესხოლმე
+// TODO: KIX კომანდით ბილდი გაითვალისწინე kix წინ დაწერილი ბრძანებები ავტომატურად გადააბი ფექიჯის გამშვების ბრძანებას
 App.start()
+// type JSXElementConstructor<P> = (props: P) => any | typeof Component<P>
+// type ComponentType = typeof ;
+// type GetClassParameterForAlphaBeta<T extends Alpha<any> | Beta<any>> =
+//     T extends Alpha<infer R>
+//     ? R : T extends Beta<infer R>
+//     ? R : unknown; 
+
 // import path from "path";
 // import ts from "typescript";
 

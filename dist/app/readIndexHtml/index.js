@@ -19,22 +19,23 @@ function readIndexHtml() {
     const createHostProgram = () => {
         index_1.App.requestsThreshold.clear();
         const rootNames = (0, readJsDomHtml_1.readJsDomHtml)(indexHTMLPath);
+        const defaultModuleRootNames = index_1.App.devMode ? [
+            index_1.App.injectPaths.kix,
+            index_1.App.injectPaths.codeController
+        ] : [index_1.App.injectPaths.kix];
         const hostProgram = new createProgram_1.createProgramHost(rootNames, {
-            target: typescript_1.default.ScriptTarget.ES2020,
             module: typescript_1.default.ModuleKind.CommonJS,
             incremental: true,
             allowJs: true,
             removeComments: true,
             jsx: typescript_1.default.JsxEmit.Preserve,
             esModuleInterop: false,
+            "moduleResolution": typescript_1.default.ModuleResolutionKind.NodeNext,
             lib: [
                 index_1.App.injectPaths.kixType
             ],
             suppressOutputPathCheck: true,
-        }, index_1.App.devMode, [
-            index_1.App.injectPaths.kix,
-            index_1.App.injectPaths.codeController
-        ]);
+        }, index_1.App.devMode, defaultModuleRootNames);
         hostProgram.watcher.createWatcher({
             filePath: indexHTMLPath,
             callBack: () => {

@@ -8,23 +8,21 @@ export const minifyCode = async (fileRequestPath: string, content: string) => {
     // console.log("🚀 --> file: index.ts --> line 7 --> minifyCode --> fileRequestPath", fileRequestPath);
 
 
-
+    // return content
 
 
     let sourceMap: string | undefined;
-    switch (path.extname(fileRequestPath).toLocaleLowerCase()) {
-        case ".js":
-            const jsFileSourceMap = App.requestsThreshold.get(fileRequestPath + ".map")?.();
-            const { code, map } = minifyJs(content, jsFileSourceMap);
-            sourceMap = map;
-            content = code;
-            break;
-        case ".html":
-            content = await minifyHtml(content);
-            break;
-        // default:
-        //     return content
-    }
+    // switch (path.extname(fileRequestPath).toLocaleLowerCase()) {
+    //     case ".js":
+    //         const jsFileSourceMap = App.requestsThreshold.get(fileRequestPath + ".map")?.();
+    //         const { code, map } = minifyJs(content, jsFileSourceMap);
+    //         sourceMap = map;
+    //         content = code;
+    //         break;
+    //     case ".html":
+    //         content = await minifyHtml(content);
+    //         break;
+    // }
 
 
 

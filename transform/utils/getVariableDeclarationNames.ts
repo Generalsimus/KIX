@@ -1,6 +1,7 @@
 import ts from "typescript";
 
-export const getVariableDeclarationNames = (node: ts.ExportSpecifier | ts.BindingElement | ts.VariableDeclaration, currentThree: string[] = [], three: Record<string, string[]> = {}) => {
+
+export const getVariableDeclarationNames = (node: ts.ParameterDeclaration | ts.ExportSpecifier | ts.BindingElement | ts.VariableDeclaration, currentThree: string[] = [], three: Record<string, string[]> = {}) => {
     const currentThreeList = [...currentThree]
     const identifierName = ((node as any).propertyName || node.name)
     if (ts.isIdentifier(identifierName)) {

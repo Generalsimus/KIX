@@ -20,14 +20,14 @@ const abstractNodes = {
         }
 
     },
-    switch(objectNodeProperty, objectNode, createElementName, createElement) {
+    "route-link"(objectNodeProperty, objectNode, createElementName, createElement) {
         let switchObjectNode = {
             ...objectNode
         };
         const namedNode = createElementName("a")
         kix(namedNode, switchObjectNode[objectNodeProperty])
         delete switchObjectNode[objectNodeProperty];
-        abstractAttributes.e(namedNode, {
+        abstractAttributes.$E(namedNode, {
             click: function (e) {
                 e.preventDefault();
                 // TODO: ავტო სქროლის გათიშვა დაამატე. პს სჯობს ჯერ გაარკვიო სხვაგან როგორ ისქროლება
@@ -43,8 +43,8 @@ const abstractNodes = {
         return createElement(switchObjectNode, namedNode)
 
     },
-    routing(_, routeObjectNode) {
-        const children = routeObjectNode.routing;
+    "route-block"(objectNodeProperty, routeObjectNode) {
+        const children = routeObjectNode[objectNodeProperty];
         const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
         const [startMarker, endMarker] = createMarker()
         const [startRenderMarker, endRenderMarker, Render] = createMarker()
@@ -66,17 +66,20 @@ const abstractNodes = {
             };
             return renderComponent
         }
-        window.addEventListener("popstate", rerender)
 
-        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker]
+
+        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker, () => {
+            window.addEventListener("popstate", rerender);
+        }]
     },
-    router(objectNodeProperty, { path, unique, component }, createElementName, createElement) {
+    "route-switch"(objectNodeProperty, routeObjectNode, createElementName, createElement) {
         let currentComponent;
         let currentNodesCache;
+        const { path, unique, component } = routeObjectNode
         const [startMarker, endMarker, Render, getChildren] = createMarker();
         const toPath = flatFunction(path);
         const uniqValue = flatFunction(unique);
-        const componentValue = flatFunction(component);
+        const componentValue = flatFunction(component || routeObjectNode[objectNodeProperty]);
         const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
         const regExpString = (uniqValue ? [
             escapeRegexp,
@@ -118,13 +121,13 @@ const abstractNodes = {
         return [startMarker, getRouteNode, endMarker]
         // return [currentNodes, routeNode];
     },
-    _R(objectNodeProperty, objectNode, createElementName, createElement) {
+    $R(objectNodeProperty, objectNode, createElementName, createElement) {
 
 
         return propertyRegistry(objectNode[objectNodeProperty]);
     },
-    _F(objectNodeProperty, objectNode, createElementName, createElement) {
-        const component = objectNode._F
+    $F(objectNodeProperty, objectNode, createElementName, createElement) {
+        const component = objectNode[objectNodeProperty]
         if (!(component instanceof Function)) return;
 
         if (component.prototype?.render) {
@@ -145,7 +148,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         } else if (Object.getOwnPropertyDescriptor(component, 'prototype')?.writable !== false) {
 
-            const props = registerProps({ ...(objectNode.s || {}) }, objectNode.d);
+            const props = registerProps({ children: objectNode.c, ...(objectNode.s || {}) }, objectNode.d);
             const result = component(props);
 
             return result;
@@ -153,7 +156,7 @@ const abstractNodes = {
 
 
     },
-    _D(objectNodeProperty, objectNode, createElementName, createElement) {
+    $D(objectNodeProperty, objectNode, createElementName, createElement) {
         let node
         for (const attributeName in objectNode) {
             if (node) {
@@ -170,7 +173,7 @@ const abstractNodes = {
 //TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს 
 
 const abstractAttributes = {
-    e(node, eventsObject) {
+    $E(node, eventsObject) {
         for (var eventNames in eventsObject) {
             for (var eventName of eventNames.split("_")) {
                 if (eventsObject[eventName] instanceof Function) {
@@ -249,7 +252,8 @@ export const Router = {
     history: window.history
 }
 export const useListener = (objectValue, propertyName, callback) => {
-    let closed = false;
+    // let closed = false;
+    let opened = true;
     let callBackList = [];
     const listenerService = {
         addCallback(callback) {
@@ -263,21 +267,22 @@ export const useListener = (objectValue, propertyName, callback) => {
             return listenerService
         },
         close() {
-            closed = true;
+            opened = false;
         },
         open() {
-            closed = false;
+            opened = true;
         }
     }
     const registerFunction = (r) => (r(objectValue, propertyName));
     ((registration(registerFunction, (value) => {
-        if (closed) return;
-        for (const callback of callBackList) {
-            callback(value, propertyName)
+        if (opened) {
+            for (const callback of callBackList) {
+                callback(value, propertyName, objectValue)
+            }
         }
     }))());
 
-    return listenerService.addCallback(callback)
+    return listenerService.addCallback(callback);
 };
 /////////////////////////////////////
 function registration(registerFunction, onSet) {
@@ -285,25 +290,26 @@ function registration(registerFunction, onSet) {
         return Array.prototype.reduce.call(arguments, (obj, key) => {
             let value = obj?.[key];
 
-            if (obj?.hasOwnProperty(key)) {
-                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-                const defineRegistrations = descriptor.set?._R_C || [];
-                if (defineRegistrations.indexOf(registerFunction) === -1) {
+            if (typeof obj === "object") {
+                const { set, configurable } = (Object.getOwnPropertyDescriptor(obj, key) || {});
+                const defineRegistrations = set?._R_C || [];
+                if (configurable !== false && defineRegistrations.indexOf(registerFunction) === -1) {
                     defineRegistrations.push(registerFunction);
-                    function set(setValue) {
+                    function setter(setValue) {
                         value = setValue;
-                        descriptor.set && descriptor.set(value)
+                        (set && set(value));
                         onSet(value);
                     }
-                    set._R_C = defineRegistrations
+                    setter._R_C = defineRegistrations
                     Object.defineProperty(obj, key, {
                         enumerable: true,
                         configurable: true,
                         get() {
                             return value;
                         },
-                        set
+                        set: setter
                     })
+
                 }
             }
             return typeof value === "function" ? value.bind(obj) : value;
@@ -320,8 +326,9 @@ function registration(registerFunction, onSet) {
 function registerProps(props, registerProps) {
     for (const attrKey in (registerProps || {})) {
         const getValue = registration(registerProps[attrKey], () => {
-            props[attrKey] = getValue()
-        })
+            // console.log("🚀 --> file: index.js --> line 324 --> getValue --> attrKey", attrKey);
+            props[attrKey] = getValue();
+        });
         props[attrKey] = getValue()
     }
     return props;
@@ -386,7 +393,7 @@ function createMarker() {
 აკეთებს დინამიური ფროფერთების რეგისტრაციას
 */
 function propertyRegistry(registerFunction) {
-    let currentNodes;
+ 
     return (parent, attribute) => {
         const [startMarker, endMarker, Render] = createMarker();
 

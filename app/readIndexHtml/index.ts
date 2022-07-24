@@ -16,17 +16,23 @@ export function readIndexHtml() {
   const createHostProgram = () => {
     App.requestsThreshold.clear();
     const rootNames = readJsDomHtml(indexHTMLPath)
+    const defaultModuleRootNames = App.devMode ? [
+      App.injectPaths.kix,
+      App.injectPaths.codeController
+    ] : [App.injectPaths.kix]
     const hostProgram = new createProgramHost(
       rootNames,
       {
-
-        target: ts.ScriptTarget.ES2020,
+        /* გაითვალისწინე რომ ამ ოფშნებს კლიენტი ვერ შეცვლის tsconfig.json ფაილიდან */
+        /* ამიტომ target ამოვაკელით :) */
+        // target: ts.ScriptTarget.ES2020,
         module: ts.ModuleKind.CommonJS,
         incremental: true,
         allowJs: true,
         removeComments: true,
         jsx: ts.JsxEmit.Preserve,
         esModuleInterop: false,
+        "moduleResolution": ts.ModuleResolutionKind.NodeNext,
         lib: [
           App.injectPaths.kixType
         ],
@@ -40,10 +46,7 @@ export function readIndexHtml() {
         suppressOutputPathCheck: true,
       },
       App.devMode,
-      [
-        App.injectPaths.kix,
-        App.injectPaths.codeController
-      ]
+      defaultModuleRootNames
     )
     hostProgram.watcher.createWatcher({
       filePath: indexHTMLPath,

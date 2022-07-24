@@ -5,11 +5,13 @@ import { ModuleInfoType } from "../../utils/getModuleInfo"
 import { arrowFunction } from "./arrowFunction"
 import { callFunction } from "./callFunction"
 
-export const moduleBody = (moduleInfo: ModuleInfoType, statements: ts.Statement[] = [], context: CustomContextType) => {
+export const moduleBody = (moduleInfo: ModuleInfoType, statements: ts.Statement[] = [] ) => {
+
+
     return ts.factory.createExpressionStatement(callFunction(App.uniqAccessKey + "_MODULE", [
         ts.factory.createNumericLiteral(moduleInfo.moduleIndex),
         arrowFunction(
-            ["exports", context.getVariableDeclarationStateNameIdentifier(), "module"],
+            ["exports", "module"],
             statements
         )
     ]))

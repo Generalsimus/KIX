@@ -12,7 +12,11 @@ TODO: ამ ფაილში არაზუსტია ExportDeclaration �
 */
 export const exportVisitor = (node: ts.Statement, context: CustomContextType) => {
     const factory = context.factory;
-    // console.log(ts.SyntaxKind[node.kind])
+
+    // console.log(ts.SyntaxKind[node.kind]);
+    // console.log(node.getText());
+    // console.log(ts.SyntaxKind[node.kind]);
+
     switch (node.kind) {
         case ts.SyntaxKind.ExportAssignment:
             if (ts.isExportAssignment(node)) {
@@ -74,7 +78,6 @@ export const exportVisitor = (node: ts.Statement, context: CustomContextType) =>
             export let name1 = …, name2 = …, …, nameN; // also var, const
             */
             const [isFilteredVariableStatementModifiers, newVariableStatementModifiers] = filterNodeModifiers(node);
-
             if (isFilteredVariableStatementModifiers && ts.isVariableStatement(node)) {
                 const newNodes: ts.Statement[] = [
                     factory.updateVariableStatement(node, newVariableStatementModifiers, node.declarationList)
@@ -83,6 +86,7 @@ export const exportVisitor = (node: ts.Statement, context: CustomContextType) =>
                 for (const variableDeclaration of node.declarationList.declarations) {
                     const declarationNamesObject = getVariableDeclarationNames(variableDeclaration)
                     for (const variableDefinition in declarationNamesObject) {
+                      
                         newNodes.push(
                             factory.createExpressionStatement(
                                 nodeToken([

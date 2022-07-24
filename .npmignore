@@ -1,0 +1,5 @@
+./* 
+!./dist
+!./app/template
+!./main/index.js
+!./main/index.d.ts

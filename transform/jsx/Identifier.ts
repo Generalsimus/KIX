@@ -1,35 +1,42 @@
-import ts, { GeneratedIdentifierFlags } from "typescript";
+import ts, { } from "typescript";
 import { CustomContextType } from "..";
+import { callFunction } from "../factoryCode/callFunction";
+import { stringLiteral } from "../factoryCode/stringLiteral";
+import { getIdentifierState } from "./utils/getIdentifierState";
+// import { updateSubstitutions } from "../utils/updateSubstitutions";
+
 
 export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: CustomContextType) => {
 
-  // return context.factory.getGeneratedNameForNode(node, GeneratedIdentifierFlags.AllowNameSubstitution);
-  // if(ts.isLocalName(node)){
 
-  // // }
-  // console.log(ts.SyntaxKind[node.parent?.kind]);
-  // if (node.parent && context.isSubstitutionEnabled(node)) {
+  if (context.getJSXPropRegistrationIdentifier && context.isSubstitutionEnabled(node)) {
+    const JSXPropRegistrationIdentifier = context.getJSXPropRegistrationIdentifier();
 
-  //   console.log(ts.idText(node));
-  // }
-  if (context.getJSXPropRegistrationIdentifier) {
+    const identifierName = ts.idText(node);
+    const identifierState = getIdentifierState(identifierName, context);
+    
 
-    //     // console.log("🚀 --> file: Identifier.ts --> line 7 --> Identifier --> context", context);
-    // return context.factory.getGeneratedNameForNode(node, GeneratedIdentifierFlags.AllowNameSubstitution);
-    // const declaredNames = context.getVariableDeclarationNames();
-    // context.factory.createTempVariable((node) => {
-    //   console.log({ node })
-    // },/*reservedInNestedScopes*/ true)
-    // context.hoistVariableDeclaration(node)
-    // return context.hoistVariableDeclaration(node)
-    // return context.factory.createTempVariable(context.hoistVariableDeclaration, /*reservedInNestedScopes*/ true)
-    // console.log("🚀 --> file: Identifier.ts --> line 9 --> Identifier --> declaredNames", declaredNames);
-    //     if(ts.idText(node) in declaredNames){
-    //     console.log("🚀 --> Text(node)", ts.idText(node));
+    identifierState.isJsx = true; 
+    const { substituteCallback } = identifierState
+    identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {
 
-    //     }
+      context.substituteNodesList.set(node, () => {
+        return callFunction(
+          JSXPropRegistrationIdentifier,
+          [
+            declarationIdentifier,
+            stringLiteral(indexIdToUniqueString)
+          ]
+        )
+      });
+      substituteCallback(indexIdToUniqueString, declarationIdentifier)
+    }
 
   }
-  // // node
+
   return node
-} 
+}
+
+
+
+ 
