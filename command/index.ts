@@ -1,13 +1,12 @@
 import { App } from "../app";
 import { parseArgs } from "./parseArgs";
 import { runCommands } from "./runCommands";
-import { spawn } from "child_process"
+import { spawn, exec } from "child_process"
 import { isChildPath } from "../utils/isChildPath";
 import { chdir } from "process";
-
+const runKeywordForPackage = "APP_RUN_KEYWORD_FOR_PACKAGER"
 export const readCommandsAndRun = async () => {
     parseArgs().then((argv) => {
-
         Object.assign(App, {
             port: argv.port as number,
             outDir: argv["outDir"],
@@ -15,14 +14,12 @@ export const readCommandsAndRun = async () => {
             parsedArgs: argv,
         })
         const creatingNewApp = argv._.includes("new")
-        // console.log({
-        //     realModuleDirName: App.realModuleDirName,
-        //     runDirName: App.runDirName,
-        //     isChildPath: !isChildPath(App.realModuleDirName, App.runDirName)
-        // })
 
-        if (!isChildPath(App.realModuleDirName, App.runDirName) && !creatingNewApp) {
-            spawn('npm', ["exec", "kix", ...process.argv.slice(2)], {
+
+
+        if (!isChildPath(App.realModuleDirName, App.runDirName) && !creatingNewApp && argv[runKeywordForPackage] !== runKeywordForPackage) {
+            // npm exec kix start --www="sss"
+            spawn("npm exec -- kix", [...process.argv.slice(2), `--${runKeywordForPackage}="${runKeywordForPackage}"`], {
                 shell: true,
                 stdio: 'inherit'
             }).on("close", () => {
