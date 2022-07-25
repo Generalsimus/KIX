@@ -1,4 +1,4 @@
-import ts  from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "..";
 import { NumberToUniqueString } from "../../utils/numberToUniqueString";
 import { identifier } from "../factoryCode/identifier";
@@ -11,6 +11,7 @@ import { getIdentifierState } from "./utils/getIdentifierState";
 export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visitor, context: CustomContextType) => {
 
     const visitedVariableStatement = ts.visitEachChild(node, visitor, context);
+
     const returnValue: ts.Node[] = [];
     for (const variableDeclaration of visitedVariableStatement.declarationList.declarations) {
         const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
@@ -20,6 +21,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
             visitedVariableStatement.modifiers,
             context.factory.updateVariableDeclarationList(visitedVariableStatement.declarationList, [variableDeclaration])
         ));
+
         visitedVariableStatement.declarationList.flags
         // export enum NodeFlags {
         //     None = 0,
@@ -27,7 +29,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
         //     Const = 2,
         for (const declarationIdentifierName in declarationNamesObject) {
             const identifierState = getIdentifierState(declarationIdentifierName, context);
-            // const { getBlockVariableStateUniqueIdentifier } = context
+
             const declarationMarker = context.factory.createIdentifier("");
             returnValue.push(declarationMarker);
             identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;

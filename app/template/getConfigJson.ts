@@ -15,7 +15,8 @@ export const getConfigJson = (projectName: string) => {
                 "resolveJsonModule": true,
                 "forceConsistentCasingInFileNames": true,
                 "strict": true,
-                "skipLibCheck": true
+                "skipLibCheck": true,
+                "sourceMap": true
             }
         },
         packageJson: {

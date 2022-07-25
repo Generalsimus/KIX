@@ -31,7 +31,7 @@ export const buildProd = async () => {
 
     const ignoreUrlPaths = ["/"];
 
-    // console.log("🚀 --> file: index.ts --> line 35 --> buildProd --> fileUrlPath", App.requestsThreshold.keys());
+    console.log("🚀 --> file: index.ts --> line 35 --> buildProd --> fileUrlPath", App.requestsThreshold.keys());
     for (const [fileUrlPath, getFileContent] of App.requestsThreshold.entries()) {
         // console.log("🚀 --> file: index.ts --> line 36 --> buildProd --> fileUrlPath",
         //     fileUrlPath,
@@ -40,10 +40,10 @@ export const buildProd = async () => {
 
         if (!ignoreUrlPaths.includes(fileUrlPath) && !fileUrlPath.endsWith(".map")) {
             const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent());
-            // console.log("🚀 --> file: index.ts --> line 42 --> buildProd --> fileUrlPath", {
-            //     fileUrlPath,
-            //     sourceMap: sourceMap?.length,
-            // });
+            console.log("🚀 --> file: index.ts --> line 42 --> buildProd --> fileUrlPath", {
+                fileUrlPath,
+                sourceMap: sourceMap?.length,
+            });
             const fileFullPath = path.join(outputDir, fileUrlPath);
 
             writeFileSync(fileFullPath, content)

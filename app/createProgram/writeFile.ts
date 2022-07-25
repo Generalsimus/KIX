@@ -9,6 +9,7 @@ export function writeFile(this: createProgramHost, fileName: string, content: st
 
     if (!sourceFiles) return;
 
+    // console.log("🚀 --> file: writeFile.ts --> line 13 --> writeFile --> fileName", fileName);
     if (/\.((jsx?)|(map)|(json))$/i.test(fileName)) {
         for (const sourceFile of sourceFiles) {
             const moduleInfo: ModuleInfoType | undefined = App.moduleThree.get(sourceFile.fileName);

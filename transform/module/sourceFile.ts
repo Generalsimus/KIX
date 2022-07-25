@@ -21,20 +21,27 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
     const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
 
- 
+
     const visitedSourceFile = context.factory.updateSourceFile(
         node,
-        node.statements.flatMap((stateNode) => {
-            if (needsToVisit) {
-                stateNode = visitor(stateNode) as ts.Statement
-            }
-            return exportVisitor(stateNode, context).flatMap((emitNode) => {
-                let newNode: ts.Statement | ts.Statement[] | undefined = ImportVisitor(emitNode, context);
+        node.statements.flatMap((emitNode) => {
+            const modifiedImportNode = ImportVisitor(emitNode, context);
+            const modifiedExportNode = exportVisitor(modifiedImportNode, context);
 
-                return newNode ? (newNode instanceof Array ? newNode : [newNode]) : [];
-            })
+            if (needsToVisit) {
+                return modifiedExportNode.flatMap((itemNode) => {
+                    const visitedNode = visitor(itemNode);
+                    if (visitedNode instanceof Array) {
+                        return visitedNode
+                    }
+                    return [visitedNode]
+                }) as ts.Statement[];
+            }
+            return modifiedExportNode;
         })
     )
+
+
 
     return visitedSourceFile;
 }
@@ -43,7 +50,7 @@ export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, 
     const moduleInfo = App.moduleThree.get(node.fileName);
     const statements = [...node.statements];
     /* REMOVE __esModule = true */
-    statements.splice(1, 1);
+    // TODO: __esModule = true მგონი ზედმეტია 
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
     return context.factory.updateSourceFile(
         node,

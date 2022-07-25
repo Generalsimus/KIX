@@ -10,7 +10,7 @@ import { updateClassOrFunctionExport } from "./updateClassOrFunctionExport";
 /* 
 TODO: ამ ფაილში არაზუსტია ExportDeclaration დანარჩენი ყველაფერი ნორმალურადაა
 */
-export const exportVisitor = (node: ts.Statement, context: CustomContextType) => {
+export const exportVisitor = (node: ts.Statement, context: CustomContextType): ts.Statement[] => {
     const factory = context.factory;
 
     // console.log(ts.SyntaxKind[node.kind]);
@@ -86,7 +86,7 @@ export const exportVisitor = (node: ts.Statement, context: CustomContextType) =>
                 for (const variableDeclaration of node.declarationList.declarations) {
                     const declarationNamesObject = getVariableDeclarationNames(variableDeclaration)
                     for (const variableDefinition in declarationNamesObject) {
-                      
+
                         newNodes.push(
                             factory.createExpressionStatement(
                                 nodeToken([

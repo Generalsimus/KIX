@@ -16,13 +16,17 @@ export const readCommandsAndRun = async () => {
         const creatingNewApp = argv._.includes("new")
 
 
-
+        // console.log("🚀 --> file: index.ts --> line 20 --> parseArgs --> canRunPackageCommand", {
+        //     realModuleDirName: App.realModuleDirName,
+        //     runDirName: App.runDirName,
+        // });
         if (!isChildPath(App.realModuleDirName, App.runDirName) && !creatingNewApp && argv[runKeywordForPackage] !== runKeywordForPackage) {
             // npm exec kix start --www="sss"
             spawn("npm exec -- kix", [...process.argv.slice(2), `--${runKeywordForPackage}="${runKeywordForPackage}"`], {
                 shell: true,
                 stdio: 'inherit'
-            }).on("close", () => {
+            }).on("error", () => {
+                // console.log("🚀 --> file: index.ts --> line 28 --> spawn --> runCommands", runCommands);
                 runCommands()
             });
 
