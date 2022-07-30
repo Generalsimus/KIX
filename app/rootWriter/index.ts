@@ -17,10 +17,11 @@ export class rootWriter {
     injectCode: string = ""
     codeByFileName: Record<string, {
         code: string,
+        isMappingsSupported: boolean,
         decodedMappings: SourceMapMappings
         sourceMapNames: string[];
     }> = {}
-    sourceMapCommentRegExp = /\n\/\/[@#] source[M]appingURL=(.+)\r?\n?$/
+    sourceMapCommentRegExp = /\/\/[@#] source[M]appingURL=(.+)\r?\n?$/
     host: createProgramHost
     responseJSCode: string | undefined
     responseMAPCode: string | undefined
@@ -45,7 +46,7 @@ export class rootWriter {
     writeJsCode(fileName: string | undefined, content: string) {
         this.responseJSCode = undefined;
         this.responseMAPCode = undefined;
-        content = content.replace(this.sourceMapCommentRegExp, "\n");
+        content = content.replace(this.sourceMapCommentRegExp, "");
         if (fileName) {
             const codeSource = this.getCodeSource(fileName)
             codeSource.code = content

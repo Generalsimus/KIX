@@ -16,8 +16,9 @@ export const createJsxChildrenNode = (
             return newChildren
         }
 
-        if (ts.SyntaxKind.JsxText === currentChild.kind) {
-            const jsxText = currentChild.getText()
+        
+        if (ts.isJsxText(currentChild)) {
+            const jsxText = currentChild.text
             if (jsxText.trim().length === 0) {
                 return newChildren
             }

@@ -5,10 +5,6 @@ import { minifyJs } from "./minifyJs";
 
 
 export const minifyCode = async (fileRequestPath: string, content: string) => {
-    // console.log("🚀 --> file: index.ts --> line 7 --> minifyCode --> fileRequestPath", fileRequestPath);
-
-
-    // return content
 
 
     let sourceMap: string | undefined;
@@ -26,7 +22,7 @@ export const minifyCode = async (fileRequestPath: string, content: string) => {
 
 
 
-    // console.log("🚀 --> file: index.ts --> line 37 --> minifyCode --> fileRequestPath", fileRequestPath);
+
     return {
         fileRequestPath,
         content,

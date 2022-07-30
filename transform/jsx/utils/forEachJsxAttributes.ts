@@ -13,7 +13,9 @@ export const forEachJsxAttributes = (
             let attributeValueNode = safeInitializer(attribute.initializer)
             if (!attributeValueNode) continue;
             if (ts.isJsxText(attributeValueNode)) {
-                attributeValueNode = stringLiteral(attributeValueNode.getText())
+
+                attributeValueNode = stringLiteral(attributeValueNode.text)
+                // attributeValueNode = stringLiteral(attributeValueNode.getText())
             }
             forEachCallback(attributeName, attributeValueNode)
 

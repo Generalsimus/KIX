@@ -13,7 +13,7 @@ export function createRequestListeners(this: rootWriter) {
         return this.responseJSCode!;
     })
     if (this.host.options.sourceMap && !this.isNodeModules) {
-        App.requestsThreshold.set(requestPath + ".map", () => {
+        App.requestsThreshold.set(`${requestPath}.map`, () => {
             if (!this.responseMAPCode) {
                 this.createMapCode();
             }
