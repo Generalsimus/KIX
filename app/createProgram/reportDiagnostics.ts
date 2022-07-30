@@ -12,6 +12,6 @@ export function reportDiagnostics(this: createProgramHost, diagnostics: readonly
     ) + ts.sys.newLine
   );
 
-  ts.sys.write(`${this.reportDiagnoseTime} Found ${diagnostics.length} errors. Watching for file changes.`);
+  ts.sys.write(`${this.reportDiagnoseTime} Found ${diagnostics.length} errors. ${this.processLogTexts.end}`);
 
 }; 

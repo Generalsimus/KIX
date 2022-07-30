@@ -27,6 +27,7 @@ import { watcherCallBack } from "./watcherCallBack";
 import { emitLobbyFiles } from "./emitLobbyFiles";
 import { diagnose } from "./diagnose";
 import { readFileWithExt } from "./readFile/readFileWithExt";
+import { getProcessLogTexts } from "./getProcessLogTexts";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -76,6 +77,7 @@ export class createProgramHost {
 
 
   }
+  processLogTexts = getProcessLogTexts()
   emitFileLobby: Set<string> = new Set<string>();
   diagnose = diagnose
   emitLobbyFiles = emitLobbyFiles
