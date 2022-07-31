@@ -7,7 +7,7 @@ export type VariableStateType = {
     globalScopeIdentifiers?: ReturnType<CustomContextType["getVariableUniqueIdentifier"]>
 
 }
-export const createBlockVisitor = <N extends ts.Node, R = N>(
+export const createBlockVisitor = <N extends ts.Node | ts.Node[], R = N>(
     nodeVisitor: (
         node: N,
         nodeVisitor: ts.Visitor,
@@ -36,7 +36,7 @@ export const createBlockVisitor = <N extends ts.Node, R = N>(
             }
             return variableState.blockScopeIdentifiers ||= context.factory.createUniqueName("_");
         };
-       
+
         const visitedNode = nodeVisitor(node, visitor, context, variableState);
 
         context.getVariableUniqueIdentifier = getVariableUniqueIdentifierCache;

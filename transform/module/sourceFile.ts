@@ -1,9 +1,11 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
 import { App } from "../../app";
+import { arrowFunction } from "../factoryCode/arrowFunction";
 import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
+import { moduleBodyVisitor } from "./moduleBodyVisitor";
 
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
     const moduleInfo = App.moduleThree.get(node.fileName)
@@ -21,24 +23,22 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
     const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
 
+    let moduleBodyStatements = node.statements.flatMap((emitNode) => {
+        const modifiedImportNode = ImportVisitor(emitNode, context);
+        const modifiedExportNode = exportVisitor(modifiedImportNode, context);
+        return modifiedExportNode;
+    })
 
+    if (needsToVisit) {
+        moduleBodyStatements = moduleBodyVisitor(
+            moduleBodyStatements,
+            visitor,
+            context
+        )
+    }
     const visitedSourceFile = context.factory.updateSourceFile(
         node,
-        node.statements.flatMap((emitNode) => {
-            const modifiedImportNode = ImportVisitor(emitNode, context);
-            const modifiedExportNode = exportVisitor(modifiedImportNode, context);
-
-            if (needsToVisit) {
-                return modifiedExportNode.flatMap((itemNode) => {
-                    const visitedNode = visitor(itemNode);
-                    if (visitedNode instanceof Array) {
-                        return visitedNode
-                    }
-                    return [visitedNode]
-                }) as ts.Statement[];
-            }
-            return modifiedExportNode;
-        })
+        moduleBodyStatements
     )
 
 
@@ -50,12 +50,10 @@ export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, 
     const moduleInfo = App.moduleThree.get(node.fileName);
     const statements = [...node.statements];
     /* REMOVE __esModule = true */
-    // TODO: __esModule = true მგონი ზედმეტია 
+    // TODO: __esModule = true მგონი ზედმეტია
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
     return context.factory.updateSourceFile(
-        node,
-        [
-            moduleBody(moduleInfo, statements)
-        ]
-    );
+        node, [
+        moduleBody(moduleInfo, statements)
+    ]);
 }
