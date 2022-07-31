@@ -9,5 +9,6 @@ export function createCode(this: rootWriter) {
         const { code } = this.codeByFileName[fileName];
         this.responseJSCode += `${code}\n`;
     }
+
     this.responseJSCode = `(function(${App.uniqAccessKey}){\n ${this.responseJSCode}\n${this.runCode}\n})(window.${App.windowModuleLocationName} || (window.${App.windowModuleLocationName} = {}))${getMapUrl(this)}`
 }

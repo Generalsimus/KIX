@@ -1,15 +1,16 @@
 import path from "path"
-import { App } from ".."
-// import { copyFolderSync } from "../../utils/copyFolderSync"
 import fs from "fs"
 import process from 'process';
-import { copyFolderSync } from "../../utils/copyFolderSync";
-import { moveFileSync } from "../../utils/moveFileSync";
-import { writeFileSync } from "../../utils/writeFileSync";
 import { minifyCode } from "./minify";
+import { moveFileSync } from "../../../utils/moveFileSync";
+import { copyFolderSync } from "../../../utils/copyFolderSync";
+import { App } from "../..";
+import { writeFileSync } from "../../../utils/writeFileSync";
+import { createProgramHost } from "..";
 
 
-export const buildProd = async () => {
+
+export async function buildProduct(this: createProgramHost) {
     const runDirName = App.runDirName
     const fileName = path.basename(runDirName)
     const buildDirectory = path.resolve(runDirName, App.outDir)
@@ -35,13 +36,14 @@ export const buildProd = async () => {
 
 
         if (!ignoreUrlPaths.includes(fileUrlPath) && !fileUrlPath.endsWith(".map")) {
-            const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent());
+            const { content, sourceMap } = await minifyCode(fileUrlPath, getFileContent(), this);
 
             const fileFullPath = path.join(outputDir, fileUrlPath);
 
             writeFileSync(fileFullPath, content)
 
-            if (sourceMap) {
+            if (sourceMap && this.options.sourceMap) {
+                console.log("🚀 --> file: index.ts --> line 40 --> buildProduct --> content", content.split("\n").pop());
                 writeFileSync(fileFullPath + ".map", sourceMap)
             }
         }

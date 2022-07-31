@@ -28,6 +28,7 @@ import { emitLobbyFiles } from "./emitLobbyFiles";
 import { diagnose } from "./diagnose";
 import { readFileWithExt } from "./readFile/readFileWithExt";
 import { getProcessLogTexts } from "./getProcessLogTexts";
+import { buildProduct } from "./build-product";
 // const ss = ts.isArrayTypeNode
 // const sss = ts.createCompilerHost({}, true)
 // const ss = ts.DiagnosticCategory.Starting_compilation_in_watch_mode
@@ -105,6 +106,7 @@ export class createProgramHost {
   endBuildProcess = endBuildProcess
   reportDiagnostics = reportDiagnostics
   writeFile = writeFile
+  buildProduct = buildProduct
   emit(sourceFile?: ts.SourceFile) {
 
     return this.oldProgram?.emit(

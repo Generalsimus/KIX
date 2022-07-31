@@ -45,7 +45,7 @@ function readIndexHtml() {
         });
         return hostProgram;
     };
-    createHostProgram();
+    return createHostProgram();
 }
 exports.readIndexHtml = readIndexHtml;
 ;

@@ -23,7 +23,7 @@ export function readIndexHtml() {
     const hostProgram = new createProgramHost(
       rootNames,
       {
-        /* გაითვალისწინე რომ ამ ოფშნებს კლიენტი ვერ შეცვლის tsconfig.json ფაილიდან */
+        /* გაითვალისწინე რომ ამ ოფშნებს კლიენტი ვერ შეცვლის tsconfig.json ფაილიდან მაგრამ გააერთიანებს*/
         /* ამიტომ target ამოვაკელით :) */
         // target: ts.ScriptTarget.ES2020,
         module: ts.ModuleKind.CommonJS,
@@ -59,6 +59,5 @@ export function readIndexHtml() {
   }
 
 
-  createHostProgram()
-
+  return createHostProgram();
 };

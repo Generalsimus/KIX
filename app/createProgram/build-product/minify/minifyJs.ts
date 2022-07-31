@@ -1,9 +1,11 @@
 
 import UglifyJS, { SourceMapOptions } from "uglify-js"
+import { createProgramHost } from "../.."
+import { fileNameToUrlPath } from "../../../../utils/fileNameToUrlPath"
 
 
 
-export const minifyJs = (content: string, sourceMapString?: string) => {
+export const minifyJs = (fileRequestPath: string, content: string, sourceMapString: string | undefined, host: createProgramHost) => {
 
     let sourceMapObject: SourceMapOptions["content"] | undefined
     try {
@@ -11,17 +13,17 @@ export const minifyJs = (content: string, sourceMapString?: string) => {
     } catch (e) {
         sourceMapString = undefined
     }
-    // return {
-    //     code: content,
-    //     map: sourceMapString
-    // }
 
+
+
+    const needToSourceMap = host.options.sourceMap
     var result = UglifyJS.minify(content, {
-        sourceMap: {
+        sourceMap: needToSourceMap ? {
             includeSources: true,
+            url: `${fileRequestPath}.map`,
             names: true,
             content: sourceMapObject
-        }
+        } : false
     });
 
 

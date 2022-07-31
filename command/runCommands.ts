@@ -2,7 +2,6 @@ import consola from "consola";
 import { App } from "../app"
 import { createAppTemplate } from "../app/template";
 import { readIndexHtml } from "../app/readIndexHtml";
-import { buildProd } from "../app/builder";
 
 export const runCommands = () => {
     if (!App.parsedArgs) {
@@ -17,8 +16,7 @@ export const runCommands = () => {
             readIndexHtml();
             break;
         case "build":
-            readIndexHtml();
-            buildProd();
+            readIndexHtml().buildProduct();
             break;
     }
 
