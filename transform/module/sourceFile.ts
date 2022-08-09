@@ -1,12 +1,12 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
 import { App } from "../../app";
-import { arrowFunction } from "../factoryCode/arrowFunction";
 import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
 import { moduleBodyVisitor } from "./moduleBodyVisitor";
 
+const VisitableFilesExtensionRegExp = /(\.(((j|t)sx)|js)|svg)$/i
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
     const moduleInfo = App.moduleThree.get(node.fileName)
 
@@ -20,7 +20,7 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     context.usedIdentifiers = new Map();
 
 
-    const isJsxSupported = /(\.((j|t)sx)|js)$/i.test(node.fileName);
+    const isJsxSupported = VisitableFilesExtensionRegExp.test(node.fileName);
     const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
 
     let moduleBodyStatements = node.statements.flatMap((emitNode) => {
