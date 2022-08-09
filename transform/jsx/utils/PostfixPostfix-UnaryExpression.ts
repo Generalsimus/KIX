@@ -2,15 +2,19 @@ import ts from "typescript";
 import { CustomContextType } from "../..";
 import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
-// import { getKeyAccessIdentifierName } from "../Identifier";
 import { getIdentifierState } from "./getIdentifierState";
-// import { updateSubstitutions } from "./updateSubstitutions";
 
+
+const changeValueNodeTokens = [
+    ts.SyntaxKind.PlusPlusToken,
+    ts.SyntaxKind.MinusMinusToken
+]
 export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
+
 
     const visitedNode = ts.visitEachChild(node, visitor, context);
 
-    if (ts.isIdentifier(visitedNode.operand)) {
+    if (ts.isIdentifier(visitedNode.operand) && changeValueNodeTokens.includes(node.operator)) {
         const identifierName = ts.idText(visitedNode.operand);
         const identifierState = getIdentifierState(identifierName, context);
 
