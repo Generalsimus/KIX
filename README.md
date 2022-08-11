@@ -3,6 +3,7 @@
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
+<!-- [![discord server][discord-server-src]][discord-server-href] -->
 <!-- [![bundle phobia][bundle-phobia-src]][bundle-phobia-href]  -->
  
  
@@ -56,4 +57,7 @@ MIT
 
 [bundle-phobia-src]: https://img.shields.io/bundlephobia/min/kix?&style=flat-square&color=red
 [bundle-phobia-href]: https://packagephobia.com/result?p=kix
+ 
+[discord-server-src]: https://img.shields.io/discord/997869290336288809?color=%235865f2&label=discord&style=flat-square
+[discord-server-href]: https://discord.gg/JHDPzyF4fX
  
