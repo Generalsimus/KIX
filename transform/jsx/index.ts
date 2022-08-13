@@ -10,7 +10,7 @@ import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
 import { CallExpression } from "./CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
-import { PostfixPostfixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
+import { PostfixPrefixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { VariableStatement } from "./VariableStatement";
 import { SwitchStatement } from './SwitchStatement';
@@ -71,7 +71,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.Identifier]: Identifier,
     [ts.SyntaxKind.BinaryExpression]: BinaryExpression,
     [ts.SyntaxKind.VariableStatement]: VariableStatement,
-    [ts.SyntaxKind.PostfixUnaryExpression]: PostfixPostfixUnaryExpression,
-    [ts.SyntaxKind.PrefixUnaryExpression]: PostfixPostfixUnaryExpression,
+    [ts.SyntaxKind.PostfixUnaryExpression]: PostfixPrefixUnaryExpression,
+    [ts.SyntaxKind.PrefixUnaryExpression]: PostfixPrefixUnaryExpression,
 
 }

@@ -9,7 +9,7 @@ const changeValueNodeTokens = [
     ts.SyntaxKind.PlusPlusToken,
     ts.SyntaxKind.MinusMinusToken
 ]
-export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
+export const PostfixPrefixUnaryExpression = (node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, visitor: ts.Visitor, context: CustomContextType) => {
 
 
     const visitedNode = ts.visitEachChild(node, visitor, context);
@@ -42,7 +42,6 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
                                 propertyDeclarationNode
                             ),
                             context.factory.createParenthesizedExpression(visitedNode)
-                            // context.factory.createParenthesizedExpression(context.factory.createIdentifier("_ss"))
                         ],
                         ts.SyntaxKind.CommaToken
                     );
@@ -50,9 +49,9 @@ export const PostfixPostfixUnaryExpression = (node: ts.PrefixUnaryExpression | t
 
                     return nodeToken(
                         [
-                            context.factory.createPostfixUnaryExpression(
-                                propertyDeclarationNode,
-                                visitedNode.operator
+                            context.factory.updatePostfixUnaryExpression(
+                                visitedNode,
+                                propertyDeclarationNode
                             ),
                             context.factory.createParenthesizedExpression(visitedNode)
                         ],
