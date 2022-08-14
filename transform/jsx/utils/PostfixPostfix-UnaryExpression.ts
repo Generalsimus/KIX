@@ -21,12 +21,12 @@ export const PostfixPrefixUnaryExpression = (node: ts.PrefixUnaryExpression | ts
 
         identifierState.isChanged = true;
         context.enableSubstitution(visitedNode.kind);
-        // const { getBlockVariableStateUniqueIdentifier } = context
+
         const { substituteCallback } = identifierState
         identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
             context.substituteNodesList.set(visitedNode, () => {
                 context.substituteNodesList.delete(visitedNode);
-                // let operandNode: undefined | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
+
                 const propertyDeclarationNode = propertyAccessExpression(
                     [
                         declarationIdentifier,
@@ -34,30 +34,21 @@ export const PostfixPrefixUnaryExpression = (node: ts.PrefixUnaryExpression | ts
                     ],
                     "createPropertyAccessExpression"
                 );
-                if (ts.isPrefixUnaryExpression(visitedNode)) {
-                    return nodeToken(
-                        [
-                            context.factory.updatePrefixUnaryExpression(
+                return nodeToken(
+                    [
+                        (
+                            ts.isPrefixUnaryExpression(visitedNode) ? context.factory.updatePrefixUnaryExpression(
                                 visitedNode,
                                 propertyDeclarationNode
-                            ),
-                            context.factory.createParenthesizedExpression(visitedNode)
-                        ],
-                        ts.SyntaxKind.CommaToken
-                    );
-                } else {
-
-                    return nodeToken(
-                        [
-                            context.factory.updatePostfixUnaryExpression(
+                            ) : context.factory.updatePostfixUnaryExpression(
                                 visitedNode,
                                 propertyDeclarationNode
-                            ),
-                            context.factory.createParenthesizedExpression(visitedNode)
-                        ],
-                        ts.SyntaxKind.CommaToken
-                    );
-                }
+                            )
+                        ),
+                        context.factory.createParenthesizedExpression(visitedNode)
+                    ],
+                    ts.SyntaxKind.CommaToken
+                );
 
             });
             substituteCallback(indexIdToUniqueString, declarationIdentifier);
