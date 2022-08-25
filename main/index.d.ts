@@ -31,8 +31,12 @@ export type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementCon
 
 
 /// START EXPORT ROUTE PARAMS //////////////////////////////////////////////////
+export interface RouteParamsType {
+  readonly [key: string]: string
+}
 export const Router: {
-  readonly params: { readonly [key: string]: string }
+  readonly getPathParams: (path: string) => RouteParamsType
+  readonly getGlobalParams: () => RouteParamsType
   readonly history: typeof window.history
 }
 /// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////
@@ -41,22 +45,38 @@ export const Router: {
 export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T, object: U) => any;
 export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
   addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-  removeCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-  close: () => void;
-  open: () => void;
+  addChildListener: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+  isOpen: () => boolean;
+  close: () => ListenerReturnType<T, U>;
+  open: () => ListenerReturnType<T, U>;
+  init: () => ListenerReturnType<T, U>;
 }
 export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////
 
+/// START ABSTRACT NODE ///////////////////////////////////////// 
+export declare const createElement: <T extends string>(tagName: T, renderCallback: (
+  objectNode: { [K: T]: any } & Record<any, any>,
+  tagName: T,
+  kix: typeof kix,
+  createElement: (tagName: string) => NODE,
+  setAttribute: (node: HTMLElement, attributeName: string, value: string) => NODE,
+  createObjectElement: (objectNode: Record<any, any>) => NODE,
+) => any) => void
+/// END ABSTRACT NODE ///////////////////////////////////////////
+
+/// START ABSTRACT ATTRIBUTE ///////////////////////////////////////// 
+export declare const createAttribute: <A extends string>(
+  attributeName: A,
+  setCallback: (node: HTMLElement, attributeName: A, value: string, setAttribute: (node: HTMLElement, attributeName: A, value: string) => void) => any,
+  autoSet?: boolean
+) => void
+/// END ABSTRACT ATTRIBUTE ///////////////////////////////////////////
+
+
+
 
 declare global {
-
-  /// START KIX MODULE //////////////////////////////////////////////////
-  // declare module "kix" {
-
-  // }
-  /// END KIX MODULE //////////////////////////////////////////////////
-
 
   /// START GLOBAL DECLARED VARIABLES /////////////////////////////////
   declare var exports: Record<any, any>
@@ -75,18 +95,12 @@ declare global {
 
   type JSXHtmlElementsList = {
     [TagName in keyof HTMLElements]: Partial<{
-      $E: Partial<{
-        [EventName in keyof HTMLElementEventMap]: (
-          this: HTMLElements[TagName],
-          event: HTMLElementEventMap[EventName]
-        ) => any;
-      }>;
-    } & {
-        [EventName in keyof HTMLElementEventMap as `on${Capitalize<EventName>}`]: (
-          this: HTMLElements[TagName],
-          event: HTMLElementEventMap[EventName]
-        ) => any;
-      }> & Record<string, ((element: HTMLElements[TagName]) => any)> | Record<string, any>
+      [EventName in keyof HTMLElementEventMap as `on${Capitalize<EventName>}`]: (
+        this: HTMLElements[TagName],
+        event: HTMLElementEventMap[EventName],
+        element: HTMLElements[TagName]
+      ) => any;
+    }> & Record<string, ((element: HTMLElements[TagName]) => any)> | Record<string, any>
   }
 
 

@@ -48,7 +48,7 @@ export const jsxTransformers = {
             context,
             node.children
         )
-        return childrenNode
+        return childrenNode || context.factory.createArrayLiteralExpression([], false)
     },
     [ts.SyntaxKind.ArrowFunction]: ArrowFunction,
     [ts.SyntaxKind.FunctionExpression]: FunctionExpression,

@@ -1,11 +1,8 @@
 import path from "path";
-import express from "express"
 import { ModuleInfoType } from "../utils/getModuleInfo";
 import { readCommandsAndRun } from "../command";
 import { ArgumentsCamelCase } from "yargs";
 import { getInjectCodePaths } from "../utils/getInjectCodePaths";
-import { spawn } from "child_process"
-import { isChildPath } from "../utils/isChildPath";
 
 const runDirName = path.resolve("./");
 // const kixModulePath = resolveKixModule(runDirName);

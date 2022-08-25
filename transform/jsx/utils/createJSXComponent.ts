@@ -13,7 +13,7 @@ import { useJsxPropRegistration } from "./useJsxPropRegistration"
 export const createJSXComponent = (
     visitor: ts.Visitor,
     context: CustomContextType,
-    tagName: ts.JsxTagNameExpression,
+    componentName: ts.JsxTagNameExpression,
     attributes: ts.JsxAttributes,
     children: ts.NodeArray<ts.JsxChild>
 ) => {
@@ -24,10 +24,15 @@ export const createJSXComponent = (
     )
 
     const propsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = [
-        ["$F", tagName],
-        ["c", childrenNode]
+        ["$C", componentName],
     ]
 
+    if (childrenNode) {
+        propsObjectNodesForFactoryCode.push([
+            "i",
+            childrenNode,
+        ]);
+    }
     const dynamicPropsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = []
     const staticPropsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = []
 
@@ -46,19 +51,12 @@ export const createJSXComponent = (
             }
         )
     })
+    if (staticPropsObjectNodesForFactoryCode.length) {
+        propsObjectNodesForFactoryCode.push(["a", createObject(staticPropsObjectNodesForFactoryCode)])
+    }
     if (dynamicPropsObjectNodesForFactoryCode.length) {
         propsObjectNodesForFactoryCode.push(["d", createObject(dynamicPropsObjectNodesForFactoryCode)])
     }
-    /*
-    
-    (_P)=>(_R({}),_R({}),FooComponent)
-    */
-
-    if (staticPropsObjectNodesForFactoryCode.length) {
-        propsObjectNodesForFactoryCode.push(["s", createObject(staticPropsObjectNodesForFactoryCode)])
-    }
-
-    // const componentRegistryIdentifier = context.factory.createUniqueName("RC")
 
     return createObject(propsObjectNodesForFactoryCode);
 }

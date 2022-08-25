@@ -1,199 +1,258 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useListener = exports.Router = exports.Component = exports.styleCssDom = exports.kix = void 0;
-const routeParams = {};
+exports.useListener = exports.createAttribute = exports.createElement = exports.Router = exports.Component = exports.styleCssDom = exports.kix = void 0;
 const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => ((tag === null || tag === void 0 ? void 0 : tag.__proto__.ELEMENT_NODE) === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-const createSVGElement = (nodeName) => document.createElementNS("http://www.w3.org/2000/svg", nodeName);
+const GlobalRouteParams = {};
+const RoutePathParams = {};
+const attributeNameForCatchDynamicNameAndEvents = " $_%^%_$";
 const abstractNodes = {
-    svg(objectNodeProperty, objectNode, createElementName, createElement) {
-        return (parent) => {
-            if (createElementName === createSVGElement) {
-                objectNode = Object.assign({}, objectNode);
-                const node = createSVGElement(objectNodeProperty);
-                KixSVG(node, objectNode[objectNodeProperty]);
-                delete objectNode[objectNodeProperty];
-                return createElement(objectNode, node);
-            }
-            else {
-                return KixSVG(parent, objectNode);
-            }
-        };
-    },
-    "route-link"(objectNodeProperty, objectNode, createElementName, createElement) {
-        let switchObjectNode = Object.assign({}, objectNode);
-        const namedNode = createElementName("a");
-        (0, exports.kix)(namedNode, switchObjectNode[objectNodeProperty]);
-        delete switchObjectNode[objectNodeProperty];
-        abstractAttributes.$E(namedNode, {
-            click: function (e) {
-                e.preventDefault();
-                window.scrollTo(0, 0);
-                const state = {
-                    routeTime: new Date().getTime()
-                };
-                window.history.pushState(state, document.title, this.getAttribute("href"));
-                window.dispatchEvent(new CustomEvent('popstate'));
-            },
-        });
-        return createElement(switchObjectNode, namedNode);
-    },
-    "route-block"(objectNodeProperty, routeObjectNode) {
-        const children = routeObjectNode[objectNodeProperty];
-        const emptyComponent = flatFunction(routeObjectNode.ifEmptyComponent) || "";
-        const [startMarker, endMarker] = createMarker();
-        const [startRenderMarker, endRenderMarker, Render] = createMarker();
-        const rerender = () => {
-            let nextNode = startMarker;
-            let renderComponent = emptyComponent;
-            while (nextNode = nextNode.nextSibling) {
-                if (nextNode === endMarker)
-                    break;
-                if (nextNode.nodeType === Node.TEXT_NODE &&
-                    !nextNode.textContent.trim().length) {
-                    continue;
+    $(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        const eventsGetFunc = objectNode["E"];
+        const dynamicAttributesObject = objectNode["D"];
+        const JsxElementObject = Object.assign(Object.assign({}, objectNode[objectPropertyName]), { [attributeNameForCatchDynamicNameAndEvents]: (htmlTagNode) => {
+                delete JsxElementObject[attributeNameForCatchDynamicNameAndEvents];
+                if (dynamicAttributesObject) {
+                    for (const dynamicAttributeName in dynamicAttributesObject) {
+                        const onChangeAttribute = (value) => {
+                            if (htmlTagNode) {
+                                setAttribute(htmlTagNode, dynamicAttributeName, value);
+                            }
+                            else {
+                                JsxElementObject[dynamicAttributeName] = value;
+                            }
+                        };
+                        onChangeAttribute(propertyRegistration(dynamicAttributesObject[dynamicAttributeName], onChangeAttribute));
+                    }
                 }
-                renderComponent = "";
-            }
-            if (endRenderMarker.parentNode) {
-                Render(renderComponent);
-            }
-            ;
-            return renderComponent;
-        };
-        return [startMarker, children, endMarker, startRenderMarker, rerender, endRenderMarker, () => {
-                window.addEventListener("popstate", rerender);
-            }];
-    },
-    "route-switch"(objectNodeProperty, routeObjectNode, createElementName, createElement) {
-        let currentComponent;
-        let currentNodesCache;
-        const { path, unique, component } = routeObjectNode;
-        const [startMarker, endMarker, Render, getChildren] = createMarker();
-        const toPath = flatFunction(path);
-        const uniqValue = flatFunction(unique);
-        const componentValue = flatFunction(component || routeObjectNode[objectNodeProperty]);
-        const escapeRegexp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
-        const regExpString = (uniqValue ? [
-            escapeRegexp,
-            [/\((.*?)\)/g, "(?:$1)?"],
-            [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
-            [/\*\w+/g, "(.*?)"]
-        ] : [
-            escapeRegexp,
-            [/:[^\s/]+/g, "([\\w-]+)"]
-        ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), toPath);
-        const routeRegExp = new RegExp(uniqValue ? "^" + regExpString + "$" : regExpString, "i");
-        const getRouteNode = () => {
-            const localPath = decodeURI(document.location.pathname);
-            const matchPath = localPath.match(routeRegExp) || [];
-            toPath.replace(/\/:/g, "/").match(routeRegExp).forEach((v, i) => (routeParams[v] = matchPath[i]));
-            let renderComponent;
-            if (routeRegExp.test(localPath)) {
-                renderComponent = componentValue;
-            }
-            if (renderComponent === componentValue) {
-                if (currentComponent === componentValue) {
-                    currentNodesCache = getChildren();
+                if (eventsGetFunc) {
+                    for (const eventName in eventsGetFunc()) {
+                        if (htmlTagNode) {
+                            htmlTagNode.addEventListener(eventName, (e) => {
+                                const eventCallback = eventsGetFunc()[eventName];
+                                if (typeof eventCallback === "function") {
+                                    eventCallback(e, htmlTagNode);
+                                }
+                            });
+                        }
+                        else {
+                            JsxElementObject["on" + eventName.replace(/^\w/, c => c.toUpperCase())] = (event, tagNode) => { var _a, _b; return ((_b = (_a = eventsGetFunc())[eventName]) === null || _b === void 0 ? void 0 : _b.call(_a, event, tagNode)); };
+                        }
+                    }
                 }
-                if (currentNodesCache &&
-                    currentComponent === componentValue)
-                    return;
-            }
-            if (endMarker.parentNode) {
-                Render(renderComponent);
-            }
-            ;
-            currentComponent = renderComponent;
-            return renderComponent;
-        };
-        window.addEventListener("popstate", getRouteNode);
-        return [startMarker, getRouteNode, endMarker];
+            } });
+        return JsxElementObject;
     },
-    $R(objectNodeProperty, objectNode, createElementName, createElement) {
-        return propertyRegistry(objectNode[objectNodeProperty]);
-    },
-    $F(objectNodeProperty, objectNode, createElementName, createElement) {
-        var _a, _b;
-        const component = objectNode[objectNodeProperty];
+    $C(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        var _a;
+        const component = objectNode[objectPropertyName];
+        const props = objectNode["a"] || {};
+        const dynamicProps = objectNode["d"] || {};
+        const componentChildren = objectNode["i"];
         if (!(component instanceof Function))
             return;
+        const registerProps = (state) => {
+            for (const propsName in props) {
+                state[propsName] = props[propKey];
+            }
+            for (const dynamicPropsName in dynamicProps) {
+                state[dynamicPropsName] = propertyRegistration(dynamicProps[dynamicPropsName], (value) => (state[dynamicPropsName] = value));
+            }
+        };
         if ((_a = component.prototype) === null || _a === void 0 ? void 0 : _a.render) {
             class ComponentNode extends component {
                 constructor() {
                     super();
-                    const props = Object.assign(Object.assign({}, (objectNode.s || {})), registerProps(this, objectNode.d));
-                    for (const propKey in props) {
-                        this[propKey] = props[propKey];
-                    }
-                    this.children = objectNode.c || this.children;
+                    registerProps(this, dynamicProps);
+                    this.children = componentChildren;
                     this.render = this.render || (() => { });
                 }
             }
             return new ComponentNode().render();
         }
-        else if (((_b = Object.getOwnPropertyDescriptor(component, 'prototype')) === null || _b === void 0 ? void 0 : _b.writable) !== false) {
-            const props = registerProps(Object.assign({ children: objectNode.c }, (objectNode.s || {})), objectNode.d);
-            const result = component(props);
-            return result;
+        else {
+            const propsSate = {};
+            registerProps(propsSate, dynamicProps);
+            return component(propsSate);
         }
     },
-    $D(objectNodeProperty, objectNode, createElementName, createElement) {
-        let node;
-        for (const attributeName in objectNode) {
-            if (node) {
-                node[attributeName] = (tagNode) => (propertyRegistry(objectNode[attributeName])(tagNode, attributeName));
-            }
-            else {
-                node = Object.assign({}, objectNode[attributeName]);
-            }
+    $X(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        const JsxElement = objectNode[objectPropertyName];
+        const defaultXmlnsNamespaceURI = objectNode["$D"];
+        const xmlnsList = Object.assign({}, objectNode);
+        delete xmlnsList["$X"];
+        delete xmlnsList["$D"];
+        if (defaultXmlnsNamespaceURI) {
+            createElement = (elementName) => {
+                return document.createElementNS(defaultXmlnsNamespaceURI, elementName);
+            };
         }
-        return node;
-    }
+        for (const xmlnsName in xmlnsList) {
+            const createElementCache = createElement;
+            const setAttributeCache = setAttribute;
+            createElement = (elementName) => {
+                if (elementName.startsWith(`${xmlnsName}:`)) {
+                    return document.createElementNS(xmlnsList[xmlnsName], elementName);
+                }
+                return createElementCache(elementName);
+            };
+            setAttribute = (node, attributeName, value) => {
+                if (attributeName.startsWith(`${xmlnsName}:`)) {
+                    node.setAttributeNS(xmlnsList[xmlnsName], attributeName, value);
+                }
+                else {
+                    return setAttributeCache(node, attributeName, value);
+                }
+            };
+        }
+        return createApp(createElement, setAttribute)(null, JsxElement);
+    },
+    $D(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        const [startMarker, endMarker, ReplaceNode] = createMarker();
+        return [
+            startMarker,
+            propertyRegistration(objectNode[objectPropertyName], ReplaceNode),
+            endMarker
+        ];
+    },
+    "route-link"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        const renderJsxObject = Object.assign(Object.assign({ a: objectNode[objectPropertyName] }, objectNode), { [attributeNameForCatchDynamicNameAndEvents]: (htmlNode) => {
+                htmlNode.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const state = {
+                        routeTime: new Date().getTime()
+                    };
+                    window.history.pushState(state, document.title, htmlNode.getAttribute("href"));
+                    window.dispatchEvent(new CustomEvent('popstate'));
+                });
+            } });
+        delete renderJsxObject[objectPropertyName];
+        return renderJsxObject;
+    },
+    "route-block"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        const [startMarker, endMarker, _, getChildren] = createMarker();
+        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker] = createMarker();
+        const children = objectNode[objectPropertyName];
+        const emptyComponent = objectNode.ifEmptyComponent;
+        return [startMarker, children, endMarker, startMarkerEmptyMarker, endMarkerEmptyMarker, () => {
+                const render = () => {
+                    const children = getChildren();
+                    console.log("🚀 --> file: index.js --> line 164 --> render --> children", children);
+                    for (const htmlNode of children) {
+                        const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
+                        console.log("🚀 isTextNode", htmlNode, isTextNode && htmlNode.textContent.trim().length, !isTextNode);
+                        if (isTextNode && htmlNode.textContent.trim().length || !isTextNode) {
+                            RenderEmptyMarker("");
+                            return;
+                        }
+                    }
+                    RenderEmptyMarker(emptyComponent);
+                };
+                window.addEventListener("popstate", render);
+                render();
+            }];
+    },
+    "route-switch"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
+        var _a;
+        (_a = objectNode[attributeNameForCatchDynamicNameAndEvents]) === null || _a === void 0 ? void 0 : _a.call(objectNode);
+        let path;
+        let unique;
+        let component;
+        let renderCache;
+        let isRendered;
+        const [startMarker, endMarker, Render, getChildren] = createMarker();
+        const escapeRegExp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
+        const renderComponent = () => {
+            const queryRegExpList = (unique ? [
+                escapeRegExp,
+                [/\((.*?)\)/g, "(?:$1)?"],
+                [/(\(\?)?:\w+/g, (match, optional) => optional ? match : "([^/]+)"],
+                [/\*\w+/g, "(.*?)"]
+            ] : [
+                escapeRegExp,
+                [/:[^\s/]+/g, "([\\w-]+)"]
+            ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), path);
+            const queryRegExp = new RegExp(unique ? "^" + queryRegExpList + "$" : queryRegExpList, "i");
+            const localPath = decodeURI(document.location.pathname);
+            const matchPath = localPath.match(queryRegExp) || [];
+            const pathParams = exports.Router.getPathParams(path);
+            GlobalRouteParams;
+            path.replace(/\/:/g, "/").match(queryRegExp).forEach((paramName, index) => {
+                (GlobalRouteParams[paramName] = (pathParams[paramName] = matchPath[index]));
+            });
+            const isRunAfterRender = isRendered;
+            isRendered = true;
+            if (!queryRegExp.test(localPath)) {
+                if (isRunAfterRender) {
+                    Render("");
+                }
+                return "";
+            }
+            if (isRunAfterRender) {
+                Render(renderCache || component);
+            }
+            setTimeout(() => {
+                renderCache = getChildren();
+            });
+            return component;
+        };
+        window.addEventListener("popstate", renderComponent);
+        (0, exports.useListener)(objectNode, "path", (value) => {
+            path = value;
+        }).init().addCallback(renderComponent);
+        (0, exports.useListener)(objectNode, "unique", (value) => {
+            unique = value;
+        }).init().addCallback(renderComponent);
+        (0, exports.useListener)(objectNode, "component", (value) => {
+            component = value;
+        }).init().addCallback(renderComponent);
+        return [startMarker, renderComponent, endMarker];
+    },
 };
 const abstractAttributes = {
-    $E(node, eventsObject) {
-        for (var eventNames in eventsObject) {
-            for (var eventName of eventNames.split("_")) {
-                if (eventsObject[eventName] instanceof Function) {
-                    node.addEventListener(eventName, eventsObject[eventName]);
-                }
-            }
-        }
+    [attributeNameForCatchDynamicNameAndEvents](node, attributeName, value, setAttribute) {
+        value(node);
     }
 };
-const setAttribute = (node, value, attributeName) => {
-    const abstraction = abstractAttributes[attributeName];
-    abstraction ? abstraction(node, value, attributeName) : node.setAttribute(attributeName, flatFunction(value, node, attributeName));
-};
-function createApp(createElementName) {
-    function createElement(objectNode, elementNode) {
-        for (const objectNodeProperty in objectNode) {
+function createApp(createElementName, setAttribute) {
+    const setAttributeTagNode = (node, attributeName, value) => {
+        if (abstractAttributes.hasOwnProperty(attributeName)) {
+            abstractAttributes[attributeName](node, attributeName, value, setAttributeTagNode);
+        }
+        else if (value instanceof Function) {
+            setAttributeTagNode(node, value(node), attributeName);
+        }
+        else {
+            setAttribute(node, attributeName, String(value !== null && value !== void 0 ? value : ""));
+        }
+    };
+    function createObjectElement(objectNode, elementNode) {
+        for (const objectPropertyName in objectNode) {
             if (elementNode) {
-                setAttribute(elementNode, objectNode[objectNodeProperty], objectNodeProperty);
+                setAttributeTagNode(elementNode, objectPropertyName, objectNode[objectPropertyName]);
             }
             else {
-                if (abstractNodes.hasOwnProperty(objectNodeProperty)) {
-                    const newNode = abstractNodes[objectNodeProperty](objectNodeProperty, objectNode, createElementName, createElement);
-                    return isHtml(newNode) ? (newNode.parentNode ? null : newNode) : newNode;
+                if (abstractNodes.hasOwnProperty(objectPropertyName)) {
+                    return abstractNodes[objectPropertyName](objectNode, objectPropertyName, kix, createElementName, setAttributeTagNode, createObjectElement);
                 }
-                (0, exports.kix)((elementNode = createElementName(objectNodeProperty)), objectNode[objectNodeProperty]);
+                kix((elementNode = createElementName(objectPropertyName)), objectNode[objectPropertyName]);
             }
         }
         return elementNode;
     }
-    return function kix(parent, children) {
+    const kix = (parent, children) => {
         switch (type(children)) {
             case "[object Array]":
                 return children.map((childNode) => kix(parent, childNode));
             case "[object Function]":
                 return kix(parent, children(parent));
             case "[object Object]":
-                return kix(parent, createElement(children));
+                return kix(parent, createObjectElement(children));
             case "[object Promise]":
-                children.then((result) => children.Replace(result));
-                return children = kix(parent, "");
+                const [startMarker, endMarker, Render] = createMarker();
+                children.then((result) => Render(result));
+                return kix(parent, [startMarker, endMarker]);
             case "[object Undefined]":
             case "[object Null]":
             case "[object Boolean]":
@@ -208,91 +267,57 @@ function createApp(createElementName) {
         }
         return children;
     };
+    return kix;
 }
-const KixSVG = createApp(createSVGElement);
-exports.kix = createApp(document.createElement.bind(document));
-exports.default = exports.kix;
-exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
-class Component {
-    render() { }
-}
-exports.Component = Component;
-exports.Router = {
-    params: routeParams,
-    history: window.history
-};
-const useListener = (objectValue, propertyName, callback) => {
-    let opened = true;
-    let callBackList = [];
-    const listenerService = {
-        addCallback(callback) {
-            if (callback instanceof Function) {
-                callBackList.push(callback);
+let registrationId = 0;
+const propertyRegistration = (registrationFunc, callback = () => { }) => {
+    const currentRegistrationId = ++registrationId;
+    const getValue = () => registrationFunc(function () {
+        const ARGUMENTS = arguments;
+        const registers = [];
+        return Array.prototype.reduce.call(ARGUMENTS, (prevValue, propertyKey, index) => {
+            if (prevValue === undefined)
+                return prevValue;
+            if (typeof prevValue === "object") {
+                register(prevValue, propertyKey, registers, index, currentRegistrationId, () => {
+                    callback(getValue());
+                });
             }
-            return listenerService;
-        },
-        removeCallback(callback) {
-            callBackList = callBackList.filter(f => (f !== callback));
-            return listenerService;
-        },
-        close() {
-            opened = false;
-        },
-        open() {
-            opened = true;
-        }
-    };
-    const registerFunction = (r) => (r(objectValue, propertyName));
-    ((registration(registerFunction, (value) => {
-        if (opened) {
-            for (const callback of callBackList) {
-                callback(value, propertyName, objectValue);
-            }
-        }
-    }))());
-    return listenerService.addCallback(callback);
+            return prevValue === null || prevValue === void 0 ? void 0 : prevValue[propertyKey];
+        });
+    });
+    return getValue();
 };
-exports.useListener = useListener;
-function registration(registerFunction, onSet) {
-    const getValue = () => (registerFunction(function () {
-        return Array.prototype.reduce.call(arguments, (obj, key) => {
-            let value = obj === null || obj === void 0 ? void 0 : obj[key];
-            if (typeof obj === "object") {
-                const { set, configurable } = (Object.getOwnPropertyDescriptor(obj, key) || {});
-                const defineRegistrations = (set === null || set === void 0 ? void 0 : set._R_C) || [];
-                if (configurable !== false && defineRegistrations.indexOf(registerFunction) === -1) {
-                    defineRegistrations.push(registerFunction);
-                    function setter(setValue) {
-                        value = setValue;
-                        (set && set(value));
-                        onSet(value);
-                    }
-                    setter._R_C = defineRegistrations;
-                    Object.defineProperty(obj, key, {
-                        enumerable: true,
-                        configurable: true,
-                        get() {
-                            return value;
-                        },
-                        set: setter
-                    });
+const register = (obj, key, registers, index, currentRegistrationId, changeCallback) => {
+    let { set, get, value, configurable } = Object.getOwnPropertyDescriptor(obj, key) || {};
+    const idList = (set === null || set === void 0 ? void 0 : set._$IDS) || [];
+    if (!idList.includes(currentRegistrationId) && configurable !== false) {
+        idList.push(currentRegistrationId);
+        registers[index] = idList;
+        const getCurrentValue = () => (get ? get() : value);
+        const setter = (setValue) => {
+            if (set) {
+                set(setValue);
+            }
+            else {
+                value = setValue;
+            }
+            if (idList.includes(currentRegistrationId)) {
+                if (typeof newValue === "object" && oldValue !== newValue) {
                 }
+                changeCallback();
             }
-            return typeof value === "function" ? value.bind(obj) : value;
+        };
+        setter === null || setter === void 0 ? void 0 : setter._$IDS = idList;
+        Object.defineProperty(obj, key, {
+            enumerable: true,
+            configurable: true,
+            get: get || getCurrentValue,
+            set: setter
         });
-    }));
-    return getValue;
-}
-function registerProps(props, registerProps) {
-    for (const attrKey in (registerProps || {})) {
-        const getValue = registration(registerProps[attrKey], () => {
-            props[attrKey] = getValue();
-        });
-        props[attrKey] = getValue();
     }
-    return props;
-}
-function createMarker() {
+};
+const createMarker = () => {
     const startMarker = (0, exports.kix)(null, "");
     const endMarker = (0, exports.kix)(null, "");
     const replaceNodes = (sibling, replaceNode, currentNodes) => {
@@ -340,22 +365,84 @@ function createMarker() {
             return currentNodes;
         }
     ];
+};
+exports.kix = createApp((elementName) => document.createElement(elementName), (node, attributeName, value) => node.setAttribute(attributeName, value));
+exports.default = exports.kix;
+exports.styleCssDom = (0, exports.kix)(document.body, { style: "" });
+class Component {
+    render() { }
 }
-function propertyRegistry(registerFunction) {
-    return (parent, attribute) => {
-        const [startMarker, endMarker, Render] = createMarker();
-        const getRenderValue = registration((a) => registerFunction(a), (value) => {
-            if (attribute) {
-                setAttribute(parent, getRenderValue(parent, attribute), attribute);
-            }
-            else {
-                Render(getRenderValue(parent, attribute));
-            }
-        });
-        const value = getRenderValue();
-        if (attribute) {
-            return value;
+exports.Component = Component;
+exports.Router = {
+    getPathParams(path) {
+        return RoutePathParams[path] || (RoutePathParams[path] = {});
+    },
+    getGlobalParams() {
+        return GlobalRouteParams;
+    },
+    history: window.history
+};
+const createElement = (tagName, renderCallback) => {
+    abstractNodes[tagName] = renderCallback;
+};
+exports.createElement = createElement;
+const createAttribute = (attributeName, renderCallback, autoSet) => {
+    abstractAttributes[attributeName] = (node, attributeName, value, setAttribute) => {
+        const value = renderCallback(node, attributeName, value, setAttribute);
+        if (autoSet) {
+            setAttribute(node);
         }
-        return [startMarker, value, endMarker];
     };
-}
+};
+exports.createAttribute = createAttribute;
+const useListener = (objectValue, propertyName, callback) => {
+    const createCallbackChannel = (childCallback = () => { }) => {
+        let isOpen = false;
+        const listenerService = {
+            addCallback(newCallback) {
+                const parentCallback = childCallback;
+                childCallback = () => {
+                    if (isOpen) {
+                        parentCallback(currentValue, propertyName, objectValue);
+                        newCallback(currentValue, propertyName, objectValue);
+                    }
+                };
+                return listenerService;
+            },
+            addChildListener(newCallback) {
+                const childChannel = createCallbackChannel(newCallback);
+                const parentCallback = childCallback;
+                childCallback = () => {
+                    if (isOpen) {
+                        parentCallback(currentValue, propertyName, objectValue);
+                        childChannel.init(currentValue, propertyName, objectValue);
+                    }
+                };
+                return childChannel;
+            },
+            close() {
+                isOpen = false;
+                return listenerService;
+            },
+            isOpen() {
+                return isOpen;
+            },
+            open() {
+                isOpen = true;
+                return listenerService;
+            },
+            init() {
+                childCallback(currentValue, propertyName, objectValue);
+                return listenerService;
+            }
+        };
+        return listenerService;
+    };
+    const channel = createCallbackChannel(callback);
+    let currentValue = propertyRegistration((r) => (r(objectValue, propertyName)), (value) => {
+        currentValue = value;
+        channel.init();
+    });
+    return channel;
+};
+exports.useListener = useListener;

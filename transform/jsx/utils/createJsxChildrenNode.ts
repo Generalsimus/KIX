@@ -16,7 +16,7 @@ export const createJsxChildrenNode = (
             return newChildren
         }
 
-        
+
         if (ts.isJsxText(currentChild)) {
             const jsxText = currentChild.text
             if (jsxText.trim().length === 0) {
@@ -28,7 +28,7 @@ export const createJsxChildrenNode = (
             newChildren.push(useJsxPropRegistration(currentChild, visitor, context, (node, isRegisterNode) => {
                 if (isRegisterNode) {
                     return createObject([
-                        ["$R", node]
+                        ["$D", node]
                     ])
                 }
 
@@ -38,5 +38,9 @@ export const createJsxChildrenNode = (
 
         return newChildren
     }, [])
-    return newChildren.length === 1 ? newChildren[0] : context.factory.createArrayLiteralExpression(newChildren, false)
+    if (newChildren.length > 1) {
+        return context.factory.createArrayLiteralExpression(newChildren, false)
+    } else if (newChildren.length === 1) {
+        return newChildren[0]
+    }
 }
