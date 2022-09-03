@@ -54,7 +54,7 @@ const abstractNodes = {
             return;
         const registerProps = (state) => {
             for (const propsName in props) {
-                state[propsName] = props[propKey];
+                state[propsName] = props[propsName];
             }
             for (const dynamicPropsName in dynamicProps) {
                 state[dynamicPropsName] = propertyRegistration(dynamicProps[dynamicPropsName], (value) => (state[dynamicPropsName] = value));
@@ -72,7 +72,7 @@ const abstractNodes = {
             return new ComponentNode().render();
         }
         else {
-            const propsSate = {};
+            const propsSate = { children: componentChildren };
             registerProps(propsSate, dynamicProps);
             return component(propsSate);
         }
@@ -112,18 +112,17 @@ const abstractNodes = {
         const [startMarker, endMarker, ReplaceNode] = createMarker();
         return [
             startMarker,
-            propertyRegistration(objectNode[objectPropertyName], ReplaceNode),
+            propertyRegistration(objectNode[objectPropertyName], (v) => (ReplaceNode(v))),
             endMarker
         ];
     },
     "route-link"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const renderJsxObject = Object.assign(Object.assign({ a: objectNode[objectPropertyName] }, objectNode), { [attributeNameForCatchDynamicNameAndEvents]: (htmlNode) => {
+                var _a;
+                (_a = objectNode[attributeNameForCatchDynamicNameAndEvents]) === null || _a === void 0 ? void 0 : _a.call(objectNode, htmlNode);
                 htmlNode.addEventListener("click", (e) => {
                     e.preventDefault();
-                    const state = {
-                        routeTime: new Date().getTime()
-                    };
-                    window.history.pushState(state, document.title, htmlNode.getAttribute("href"));
+                    window.history.pushState({ routeTime: new Date().getTime() }, document.title, htmlNode.getAttribute("href"));
                     window.dispatchEvent(new CustomEvent('popstate'));
                 });
             } });
@@ -132,26 +131,31 @@ const abstractNodes = {
     },
     "route-block"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const [startMarker, endMarker, _, getChildren] = createMarker();
-        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker] = createMarker();
+        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker, getRenderedChildren] = createMarker();
         const children = objectNode[objectPropertyName];
-        const emptyComponent = objectNode.ifEmptyComponent;
-        return [startMarker, children, endMarker, startMarkerEmptyMarker, endMarkerEmptyMarker, () => {
-                const render = () => {
-                    const children = getChildren();
-                    console.log("🚀 --> file: index.js --> line 164 --> render --> children", children);
-                    for (const htmlNode of children) {
-                        const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
-                        console.log("🚀 isTextNode", htmlNode, isTextNode && htmlNode.textContent.trim().length, !isTextNode);
-                        if (isTextNode && htmlNode.textContent.trim().length || !isTextNode) {
-                            RenderEmptyMarker("");
-                            return;
-                        }
-                    }
-                    RenderEmptyMarker(emptyComponent);
-                };
-                window.addEventListener("popstate", render);
-                render();
-            }];
+        let emptyComponent;
+        let renderedEmptyComponent;
+        const render = () => {
+            const children = getChildren();
+            for (const htmlNode of children) {
+                const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
+                if (!isTextNode || isTextNode && htmlNode.textContent.trim().length) {
+                    return "";
+                }
+            }
+            setTimeout(() => {
+                renderedEmptyComponent = getRenderedChildren();
+                console.log("🚀 --> file: index.js --> line 173 --> setTimeout --> renderedEmptyComponent", renderedEmptyComponent);
+            });
+            return renderedEmptyComponent || emptyComponent;
+        };
+        const renderComponent = () => RenderEmptyMarker(render());
+        (0, exports.useListener)(objectNode, "ifEmptyComponent", (value) => {
+            renderedEmptyComponent = undefined;
+            emptyComponent = value;
+        }).init().addCallback(renderComponent);
+        setTimeout(() => window.addEventListener("popstate", renderComponent));
+        return [startMarker, children, endMarker, startMarkerEmptyMarker, render, endMarkerEmptyMarker];
     },
     "route-switch"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         var _a;
@@ -159,8 +163,7 @@ const abstractNodes = {
         let path;
         let unique;
         let component;
-        let renderCache;
-        let isRendered;
+        let renderedComponent;
         const [startMarker, endMarker, Render, getChildren] = createMarker();
         const escapeRegExp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
         const renderComponent = () => {
@@ -177,36 +180,29 @@ const abstractNodes = {
             const localPath = decodeURI(document.location.pathname);
             const matchPath = localPath.match(queryRegExp) || [];
             const pathParams = exports.Router.getPathParams(path);
-            GlobalRouteParams;
             path.replace(/\/:/g, "/").match(queryRegExp).forEach((paramName, index) => {
                 (GlobalRouteParams[paramName] = (pathParams[paramName] = matchPath[index]));
             });
-            const isRunAfterRender = isRendered;
-            isRendered = true;
             if (!queryRegExp.test(localPath)) {
-                if (isRunAfterRender) {
-                    Render("");
-                }
                 return "";
             }
-            if (isRunAfterRender) {
-                Render(renderCache || component);
-            }
             setTimeout(() => {
-                renderCache = getChildren();
+                renderedComponent = getChildren();
             });
-            return component;
+            return renderedComponent || component;
         };
-        window.addEventListener("popstate", renderComponent);
+        const resetComponent = () => Render(renderComponent());
+        window.addEventListener("popstate", resetComponent);
         (0, exports.useListener)(objectNode, "path", (value) => {
             path = value;
-        }).init().addCallback(renderComponent);
+        }).init().addCallback(resetComponent);
         (0, exports.useListener)(objectNode, "unique", (value) => {
             unique = value;
-        }).init().addCallback(renderComponent);
+        }).init().addCallback(resetComponent);
         (0, exports.useListener)(objectNode, "component", (value) => {
+            renderedComponent = undefined;
             component = value;
-        }).init().addCallback(renderComponent);
+        }).init().addCallback(resetComponent);
         return [startMarker, renderComponent, endMarker];
     },
 };
@@ -283,17 +279,25 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
                     callback(getValue());
                 });
             }
-            return prevValue === null || prevValue === void 0 ? void 0 : prevValue[propertyKey];
+            const value = prevValue === null || prevValue === void 0 ? void 0 : prevValue[propertyKey];
+            if (typeof value === "function") {
+                return value.bind(prevValue);
+            }
+            return value;
         });
     });
     return getValue();
 };
 const register = (obj, key, registers, index, currentRegistrationId, changeCallback) => {
-    let { set, get, value, configurable } = Object.getOwnPropertyDescriptor(obj, key) || {};
+    let descriptor = Object.getOwnPropertyDescriptor(obj, key);
+    let { set, get, value, configurable } = descriptor || {};
     const idList = (set === null || set === void 0 ? void 0 : set._$IDS) || [];
     if (!idList.includes(currentRegistrationId) && configurable !== false) {
         idList.push(currentRegistrationId);
         registers[index] = idList;
+        if (!descriptor) {
+            value = obj[key];
+        }
         const getCurrentValue = () => (get ? get() : value);
         const setter = (setValue) => {
             if (set) {
@@ -308,7 +312,7 @@ const register = (obj, key, registers, index, currentRegistrationId, changeCallb
                 changeCallback();
             }
         };
-        setter === null || setter === void 0 ? void 0 : setter._$IDS = idList;
+        setter._$IDS = idList;
         Object.defineProperty(obj, key, {
             enumerable: true,
             configurable: true,
@@ -320,17 +324,17 @@ const register = (obj, key, registers, index, currentRegistrationId, changeCallb
 const createMarker = () => {
     const startMarker = (0, exports.kix)(null, "");
     const endMarker = (0, exports.kix)(null, "");
-    const replaceNodes = (sibling, replaceNode, currentNodes) => {
+    const replaceNodes = (sibling, replaceNode) => {
         if (replaceNode instanceof Array) {
             for (const childNode of replaceNode) {
-                sibling = replaceNodes(sibling, childNode, currentNodes);
+                sibling = replaceNodes(sibling, childNode);
             }
         }
         else {
             const parent = sibling.parentNode;
             const replaceableNode = (0, exports.kix)(null, flatFunction(replaceNode, parent));
             if (replaceableNode instanceof Array) {
-                return replaceNodes(sibling, replaceableNode, currentNodes);
+                return replaceNodes(sibling, replaceableNode);
             }
             else if (sibling === endMarker) {
                 parent.insertBefore(replaceableNode, endMarker);
@@ -339,25 +343,23 @@ const createMarker = () => {
                 parent.replaceChild(replaceableNode, sibling);
                 sibling = replaceableNode.nextSibling;
             }
-            currentNodes.push(replaceableNode);
         }
         return sibling;
+    };
+    const renderNodes = (replaceNode) => {
+        const startSibling = startMarker.nextSibling;
+        let sibling = replaceNodes(startSibling, replaceNode);
+        const parent = sibling.parentNode;
+        while (sibling && sibling !== endMarker) {
+            const nextSibling = sibling.nextSibling;
+            parent.removeChild(sibling);
+            sibling = nextSibling;
+        }
     };
     return [
         startMarker,
         endMarker,
-        (replaceNode) => {
-            const currentNodes = [];
-            const startIndex = startMarker.nextSibling;
-            let sibling = replaceNodes(startIndex, replaceNode, currentNodes);
-            const parent = sibling.parentNode;
-            while (sibling && sibling !== endMarker) {
-                const nextSibling = sibling.nextSibling;
-                parent.removeChild(sibling);
-                sibling = nextSibling;
-            }
-            return currentNodes;
-        },
+        renderNodes,
         (currentNodes = [], sibling = startMarker) => {
             while ((sibling = sibling.nextSibling) && sibling !== endMarker) {
                 currentNodes.push(sibling);
@@ -388,9 +390,9 @@ const createElement = (tagName, renderCallback) => {
 exports.createElement = createElement;
 const createAttribute = (attributeName, renderCallback, autoSet) => {
     abstractAttributes[attributeName] = (node, attributeName, value, setAttribute) => {
-        const value = renderCallback(node, attributeName, value, setAttribute);
+        const setValue = renderCallback(node, attributeName, value, setAttribute);
         if (autoSet) {
-            setAttribute(node);
+            setAttribute(setValue);
         }
     };
 };
@@ -399,7 +401,7 @@ const useListener = (objectValue, propertyName, callback) => {
     const createCallbackChannel = (childCallback = () => { }) => {
         let isOpen = false;
         const listenerService = {
-            addCallback(newCallback) {
+            addCallback: (newCallback) => {
                 const parentCallback = childCallback;
                 childCallback = () => {
                     if (isOpen) {
@@ -409,7 +411,7 @@ const useListener = (objectValue, propertyName, callback) => {
                 };
                 return listenerService;
             },
-            addChildListener(newCallback) {
+            addChildListener: (newCallback) => {
                 const childChannel = createCallbackChannel(newCallback);
                 const parentCallback = childCallback;
                 childCallback = () => {
@@ -420,21 +422,22 @@ const useListener = (objectValue, propertyName, callback) => {
                 };
                 return childChannel;
             },
-            close() {
+            close: () => {
                 isOpen = false;
                 return listenerService;
             },
-            isOpen() {
+            isOpen: () => {
                 return isOpen;
             },
-            open() {
+            open: () => {
                 isOpen = true;
                 return listenerService;
             },
-            init() {
+            init: () => {
                 childCallback(currentValue, propertyName, objectValue);
                 return listenerService;
-            }
+            },
+            getValue: () => currentValue
         };
         return listenerService;
     };

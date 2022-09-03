@@ -1,6 +1,5 @@
 
 import ts from "typescript";
-import { IfStatement } from './IfStatement';
 import { CustomContextType } from "..";
 import { ArrowFunction } from "./ArrowFunction";
 import { BinaryExpression } from "./BinaryExpression";
@@ -13,13 +12,15 @@ import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
 import { PostfixPrefixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { VariableStatement } from "./VariableStatement";
+import { IfStatement } from './IfStatement';
 import { SwitchStatement } from './SwitchStatement';
 import { ForStatement } from './ForStatement';
 import { ForInStatement } from './ForInStatement';
-import { ForOfStatement } from './ForOfStatement';
+// import { ForOfStatement } from './ForOfStatement';
 import { MethodDeclaration } from './MethodDeclaration';
 import { ClassStaticBlockDeclaration } from './ClassStaticBlockDeclaration';
 import { TryStatement } from './TryStatement';
+import { WhileStatement } from "./WhileStatement";
 
 
 export const jsxTransformers = {
@@ -27,7 +28,6 @@ export const jsxTransformers = {
         return node.expression
     },
     [ts.SyntaxKind.JsxElement]: (node: ts.JsxElement, visitor: ts.Visitor, context: CustomContextType) => {
-
         const {
             openingElement: {
                 tagName,
@@ -53,16 +53,19 @@ export const jsxTransformers = {
     [ts.SyntaxKind.ArrowFunction]: ArrowFunction,
     [ts.SyntaxKind.FunctionExpression]: FunctionExpression,
     [ts.SyntaxKind.FunctionDeclaration]: FunctionDeclaration,
-    [ts.SyntaxKind.IfStatement]: IfStatement,
-    [ts.SyntaxKind.SwitchStatement]: SwitchStatement,
-    [ts.SyntaxKind.ForStatement]: ForStatement,
-    [ts.SyntaxKind.ForInStatement]: ForInStatement,
-    [ts.SyntaxKind.ForOfStatement]: ForOfStatement,
     [ts.SyntaxKind.MethodDeclaration]: MethodDeclaration,
     [ts.SyntaxKind.ClassStaticBlockDeclaration]: ClassStaticBlockDeclaration,
+    [ts.SyntaxKind.IfStatement]: IfStatement,
     [ts.SyntaxKind.TryStatement]: TryStatement,
+    [ts.SyntaxKind.SwitchStatement]: SwitchStatement,
+    [ts.SyntaxKind.WhileStatement]: WhileStatement,
+    [ts.SyntaxKind.ForStatement]: ForStatement,
+    [ts.SyntaxKind.ForInStatement]: ForInStatement,
+    // [ts.SyntaxKind.ForOfStatement]: ForOfStatement, 
 
-    // [ts.SyntaxKind.IfStatement]: createLowLevelBlockVisitor(ts.visitEachChild),
+
+
+    ////////////////////////////////// 
     // [ts.SyntaxKind.CaseClause]: createLowLevelBlockVisitor(ts.visitEachChild),
     //  
     [ts.SyntaxKind.PropertyAccessExpression]: PropertyAccessExpressionOrElementAccessExpression,

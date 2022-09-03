@@ -1,82 +1,93 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
 import { NumberToUniqueString } from "../../utils/numberToUniqueString";
-import { createObject } from "../factoryCode/createObject";
+import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { identifier } from "../factoryCode/identifier";
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
-import { getIdentifierState } from "./utils/getIdentifierState";
-const catchClauseVisitor = createBlockVisitor((
-    node: ts.CatchClause,
-    visitor: ts.Visitor,
-    context: CustomContextType,
-    variableState: VariableStateType
-) => {
-    let propertyDeclaration: Parameters<typeof createObject>[0] = [];
-    const visitedNode = ts.visitEachChild(node, visitor, context);
-    if (visitedNode.variableDeclaration) {
-        const declarationNamesObject = getVariableDeclarationNames(visitedNode.variableDeclaration);
+import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+// import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+
+const TryStatementVisitor = newBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+
+    return visitor(node);
+}, false);
+
+const TryStatementCatchClauseVisitor = newBlockVisitor(<N extends ts.CatchClause>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+    let propertyDeclaration: createObjectArgsType = [];
+    if (node.variableDeclaration) {
+        const declarationNamesObject = getVariableDeclarationNames(node.variableDeclaration);
         for (const declarationIdentifierName in declarationNamesObject) {
-            const identifierState = getIdentifierState(declarationIdentifierName, context);
-            identifierState.declaredFlag = ts.NodeFlags.None;
-            const { substituteCallback } = identifierState
-            identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-                propertyDeclaration.push([
-                    indexIdToUniqueString,
-                    identifier(declarationIdentifierName)
-                ])
-                substituteCallback(indexIdToUniqueString, declarationIdentifier)
-            }
+            context.addDeclaredIdentifierState(declarationIdentifierName);
+            context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
+                identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+                    propertyDeclaration.push([
+                        indexIdToUniqueString,
+                        identifier(declarationIdentifierName)
+                    ])
+                }
+            })
         }
     }
-    if (variableState.blockScopeIdentifiers) {
-        return context.factory.updateCatchClause(
-            visitedNode,
-            visitedNode.variableDeclaration,
-            context.factory.updateBlock(
-                visitedNode.block,
-                [
-                    variableStatement([
-                        [variableState.blockScopeIdentifiers, createObject(propertyDeclaration)]
-                    ]),
-                    ...visitedNode.block.statements
-                ]
-            ),
-        )
+    return {
+        propertyDeclaration,
+        visitedNode: visitor(node)
     }
-    return visitedNode
-})
-const tryBlockVisitor = createBlockVisitor((
-    node: ts.Block,
+}, false);
+
+export const TryStatement = (
+    node: ts.TryStatement,
     visitor: ts.Visitor,
     context: CustomContextType,
-    variableState: VariableStateType
 ) => {
+    //  tryBlock
+    const [tryBlockNode, tryBlockVariableState] = TryStatementVisitor(node.tryBlock, visitor, context);
 
-    const visitedNode = ts.visitEachChild(node, visitor, context);
-    if (variableState.blockScopeIdentifiers) {
-        return context.factory.updateBlock(
-            visitedNode,
-            [
-                variableStatement([
-                    [variableState.blockScopeIdentifiers, createObject([])]
-                ]),
-                ...visitedNode.statements
-            ]
-        )
+    //  catchClause
+    const catchClause = node.catchClause && TryStatementCatchClauseVisitor(node.catchClause, visitor, context);
+    let catchClauseNode: typeof node.catchClause
+    if (catchClause) {
+        const [{ propertyDeclaration, visitedNode }, catchClauseVariableState] = catchClause
+        const visitedCatchClauseNode = visitedNode as ts.CatchClause
+
+        catchClauseNode = visitedCatchClauseNode && context.factory.updateCatchClause(
+            visitedCatchClauseNode,
+            visitedCatchClauseNode.variableDeclaration,
+            updateBlock(visitedCatchClauseNode.block, catchClauseVariableState, context, propertyDeclaration)
+        );
     }
-    return visitedNode;
-})
-export const TryStatement = (node: ts.TryStatement, visitor: ts.Visitor, context: CustomContextType) => {
-
-    const tryBlock = tryBlockVisitor(node.tryBlock, visitor, context);
-    const catchClause = node.catchClause && catchClauseVisitor(node.catchClause, visitor, context);
-    const finallyBlock = node.finallyBlock && tryBlockVisitor(node.finallyBlock, visitor, context);
+    // finallyBlock
+    const finallyBlock = node.finallyBlock && TryStatementVisitor(node.finallyBlock, visitor, context);
+    let finallyBlockNode: typeof node.finallyBlock
+    if (finallyBlock) {
+        const [visitedFinallyBlockNode, finallyBlockVariableState] = finallyBlock
+        finallyBlockNode = visitedFinallyBlockNode && updateBlock(visitedFinallyBlockNode as ts.Block, finallyBlockVariableState, context)
+    }
+    // update
     return context.factory.updateTryStatement(
         node,
-        tryBlock,
-        catchClause,
-        finallyBlock,
+        updateBlock(tryBlockNode as typeof node.tryBlock, tryBlockVariableState, context),
+        catchClauseNode,
+        finallyBlockNode,
     )
 }
+
+
+
+const updateBlock = (
+    node: ts.Block,
+    variableState: VariableStateType,
+    context: CustomContextType,
+    definedVariablesNames: createObjectArgsType = [],
+) => {
+    if (variableState.blockScopeIdentifiers) {
+        const declarationNode = variableStatement([
+            [variableState.blockScopeIdentifiers, createObject(definedVariablesNames)]
+        ]);
+        return context.factory.updateBlock(
+            node,
+            [declarationNode, ...node.statements]
+        )
+    }
+    return node
+} 

@@ -2,13 +2,6 @@
 const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-// const createHTMLElement = document.createElement.bind(document);
-// const createHTMLElementNS = (nodeName, namespaceURI = null) => document.createElementNS(namespaceURI, nodeName);
-// const setHTMLAttribute = (node, qualifiedName, value) => node.setAttribute(qualifiedName, value);
-// const setHTMLAttributeNS = (node, qualifiedName, value, namespace = null) => node.setAttributeNS(namespace, qualifiedName, value);
-
-// const KixSVG = createApp(createSVGElement);
-// export const kix = createApp(); 
 
 //TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს 
 const GlobalRouteParams = {}
@@ -158,14 +151,10 @@ const abstractNodes = {
     },
     "route-block"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const [startMarker, endMarker, _, getChildren] = createMarker()
-        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker] = createMarker()
+        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker, getRenderedChildren] = createMarker()
         const children = objectNode[objectPropertyName];
-        let emptyComponent = objectNode.ifEmptyComponent
+        let emptyComponent
         let renderedEmptyComponent
-        useListener(objectNode, "ifEmptyComponent", (value) => {
-            renderedEmptyComponent = undefined;
-            emptyComponent = value;
-        }).init();
         const render = () => {
             const children = getChildren();
 
@@ -176,13 +165,18 @@ const abstractNodes = {
                 }
             }
             setTimeout(() => {
-                renderedEmptyComponent = getChildren();
+                renderedEmptyComponent = getRenderedChildren();
+                console.log("🚀 --> file: index.js --> line 173 --> setTimeout --> renderedEmptyComponent", renderedEmptyComponent);
             });
 
-            return emptyComponent
+            return renderedEmptyComponent || emptyComponent
         }
-
-        setTimeout(() => RenderEmptyMarker(render()));
+        const renderComponent = () => RenderEmptyMarker(render())
+        useListener(objectNode, "ifEmptyComponent", (value) => {
+            renderedEmptyComponent = undefined;
+            emptyComponent = value
+        }).init().addCallback(renderComponent);
+        setTimeout(() => window.addEventListener("popstate", renderComponent));
         return [startMarker, children, endMarker, startMarkerEmptyMarker, render, endMarkerEmptyMarker]
     },
     "route-switch"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
@@ -367,7 +361,7 @@ const register = (obj, key, registers, index, currentRegistrationId, changeCallb
                 changeCallback();
             }
         }
-        setter?._$IDS = idList;
+        setter._$IDS = idList;
         Object.defineProperty(obj, key, {
             enumerable: true,
             configurable: true,
@@ -402,9 +396,9 @@ const createMarker = () => {
 
     const renderNodes = (replaceNode) => {
         const startSibling = startMarker.nextSibling;
-        if (!startSibling) {
-            return startMarker.addEventListener('DOMNodeInsertedIntoDocument', () => renderNodes(replaceNode), false);
-        }
+        // if (!startSibling) {
+        //     return startMarker.addEventListener('DOMNodeInsertedIntoDocument', () => renderNodes(replaceNode), false);
+        // }
         let sibling = replaceNodes(startSibling, replaceNode);
         const parent = sibling.parentNode;
 
@@ -468,7 +462,7 @@ export const useListener = (objectValue, propertyName, callback) => {
     const createCallbackChannel = (childCallback = () => { }) => {
         let isOpen = false;
         const listenerService = {
-            addCallback(newCallback) {
+            addCallback: (newCallback) => {
                 const parentCallback = childCallback;
                 childCallback = () => {
                     if (isOpen) {
@@ -478,7 +472,7 @@ export const useListener = (objectValue, propertyName, callback) => {
                 };
                 return listenerService
             },
-            addChildListener(newCallback) {
+            addChildListener: (newCallback) => {
                 const childChannel = createCallbackChannel(newCallback);
                 const parentCallback = childCallback;
                 childCallback = () => {
@@ -489,21 +483,22 @@ export const useListener = (objectValue, propertyName, callback) => {
                 };
                 return childChannel
             },
-            close() {
+            close: () => {
                 isOpen = false
                 return listenerService
             },
-            isOpen() {
+            isOpen: () => {
                 return isOpen
             },
-            open() {
+            open: () => {
                 isOpen = true
                 return listenerService
             },
-            init() {
+            init: () => {
                 childCallback(currentValue, propertyName, objectValue);
                 return listenerService
-            }
+            },
+            getValue: () => currentValue
         }
         return listenerService;
     }
@@ -515,49 +510,3 @@ export const useListener = (objectValue, propertyName, callback) => {
 
     return channel
 }
-/*
-// for svg Element
- $S ტეგის სახელი ტრანსფოტმისას ეს გახადე
-*/
-/*
-// element structure
-
-const elemens = {
-    $: { div: [] }
-    D: {
-        class: (reg) => reg(es, "sss")
-    }
-    E: () => ({
-        click: (event, element) => {
-
-        }
-    })
-}; 
-*/
-/*
-// component structure
-
-const elemens = {
-    $C: Component
-    i:[],
-    a:{}
-    d:{}
-}; 
-*/
-/*
-// dynamic child structure
-
-const elemens = {
-    $D: ()=>() 
-}; 
-*/
-/*
-// NS element structure
-
-const elemens = {
-    $X:{}
-    $D:"",
-    h:"http://www.w3.org/TR/html4/"
-    f="http://www.w3schools.com/furniture"
-}; 
-*/

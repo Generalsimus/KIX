@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { createBlockVisitor } from "./utils/createBlockVisitor";
+// import { createBlockVisitor } from "./utils/createBlockVisitor";
 import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 
 

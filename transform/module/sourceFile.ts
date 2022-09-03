@@ -17,11 +17,9 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
     }
 
     context.substituteNodesList = new Map();
-    context.usedIdentifiers = new Map();
 
 
-    const isJsxSupported = VisitableFilesExtensionRegExp.test(node.fileName);
-    const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
+
 
     let moduleBodyStatements = node.statements.flatMap((emitNode) => {
         const modifiedImportNode = ImportVisitor(emitNode, context);
@@ -29,13 +27,13 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
         return modifiedExportNode;
     })
 
-    if (needsToVisit) {
-        moduleBodyStatements = moduleBodyVisitor(
-            moduleBodyStatements,
-            visitor,
-            context
-        )
-    }
+    // if (needsToVisit) {
+    //     moduleBodyStatements = moduleBodyVisitor(
+    //         moduleBodyStatements,
+    //         visitor,
+    //         context
+    //     )
+    // }
     const visitedSourceFile = context.factory.updateSourceFile(
         node,
         moduleBodyStatements
@@ -48,10 +46,30 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
 
 export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
     const moduleInfo = App.moduleThree.get(node.fileName);
-    const statements = [...node.statements];
+
     /* REMOVE __esModule = true */
-    // TODO: __esModule = true მგონი ზედმეტია
-    if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`)
+    // TODO: __esModule = true მგონი ზედმეტია 
+    if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`);
+
+    const statements = [...node.statements];
+
+    const isJsxSupported = VisitableFilesExtensionRegExp.test(node.fileName);
+    const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
+
+    context.identifiersChannelCallback = () => { }
+    context.addDeclaredIdentifierState = () => { }
+    context.addIdentifiersChannelCallback = () => { }
+
+    if (needsToVisit) {
+        return context.factory.updateSourceFile(
+            node, [
+            moduleBody(moduleInfo, moduleBodyVisitor(
+                statements,
+                visitor,
+                context
+            ))
+        ]);
+    }
     return context.factory.updateSourceFile(
         node, [
         moduleBody(moduleInfo, statements)

@@ -14,19 +14,29 @@ export type IdentifiersStateType = {
     declaredFlag: ts.NodeFlags | undefined,
     substituteCallback: (indexIdToUniqueString: string, declarationIdentifier: ts.Identifier) => void,
 }
-export type CustomContextType = ts.TransformationContext & {
+export type declaredBlockIdentifiersType = Map<string, IdentifiersStateType>
+export interface CustomContextType extends ts.TransformationContext {
     currentModuleInfo: ModuleInfoType
     /*   ფროფერთის სადეკლარაციო Identifier-ი */
     getJSXPropRegistrationIdentifier?: () => ts.Identifier
     /* JSX ში მოთავხებული .? უსაფრთხოებისთვის როდესაც ხდება რეგისტრაცია და ასევესაჭიროა მისი გაშვებაც ნიმუში: ssss?.() */
     JsxHaveQuestionDotToken?: ts.Node
 
-    usedIdentifiers: Map<string, IdentifiersStateType>
+
+    // globalBlockId: number
+    // blockId: number
     getVariableUniqueIdentifier: (flag: ts.NodeFlags) => ts.Identifier
     substituteNodesList: Map<ts.Node, () => ts.Node>
 
+
+
+    identifiersChannelCallback: (blockDeclaredIdentifiers: declaredBlockIdentifiersType) => void
+    addDeclaredIdentifierState: (identifierName: string) => void
+    addIdentifiersChannelCallback: (identifierName: string, addCallback: (identifierState: IdentifiersStateType) => void) => void
 }
 
+
+// const docCookies = new Proxy({ ss: 1 }, {})
 export type TransformersObjectType = Partial<
     typeof moduleTransformerBefore &
     typeof jsxTransformers &
@@ -35,17 +45,16 @@ export type TransformersObjectType = Partial<
 export const getTransformer = () => {
     const transformsBefore = concatTransformers(
         moduleTransformerBefore,
-        jsxTransformers,
     );
-    const transformsAfter = concatTransformers(moduleTransformerAfter)
+    const transformsAfter = concatTransformers(jsxTransformers, moduleTransformerAfter)
 
     // const { onSubstituteNode } = context
     return {
         before: [
-            getVisitor(transformsBefore, true) as any
+            getVisitor(transformsBefore, false) as any
         ],
         after: [
-            getVisitor(transformsAfter, false) as any
+            getVisitor(transformsAfter, true) as any
         ]
     }
 

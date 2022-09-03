@@ -46,10 +46,11 @@ export declare type ListenerCallback<T extends string, U extends Record<any, any
 export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
   addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
   addChildListener: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-  isOpen: () => boolean;
   close: () => ListenerReturnType<T, U>;
   open: () => ListenerReturnType<T, U>;
   init: () => ListenerReturnType<T, U>;
+  isOpen: () => boolean;
+  getValue: () => U[T];
 }
 export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////

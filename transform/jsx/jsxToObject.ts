@@ -136,3 +136,50 @@ export const jsxToObject = (
 }
 
 
+
+/*
+// for svg Element
+ $S ტეგის სახელი ტრანსფოტმისას ეს გახადე
+*/
+/*
+// element structure
+
+const elemens = {
+    $: { div: [] }
+    D: {
+        class: (reg) => reg(es, "sss")
+    }
+    E: () => ({
+        click: (event, element) => {
+
+        }
+    })
+}; 
+*/
+/*
+// component structure
+
+const elemens = {
+    $C: Component
+    i:[],
+    a:{}
+    d:{}
+}; 
+*/
+/*
+// dynamic child structure
+
+const elemens = {
+    $D: ()=>() 
+}; 
+*/
+/*
+// NS element structure
+
+const elemens = {
+    $X:{}
+    $D:"",
+    h:"http://www.w3.org/TR/html4/"
+    f="http://www.w3schools.com/furniture"
+}; 
+*/

@@ -3,7 +3,7 @@ import { CustomContextType } from "..";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 // import { getKeyAccessIdentifierName } from "./Identifier";
-import { getIdentifierState } from "./utils/getIdentifierState";
+// import { getIdentifierState } from "./utils/getIdentifierState";
 
 const AssignmentTokensList = [
     ts.SyntaxKind.EqualsToken,
@@ -28,43 +28,47 @@ export const BinaryExpression = (node: ts.BinaryExpression, visitor: ts.Visitor,
     if (ts.isIdentifier(visitedNode.left) && AssignmentTokensList.includes(visitedNode.operatorToken.kind)) {
 
         const identifierName = ts.idText(visitedNode.left);
-        const identifierState = getIdentifierState(identifierName, context);
 
-        identifierState.isChanged = true;
-        const { substituteCallback } = identifierState
-        // visitedNode = context.factory.updateBinaryExpression(
-        //     visitedNode,
-        //     visitedNode.left,
-        //     visitedNode.operatorToken,
-        //     context.factory.createParenthesizedExpression(visitedNode.right),
-        // )
+        context.addIdentifiersChannelCallback(identifierName, (identifierState) => {
+        console.log("🚀 --> file: BinaryExpression.ts --> line 33 --> context.addIdentifiersChannelCallback --> identifierName", identifierName);
 
-        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-            
+            identifierState.isChanged = true;
+            const { substituteCallback } = identifierState
+            // visitedNode = context.factory.updateBinaryExpression(
+            //     visitedNode,
+            //     visitedNode.left,
+            //     visitedNode.operatorToken,
+            //     context.factory.createParenthesizedExpression(visitedNode.right),
+            // )
 
-            context.substituteNodesList.set(visitedNode, () => {
+            identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
 
-                return nodeToken(
-                    [
-                        propertyAccessExpression(
-                            [
-                                declarationIdentifier,
-                                indexIdToUniqueString
-                            ],
-                            "createPropertyAccessExpression"
-                        ),
-                        context.factory.createParenthesizedExpression(
-                            context.factory.createBinaryExpression(
-                                visitedNode.left,
-                                visitedNode.operatorToken,
-                                visitedNode.right,
+
+                context.substituteNodesList.set(visitedNode, () => {
+
+                    return nodeToken(
+                        [
+                            propertyAccessExpression(
+                                [
+                                    declarationIdentifier,
+                                    indexIdToUniqueString
+                                ],
+                                "createPropertyAccessExpression"
+                            ),
+                            context.factory.createParenthesizedExpression(
+                                context.factory.createBinaryExpression(
+                                    visitedNode.left,
+                                    visitedNode.operatorToken,
+                                    visitedNode.right,
+                                )
                             )
-                        )
-                    ]
-                );
-            });
-            substituteCallback(indexIdToUniqueString, declarationIdentifier);
-        }
+                        ]
+                    );
+                });
+                substituteCallback(indexIdToUniqueString, declarationIdentifier);
+            }
+
+        });
 
 
     }

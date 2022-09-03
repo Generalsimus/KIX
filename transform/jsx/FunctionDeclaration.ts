@@ -4,7 +4,7 @@ import { identifier } from "../factoryCode/identifier";
 import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
-import { getIdentifierState } from "./utils/getIdentifierState";
+// import { getIdentifierState } from "./utils/getIdentifierState";
 
 
 const FunctionDeclarationVisitor = createGlobalBlockNodesVisitor(
@@ -35,28 +35,31 @@ export const FunctionDeclaration = (node: ts.FunctionDeclaration, visitor: ts.Vi
     ]
     if (node.name) {
         const declarationIdentifierName = ts.idText(node.name)
-        const identifierState = getIdentifierState(declarationIdentifierName, context);
-        identifierState.declaredFlag = ts.NodeFlags.None;
-        const declarationMarker = context.factory.createIdentifier("");
-        returnValue.push(declarationMarker);
-        const { substituteCallback } = identifierState
-        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier ) => {
-            context.substituteNodesList.set(declarationMarker, () => {
 
-                return context.factory.createExpressionStatement(nodeToken([
-                    propertyAccessExpression(
-                        [
-                            declarationIdentifier,
-                            indexIdToUniqueString
-                        ],
-                        "createPropertyAccessExpression"
-                    ),
-                    identifier(declarationIdentifierName)
-                ]));
-            });
+        context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
+            identifierState.declaredFlag = ts.NodeFlags.None;
+            const declarationMarker = context.factory.createIdentifier("");
+            returnValue.push(declarationMarker);
+            const { substituteCallback } = identifierState
+            identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+                context.substituteNodesList.set(declarationMarker, () => {
 
-            substituteCallback(indexIdToUniqueString, declarationIdentifier)
-        }
+                    return context.factory.createExpressionStatement(nodeToken([
+                        propertyAccessExpression(
+                            [
+                                declarationIdentifier,
+                                indexIdToUniqueString
+                            ],
+                            "createPropertyAccessExpression"
+                        ),
+                        identifier(declarationIdentifierName)
+                    ]));
+                });
+
+                substituteCallback(indexIdToUniqueString, declarationIdentifier)
+            }
+        });
+
     }
 
     // returnValue.push();
