@@ -16,7 +16,7 @@ import { IfStatement } from './IfStatement';
 import { SwitchStatement } from './SwitchStatement';
 import { ForStatement } from './ForStatement';
 import { ForInStatement } from './ForInStatement';
-// import { ForOfStatement } from './ForOfStatement';
+import { ForOfStatement } from './ForOfStatement';
 import { MethodDeclaration } from './MethodDeclaration';
 import { ClassStaticBlockDeclaration } from './ClassStaticBlockDeclaration';
 import { TryStatement } from './TryStatement';
@@ -61,7 +61,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.WhileStatement]: WhileStatement,
     [ts.SyntaxKind.ForStatement]: ForStatement,
     [ts.SyntaxKind.ForInStatement]: ForInStatement,
-    // [ts.SyntaxKind.ForOfStatement]: ForOfStatement, 
+    [ts.SyntaxKind.ForOfStatement]: ForOfStatement, 
 
 
 

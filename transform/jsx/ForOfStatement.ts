@@ -4,7 +4,7 @@ import { createObject, createObjectArgsType } from "../factoryCode/createObject"
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
-// import { createForInOfVisitor } from "./utils/createForInOfVisitor";
+
 const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForOfStatement>({ initializer, statement }: N, visitor: ts.Visitor, context: CustomContextType) => {
     const defaultDeclarations: createObjectArgsType = [];
 
@@ -13,22 +13,21 @@ const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForOfStatement>({ in
             const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
             for (const declarationIdentifierName in declarationNamesObject) {
                 context.addDeclaredIdentifierState(declarationIdentifierName);
+                
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
-                    context.addDeclaredIdentifierState(declarationIdentifierName);
-                    context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
-                        identifierState.declaredFlag = initializer.flags;
-                        const { substituteCallback } = identifierState
-                        identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-                            if (initializer.flags !== ts.NodeFlags.None) {
-                                defaultDeclarations.push([
-                                    indexIdToUniqueString,
-                                    context.factory.createIdentifier(declarationIdentifierName)
-                                ]);
-                            }
-                            substituteCallback(indexIdToUniqueString, declarationIdentifier)
+                    identifierState.declaredFlag = initializer.flags;
+                    const { substituteCallback } = identifierState
+                    identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+                        if (initializer.flags !== ts.NodeFlags.None) {
+                            defaultDeclarations.push([
+                                indexIdToUniqueString,
+                                context.factory.createIdentifier(declarationIdentifierName)
+                            ]);
                         }
-                    })
+                        substituteCallback(indexIdToUniqueString, declarationIdentifier)
+                    }
                 })
+
             }
         }
     }
