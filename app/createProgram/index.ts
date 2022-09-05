@@ -42,6 +42,7 @@ import { buildProduct } from "./build-product";
 // }
 // ParsedCommandLine
 // export const unicssssss = ts.factory.createUniqueName("unicssssss");
+// const tss = ts.getTransformer
 export class createProgramHost {
   rootNames: string[];
   moduleRootNamesSet: Set<string>;

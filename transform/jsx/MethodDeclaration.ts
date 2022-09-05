@@ -4,11 +4,11 @@ import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVis
 
 export const MethodDeclaration = createGlobalBlockNodesVisitor(
     (visitedNode: ts.MethodDeclaration, declarationNode, context) => {
+
         
         return context.factory.updateMethodDeclaration(
             visitedNode,
-            visitedNode.decorators,
-            visitedNode.modifiers,
+            ts.getModifiers(visitedNode),
             visitedNode.asteriskToken,
             visitedNode.name,
             visitedNode.questionToken,
@@ -21,7 +21,7 @@ export const MethodDeclaration = createGlobalBlockNodesVisitor(
                     declarationNode,
                     ...visitedNode.body.statements
                 ]
-            ), 
+            ),
         );
     }
 )

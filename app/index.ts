@@ -5,6 +5,7 @@ import { ArgumentsCamelCase } from "yargs";
 import { getInjectCodePaths } from "../utils/getInjectCodePaths";
 
 const runDirName = path.resolve("./");
+const msTime = new Date().getTime()
 // const kixModulePath = resolveKixModule(runDirName);
 export const App = {
   runDirName,
@@ -13,9 +14,9 @@ export const App = {
   // initServer: false,
   outDir: "./dist/",
   indexHTMLUrlPaths: ["/", "/index.html"],
-  nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
-  uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
-  windowModuleLocationName: "_KIX" + new Date().getTime(),
+  nodeModulesUrlPath: `/module${msTime}.js`,
+  uniqAccessKey: `__KIX_ACCESS_KEY_${msTime}_`,
+  windowModuleLocationName: "_KIX" + msTime,
   requestsThreshold: new Map<string, () => string>(),
   injectPaths: getInjectCodePaths(runDirName),
   moduleThree: new Map<string, ModuleInfoType>(),

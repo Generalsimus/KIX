@@ -3,6 +3,8 @@ import { ModuleInfoType } from "../utils/getModuleInfo";
 import { concatTransformers } from "./concatTransformers";
 import { jsxTransformers } from "./jsx";
 import { moduleTransformerAfter, moduleTransformerBefore } from "./module";
+// import { moduleTransformerAfter, moduleTransformerBefore } from "./module";
+import { visitSourceFileBefore, visitSourceFilesAfter } from "./module/sourceFile";
 import { getVisitor } from "./utils/getVisitor";
 
 
@@ -30,31 +32,36 @@ export interface CustomContextType extends ts.TransformationContext {
 
 
 
-    identifiersChannelCallback: (blockDeclaredIdentifiers: declaredBlockIdentifiersType) => void
+    identifiersChannelCallback: (blockDeclaredIdentifiers: declaredBlockIdentifiersType, isGlobalBlock: boolean) => void
     addDeclaredIdentifierState: (identifierName: string) => void
     addIdentifiersChannelCallback: (identifierName: string, addCallback: (identifierState: IdentifiersStateType) => void) => void
 }
 
+// export interface Node<TKind extends ts.SyntaxKind> extends ts.Node {
+//     readonly kind: TKind;
+// }
 
-// const docCookies = new Proxy({ ss: 1 }, {})
+// Partial<{
+//     [K in ts.SyntaxKind]: <N extends Node<K>>(node: N, visitor: ts.Visitor, context: CustomContextType) => ts.VisitResult<ts.Node>
+// }>
 export type TransformersObjectType = Partial<
     typeof moduleTransformerBefore &
-    typeof jsxTransformers &
-    typeof moduleTransformerAfter
+    typeof moduleTransformerAfter &
+    typeof jsxTransformers
 >
-export const getTransformer = () => {
+export const getTransformer = (): ts.CustomTransformers => {
     const transformsBefore = concatTransformers(
+        jsxTransformers,
         moduleTransformerBefore,
     );
-    const transformsAfter = concatTransformers(jsxTransformers, moduleTransformerAfter)
+    const transformsAfter = concatTransformers(moduleTransformerAfter);
 
-    // const { onSubstituteNode } = context
     return {
         before: [
-            getVisitor(transformsBefore, false) as any
+            getVisitor(transformsBefore) as any
         ],
         after: [
-            getVisitor(transformsAfter, true) as any
+            getVisitor(transformsAfter) as any
         ]
     }
 

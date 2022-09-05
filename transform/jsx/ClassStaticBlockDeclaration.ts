@@ -10,8 +10,6 @@ export const ClassStaticBlockDeclaration = createGlobalBlockNodesVisitor(
 
         return context.factory.updateClassStaticBlockDeclaration(
             visitedNode,
-            visitedNode.decorators,
-            visitedNode.modifiers,
             context.factory.updateBlock(
                 visitedNode.body,
                 [

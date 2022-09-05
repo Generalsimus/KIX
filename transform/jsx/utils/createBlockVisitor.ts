@@ -91,7 +91,7 @@ export const newBlockVisitor = <N extends ts.Node | ts.Node[] | ts.NodeArray<ts.
             }
             return variableState.blockScopeIdentifiers ||= context.factory.createUniqueName("_");
         };
-        const visitedNode = creteManageIdentifierState(context, () => {
+        const visitedNode = creteManageIdentifierState(context, isGlobalBlock, () => {
 
             return nodeVisitor(node, visitor, context);
         });

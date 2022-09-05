@@ -8,7 +8,7 @@ export const ArrowFunction = createGlobalBlockNodesVisitor(
 
         return context.factory.updateArrowFunction(
             visitedNode,
-            visitedNode.modifiers,
+            ts.getModifiers(visitedNode),
             visitedNode.typeParameters,
             visitedNode.parameters,
             visitedNode.type,

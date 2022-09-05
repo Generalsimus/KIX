@@ -5,6 +5,7 @@ import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
 import { moduleBodyVisitor } from "./moduleBodyVisitor";
+// import { transformJsx } from "./transformJsx";
 
 const VisitableFilesExtensionRegExp = /(\.(((j|t)sx)|js)|svg)$/i
 export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
@@ -16,32 +17,40 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
         context.currentModuleInfo = moduleInfo
     }
 
-    context.substituteNodesList = new Map();
 
 
+    const isJsxSupported = VisitableFilesExtensionRegExp.test(node.fileName);
+    const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
 
 
+    if (needsToVisit) {
+        const substituteNodesList = context.substituteNodesList = new Map();
+        context.identifiersChannelCallback = () => { }
+        context.addDeclaredIdentifierState = () => { }
+        context.addIdentifiersChannelCallback = () => { }
+
+        node = ts.visitEachChild(node, visitor, context);
+        if (substituteNodesList.size) {
+            const replaceNodesVisitor = (node: ts.Node) => {
+                return (substituteNodesList.get(node) || ts.visitEachChild)?.(node, replaceNodesVisitor, context);
+            }
+            node = ts.visitEachChild(node, replaceNodesVisitor, context);
+            substituteNodesList.clear();
+        }
+
+    }
     let moduleBodyStatements = node.statements.flatMap((emitNode) => {
         const modifiedImportNode = ImportVisitor(emitNode, context);
         const modifiedExportNode = exportVisitor(modifiedImportNode, context);
         return modifiedExportNode;
     })
 
-    // if (needsToVisit) {
-    //     moduleBodyStatements = moduleBodyVisitor(
-    //         moduleBodyStatements,
-    //         visitor,
-    //         context
-    //     )
-    // }
-    const visitedSourceFile = context.factory.updateSourceFile(
+
+
+    return context.factory.updateSourceFile(
         node,
         moduleBodyStatements
     )
-
-
-
-    return visitedSourceFile;
 }
 
 export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
@@ -51,27 +60,8 @@ export const visitSourceFilesAfter = (node: ts.SourceFile, visitor: ts.Visitor, 
     // TODO: __esModule = true მგონი ზედმეტია 
     if (!moduleInfo) throw new Error(`Could not find module ${node.fileName}`);
 
-    const statements = [...node.statements];
-
-    const isJsxSupported = VisitableFilesExtensionRegExp.test(node.fileName);
-    const needsToVisit = isJsxSupported && !moduleInfo.isNodeModule;
-
-    context.identifiersChannelCallback = () => { }
-    context.addDeclaredIdentifierState = () => { }
-    context.addIdentifiersChannelCallback = () => { }
-
-    if (needsToVisit) {
-        return context.factory.updateSourceFile(
-            node, [
-            moduleBody(moduleInfo, moduleBodyVisitor(
-                statements,
-                visitor,
-                context
-            ))
-        ]);
-    }
     return context.factory.updateSourceFile(
         node, [
-        moduleBody(moduleInfo, statements)
+        moduleBody(moduleInfo, [...node.statements])
     ]);
 }

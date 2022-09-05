@@ -1,20 +1,19 @@
 import ts from "typescript"
 
-export const filterNodeModifiers = (node: Pick<ts.Node, "modifiers">, modifierKind = ts.SyntaxKind.ExportKeyword): [
-    boolean,
-    ts.NodeArray<ts.Modifier>
-] => {
-    const modifiers: ts.Modifier[] = []
+
+export const filterNodeModifiers = <M extends (ts.ModifierLike | ts.Modifier)>(modifiers: readonly M[] | undefined, modifierKind = ts.SyntaxKind.ExportKeyword): any => {
+
+    const newModifiers: M[] = []
     let isFiltered = false
-    for (const modifier of (node.modifiers || [])) {
+    for (const modifier of (modifiers || [])) {
         if (modifier.kind === modifierKind) {
             isFiltered ||= true
         } else {
-            modifiers.push(modifier)
+            newModifiers.push(modifier)
         }
     }
     return [
         isFiltered,
-        ts.factory.createNodeArray(modifiers)
+        ts.factory.createNodeArray(newModifiers)
     ]
 }

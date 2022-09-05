@@ -145,7 +145,6 @@ const abstractNodes = {
             }
             setTimeout(() => {
                 renderedEmptyComponent = getRenderedChildren();
-                console.log("🚀 --> file: index.js --> line 173 --> setTimeout --> renderedEmptyComponent", renderedEmptyComponent);
             });
             return renderedEmptyComponent || emptyComponent;
         };

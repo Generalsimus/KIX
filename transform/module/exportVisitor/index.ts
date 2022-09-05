@@ -77,7 +77,8 @@ export const exportVisitor = (node: ts.Statement, context: CustomContextType): t
             export let name1, name2, …, nameN; // also var, const
             export let name1 = …, name2 = …, …, nameN; // also var, const
             */
-            const [isFilteredVariableStatementModifiers, newVariableStatementModifiers] = filterNodeModifiers(node);
+            const nodeModifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined
+            const [isFilteredVariableStatementModifiers, newVariableStatementModifiers] = filterNodeModifiers(nodeModifiers);
             if (isFilteredVariableStatementModifiers && ts.isVariableStatement(node)) {
                 const newNodes: ts.Statement[] = [
                     factory.updateVariableStatement(node, newVariableStatementModifiers, node.declarationList)

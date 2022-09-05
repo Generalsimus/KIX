@@ -11,17 +11,17 @@ export const updateClassOrFunctionExport = <
     /*
              export function functionName(){...}
     */
-    const [isExportModifierFiltered, newExportModifierFilters] = filterNodeModifiers(node);
+    ts.transform
+    const [isExportModifierFiltered, newExportModifierFilters] = filterNodeModifiers(ts.getModifiers(node));
     if (isExportModifierFiltered) {
-        var [isExportDefaultModifierFiltered, newExportDefaultModifierFilters] = filterNodeModifiers({ modifiers: newExportModifierFilters }, ts.SyntaxKind.DefaultKeyword);
+        var [isExportDefaultModifierFiltered, newExportDefaultModifierFilters] = filterNodeModifiers(newExportModifierFilters, ts.SyntaxKind.DefaultKeyword);
         // const uniqueExportIdentifier = factory.createUniqueName("__")
         const declarationName = node.name
         const exportKey = declarationName ? ts.idText(declarationName) : "default";
         const nodeIsFunctionDeclaration = ts.isFunctionDeclaration(node)
         if (declarationName) {
-            const updatedNode = nodeIsFunctionDeclaration ? factory.updateFunctionDeclaration(
+            const updatedNode = ts.isFunctionDeclaration(node) ? factory.updateFunctionDeclaration(
                 node,
-                node.decorators,
                 newExportDefaultModifierFilters,
                 node.asteriskToken,
                 node.name,
@@ -31,7 +31,6 @@ export const updateClassOrFunctionExport = <
                 node.body,
             ) : factory.updateClassDeclaration(
                 node,
-                node.decorators,
                 newExportDefaultModifierFilters,
                 node.name,
                 node.typeParameters,
@@ -57,7 +56,6 @@ export const updateClassOrFunctionExport = <
                 node.type,
                 node.body || factory.createBlock([])
             ) : factory.createClassExpression(
-                node.decorators,
                 newExportDefaultModifierFilters,
                 node.name,
                 node.typeParameters,

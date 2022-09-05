@@ -18,7 +18,7 @@ export const PostfixPrefixUnaryExpression = (node: ts.PrefixUnaryExpression | ts
         const identifierName = ts.idText(visitedNode.operand);
 
         context.addIdentifiersChannelCallback(identifierName, (identifierState) => {
-            console.log("🚀 --> file: PostfixPostfix-UnaryExpression.ts --> line 21 --> context.addIdentifiersChannelCallback --> identifierName", identifierName);
+            // console.log("🚀 --> file: PostfixPostfix-UnaryExpression.ts --> line 21 --> context.addIdentifiersChannelCallback --> identifierName", identifierName);
             identifierState.isChanged = true;
             context.enableSubstitution(visitedNode.kind);
 

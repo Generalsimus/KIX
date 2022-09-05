@@ -8,7 +8,7 @@ export const FunctionExpression = createGlobalBlockNodesVisitor(
     (visitedNode: ts.FunctionExpression, declarationNode, context) => {
         return context.factory.updateFunctionExpression(
             visitedNode,
-            visitedNode.modifiers,
+            ts.getModifiers(visitedNode),
             visitedNode.asteriskToken,
             visitedNode.name,
             visitedNode.typeParameters,

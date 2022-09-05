@@ -43,7 +43,7 @@ export async function buildProduct(this: createProgramHost) {
             writeFileSync(fileFullPath, content)
 
             if (sourceMap && this.options.sourceMap) {
-                console.log("🚀 --> file: index.ts --> line 40 --> buildProduct --> content", content.split("\n").pop());
+                // console.log("🚀 --> file: index.ts --> line 40 --> buildProduct --> content", content.split("\n").pop());
                 writeFileSync(fileFullPath + ".map", sourceMap)
             }
         }

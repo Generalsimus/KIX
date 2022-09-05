@@ -8,15 +8,16 @@ const path_1 = __importDefault(require("path"));
 const command_1 = require("../command");
 const getInjectCodePaths_1 = require("../utils/getInjectCodePaths");
 const runDirName = path_1.default.resolve("./");
+const msTime = new Date().getTime();
 exports.App = {
     runDirName,
     realModuleDirName: path_1.default.resolve(__dirname, "../../"),
     port: 2222,
     outDir: "./dist/",
     indexHTMLUrlPaths: ["/", "/index.html"],
-    nodeModulesUrlPath: `/module${new Date().getTime()}.js`,
-    uniqAccessKey: `__KIX_ACCESS_KEY_${new Date().getTime()}_`,
-    windowModuleLocationName: "_KIX" + new Date().getTime(),
+    nodeModulesUrlPath: `/module${msTime}.js`,
+    uniqAccessKey: `__KIX_ACCESS_KEY_${msTime}_`,
+    windowModuleLocationName: "_KIX" + msTime,
     requestsThreshold: new Map(),
     injectPaths: (0, getInjectCodePaths_1.getInjectCodePaths)(runDirName),
     moduleThree: new Map(),

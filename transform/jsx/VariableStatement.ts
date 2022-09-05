@@ -18,11 +18,11 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
 
         returnValue.push(context.factory.updateVariableStatement(
             visitedVariableStatement,
-            visitedVariableStatement.modifiers,
+            ts.getModifiers(visitedVariableStatement),
             context.factory.updateVariableDeclarationList(visitedVariableStatement.declarationList, [variableDeclaration])
         ));
 
-        
+
         // export enum NodeFlags {
         //     None = 0,
         //     Let = 1,
@@ -32,7 +32,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
             returnValue.push(declarationMarker);
             context.addDeclaredIdentifierState(declarationIdentifierName);
             context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
-            // console.log("🚀 --> file: VariableStatement.ts --> line 35 --> context.addIdentifiersChannelCallback --> declarationIdentifierName", declarationIdentifierName);
+                // console.log("🚀 --> file: VariableStatement.ts --> line 35 --> context.addIdentifiersChannelCallback --> declarationIdentifierName", declarationIdentifierName);
 
                 identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;
                 const { substituteCallback } = identifierState

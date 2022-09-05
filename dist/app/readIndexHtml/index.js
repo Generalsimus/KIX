@@ -24,12 +24,12 @@ function readIndexHtml() {
             index_1.App.injectPaths.codeController
         ] : [index_1.App.injectPaths.kix];
         const hostProgram = new createProgram_1.createProgramHost(rootNames, {
-            module: typescript_1.default.ModuleKind.CommonJS,
+            module: typescript_1.default.ModuleKind.None,
             incremental: true,
             allowJs: true,
             removeComments: true,
             jsx: typescript_1.default.JsxEmit.Preserve,
-            esModuleInterop: false,
+            esModuleInterop: true,
             "moduleResolution": typescript_1.default.ModuleResolutionKind.NodeNext,
             lib: [
                 index_1.App.injectPaths.kixType

@@ -26,12 +26,13 @@ export function readIndexHtml() {
         /* გაითვალისწინე რომ ამ ოფშნებს კლიენტი ვერ შეცვლის tsconfig.json ფაილიდან მაგრამ გააერთიანებს*/
         /* ამიტომ target ამოვაკელით :) */
         // target: ts.ScriptTarget.ES2020,
-        module: ts.ModuleKind.CommonJS,
+        module: ts.ModuleKind.None,
+        // "moduleResolution": "node",
         incremental: true,
         allowJs: true,
         removeComments: true,
         jsx: ts.JsxEmit.Preserve,
-        esModuleInterop: false,
+        esModuleInterop: true,
         "moduleResolution": ts.ModuleResolutionKind.NodeNext,
         lib: [
           App.injectPaths.kixType

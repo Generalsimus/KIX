@@ -21,7 +21,7 @@ const ForStatementBlockVisitor = newBlockVisitor(<N extends ts.ForStatement>(nod
             for (const declarationIdentifierName in declarationNamesObject) {
                 context.addDeclaredIdentifierState(declarationIdentifierName);
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
-                    console.log("🚀 --> file: ForStatement.ts --> line 24 --> context.addIdentifiersChannelCallback --> identifierState", identifierState);
+                    // console.log("🚀 --> file: ForStatement.ts --> line 24 --> context.addIdentifiersChannelCallback --> identifierState", identifierState);
                     identifierState.declaredFlag = initializer.flags;
                     const { substituteCallback } = identifierState
                     identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {

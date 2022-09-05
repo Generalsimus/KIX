@@ -1,4 +1,4 @@
-import ts, { } from "typescript";
+import ts from "typescript";
 import { CustomContextType } from "..";
 import { callFunction } from "../factoryCode/callFunction";
 import { stringLiteral } from "../factoryCode/stringLiteral";
@@ -7,7 +7,6 @@ import { stringLiteral } from "../factoryCode/stringLiteral";
 
 
 export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: CustomContextType) => {
-
 
   if (context.getJSXPropRegistrationIdentifier && context.isSubstitutionEnabled(node)) {
     const JSXPropRegistrationIdentifier = context.getJSXPropRegistrationIdentifier();
@@ -20,6 +19,7 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
       identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
 
         context.substituteNodesList.set(node, () => {
+
           return callFunction(
             JSXPropRegistrationIdentifier,
             [
@@ -31,16 +31,13 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
         substituteCallback(indexIdToUniqueString, declarationIdentifier)
       }
 
+
+      return node
     });
-    // const identifierState = getIdentifierState(identifierName, context);
-
-
-
 
   }
 
   return node
 }
-
 
 

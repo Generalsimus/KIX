@@ -1,6 +1,6 @@
 
 import ts from "typescript";
-import { CustomContextType } from "..";
+import { CustomContextType, TransformersObjectType } from "..";
 import { ArrowFunction } from "./ArrowFunction";
 import { BinaryExpression } from "./BinaryExpression";
 import { FunctionDeclaration } from "./FunctionDeclaration";
@@ -24,10 +24,8 @@ import { WhileStatement } from "./WhileStatement";
 
 
 export const jsxTransformers = {
-    [ts.SyntaxKind.AsExpression]: (node: ts.AsExpression, visitor: ts.Visitor, context: CustomContextType) => {
-        return node.expression
-    },
     [ts.SyntaxKind.JsxElement]: (node: ts.JsxElement, visitor: ts.Visitor, context: CustomContextType) => {
+
         const {
             openingElement: {
                 tagName,
@@ -61,7 +59,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.WhileStatement]: WhileStatement,
     [ts.SyntaxKind.ForStatement]: ForStatement,
     [ts.SyntaxKind.ForInStatement]: ForInStatement,
-    [ts.SyntaxKind.ForOfStatement]: ForOfStatement, 
+    [ts.SyntaxKind.ForOfStatement]: ForOfStatement,
 
 
 

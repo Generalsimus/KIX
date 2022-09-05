@@ -32,7 +32,8 @@ export const jsxToObject = (
     )
     // Identifier | ThisExpression | JsxTagNamePropertyAccess;
     const tagNameToString = getTagNameString(tagName);
-    
+
+
     if (tagNameToString) {
         const objectNodeProperties: createObjectArgsType = [
             [
@@ -50,6 +51,7 @@ export const jsxToObject = (
         let haveDefaultXmlns: boolean = false;
         forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
             const attributeNameString = ts.idText(attributeName)
+
 
             if (/^(on+[A-Z])/.test(attributeNameString)) {
                 eventObjectNodeProperties.push([

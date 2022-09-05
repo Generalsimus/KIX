@@ -26,6 +26,7 @@ export const createJsxChildrenNode = (
         } else {
 
             newChildren.push(useJsxPropRegistration(currentChild, visitor, context, (node, isRegisterNode) => {
+               
                 if (isRegisterNode) {
                     return createObject([
                         ["$D", node]

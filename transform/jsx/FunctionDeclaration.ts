@@ -11,8 +11,7 @@ const FunctionDeclarationVisitor = createGlobalBlockNodesVisitor(
     (visitedNode: ts.FunctionDeclaration, declarationNode, context) => {
         return context.factory.updateFunctionDeclaration(
             visitedNode,
-            visitedNode.decorators,
-            visitedNode.modifiers,
+            ts.getModifiers(visitedNode),
             visitedNode.asteriskToken,
             visitedNode.name,
             visitedNode.typeParameters,
