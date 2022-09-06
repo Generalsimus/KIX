@@ -28,12 +28,11 @@ export interface CustomContextType extends ts.TransformationContext {
     // globalBlockId: number
     // blockId: number
     getVariableUniqueIdentifier: (flag: ts.NodeFlags) => ts.Identifier
-    substituteNodesList: Map<ts.Node, () => ts.Node>
+    substituteNodesList: Map<ts.Node, () => ts.Node | ts.Node[]>
 
 
 
-    identifiersChannelCallback: (blockDeclaredIdentifiers: declaredBlockIdentifiersType, isGlobalBlock: boolean) => void
-    addDeclaredIdentifierState: (identifierName: string) => void
+    addDeclaredIdentifierState: (identifierName: string, identifierState?: IdentifiersStateType) => void
     addIdentifiersChannelCallback: (identifierName: string, addCallback: (identifierState: IdentifiersStateType) => void) => void
 }
 

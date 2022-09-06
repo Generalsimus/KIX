@@ -4,7 +4,7 @@ import { App } from "../../app";
 import { moduleBody } from "../factoryCode/moduleBody";
 import { exportVisitor } from "./exportVisitor";
 import { ImportVisitor } from "./ImportVisitor";
-import { moduleBodyVisitor } from "./moduleBodyVisitor";
+import { moduleSourceFileBodyVisitor } from "./moduleSourceFileBodyVisitor";
 // import { transformJsx } from "./transformJsx";
 
 const VisitableFilesExtensionRegExp = /(\.(((j|t)sx)|js)|svg)$/i
@@ -25,11 +25,10 @@ export const visitSourceFileBefore = (node: ts.SourceFile, visitor: ts.Visitor, 
 
     if (needsToVisit) {
         const substituteNodesList = context.substituteNodesList = new Map();
-        context.identifiersChannelCallback = () => { }
         context.addDeclaredIdentifierState = () => { }
         context.addIdentifiersChannelCallback = () => { }
 
-        node = ts.visitEachChild(node, visitor, context);
+        node = moduleSourceFileBodyVisitor(node, visitor, context);
         if (substituteNodesList.size) {
             const replaceNodesVisitor = (node: ts.Node) => {
                 return (substituteNodesList.get(node) || ts.visitEachChild)?.(node, replaceNodesVisitor, context);

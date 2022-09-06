@@ -15,12 +15,12 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
     const returnValue: ts.Node[] = [];
     for (const variableDeclaration of visitedVariableStatement.declarationList.declarations) {
         const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
-
-        returnValue.push(context.factory.updateVariableStatement(
+        const declarationNode = context.factory.updateVariableStatement(
             visitedVariableStatement,
             ts.getModifiers(visitedVariableStatement),
             context.factory.updateVariableDeclarationList(visitedVariableStatement.declarationList, [variableDeclaration])
-        ));
+        )
+        returnValue.push(declarationNode);
 
 
         // export enum NodeFlags {
@@ -28,8 +28,8 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
         //     Let = 1,
         //     Const = 2,
         for (const declarationIdentifierName in declarationNamesObject) {
-            const declarationMarker = context.factory.createIdentifier("");
-            returnValue.push(declarationMarker);
+            // const declarationMarker = context.factory.createIdentifier("");
+            // returnValue.push(declarationMarker);
             context.addDeclaredIdentifierState(declarationIdentifierName);
             context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
                 // console.log("🚀 --> file: VariableStatement.ts --> line 35 --> context.addIdentifiersChannelCallback --> declarationIdentifierName", declarationIdentifierName);
@@ -37,18 +37,20 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
                 identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;
                 const { substituteCallback } = identifierState
                 identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-                    context.substituteNodesList.set(declarationMarker, () => {
-                        return context.factory.createExpressionStatement(nodeToken([
-                            propertyAccessExpression(
-                                [
-                                    declarationIdentifier,
-                                    indexIdToUniqueString
-                                ],
-                                "createPropertyAccessExpression"
-                            ),
-                            identifier(declarationIdentifierName)
-                        ]));
-
+                    context.substituteNodesList.set(declarationNode, () => {
+                        return [
+                            declarationNode,
+                            context.factory.createExpressionStatement(nodeToken([
+                                propertyAccessExpression(
+                                    [
+                                        declarationIdentifier,
+                                        indexIdToUniqueString
+                                    ],
+                                    "createPropertyAccessExpression"
+                                ),
+                                identifier(declarationIdentifierName)
+                            ]))
+                        ]
                     });
                     substituteCallback(indexIdToUniqueString, declarationIdentifier);
                 }
