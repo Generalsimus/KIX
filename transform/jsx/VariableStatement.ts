@@ -35,11 +35,12 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
                 // console.log("🚀 --> file: VariableStatement.ts --> line 35 --> context.addIdentifiersChannelCallback --> declarationIdentifierName", declarationIdentifierName);
 
                 identifierState.declaredFlag = visitedVariableStatement.declarationList.flags;
-                const { substituteCallback } = identifierState
+                // const { substituteCallback } = identifierState
                 identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-                    context.substituteNodesList.set(declarationNode, () => {
+                    context.substituteNodesList.set(declarationNode, (_, substituteVisitor) => {
+                        context.substituteNodesList.delete(declarationNode)
                         return [
-                            declarationNode,
+                            substituteVisitor(declarationNode) as ts.Node,
                             context.factory.createExpressionStatement(nodeToken([
                                 propertyAccessExpression(
                                     [
@@ -52,7 +53,7 @@ export const VariableStatement = (node: ts.VariableStatement, visitor: ts.Visito
                             ]))
                         ]
                     });
-                    substituteCallback(indexIdToUniqueString, declarationIdentifier);
+                    // substituteCallback(indexIdToUniqueString, declarationIdentifier);
                 }
 
             })

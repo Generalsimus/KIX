@@ -28,7 +28,7 @@ export interface CustomContextType extends ts.TransformationContext {
     // globalBlockId: number
     // blockId: number
     getVariableUniqueIdentifier: (flag: ts.NodeFlags) => ts.Identifier
-    substituteNodesList: Map<ts.Node, () => ts.Node | ts.Node[]>
+    substituteNodesList: Map<ts.Node, (node: ts.Node, substituteVisitor: ts.Visitor, context: ts.Visitor) => ts.Node | ts.Node[]>
 
 
 

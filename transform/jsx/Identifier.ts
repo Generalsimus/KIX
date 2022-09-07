@@ -15,7 +15,7 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
 
     context.addIdentifiersChannelCallback(identifierName, (identifierState) => {
       identifierState.isJsx = true;
-      const { substituteCallback } = identifierState
+      // const { substituteCallback } = identifierState
       identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
 
         context.substituteNodesList.set(node, () => {
@@ -28,7 +28,7 @@ export const Identifier = (node: ts.Identifier, visitor: ts.Visitor, context: Cu
             ]
           )
         });
-        substituteCallback(indexIdToUniqueString, declarationIdentifier)
+        //   substituteCallback(indexIdToUniqueString, declarationIdentifier)
       }
 
 

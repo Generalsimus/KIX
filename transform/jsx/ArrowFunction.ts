@@ -4,7 +4,7 @@ import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVis
 
 export const ArrowFunction = createGlobalBlockNodesVisitor(
     (visitedNode: ts.ArrowFunction, declarationVariableNode, context) => {
-        console.log("🚀 --> file: ArrowFunction.ts --> line 7 --> declarationVariableNode", declarationVariableNode);
+        // console.log("🚀 --> file: ArrowFunction.ts --> line 7 --> declarationVariableNode", declarationVariableNode);
 
         return context.factory.updateArrowFunction(
             visitedNode,

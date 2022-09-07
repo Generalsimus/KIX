@@ -52,11 +52,11 @@ export interface ListenerReturnType<T extends string, U extends Record<any, any>
   isOpen: () => boolean;
   getValue: () => U[T];
 }
-export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback?: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////
 
 /// START ABSTRACT NODE ///////////////////////////////////////// 
-export declare const createElement: <T extends string>(tagName: T, renderCallback: (
+export declare const createElement: <T extends Lowercase<string>>(tagName: T, renderCallback: (
   objectNode: { [K: T]: any } & Record<any, any>,
   tagName: T,
   kix: typeof kix,
@@ -67,7 +67,7 @@ export declare const createElement: <T extends string>(tagName: T, renderCallbac
 /// END ABSTRACT NODE ///////////////////////////////////////////
 
 /// START ABSTRACT ATTRIBUTE ///////////////////////////////////////// 
-export declare const createAttribute: <A extends string>(
+export declare const createAttribute: <A extends Lowercase<string>>(
   attributeName: A,
   setCallback: (node: HTMLElement, attributeName: A, value: string, setAttribute: (node: HTMLElement, attributeName: A, value: string) => void) => any,
   autoSet?: boolean

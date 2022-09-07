@@ -68,7 +68,7 @@ export type VariableStateType = {
 
 
 
-export const newBlockVisitor = <N extends ts.Node | ts.Node[] | ts.NodeArray<ts.Node>, R extends any>(
+export const newBlockVisitor = <N extends any, R extends any>(
     nodeVisitor: (node: N, visitor: ts.Visitor, context: CustomContextType) => R,
     isGlobalBlock: boolean
 ) => {

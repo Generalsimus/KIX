@@ -6,78 +6,20 @@ import { nodeToken } from "../../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
 import { getIndexId } from "./getIndexId";
 
-// export const getIdentifierState = (identifierName: string, context: CustomContextType): IdentifiersStateType => {
-//     let identifierState = context.usedIdentifiers.get(identifierName)
 
-
-//     if (!identifierState) {
-//         let substituteCallback: IdentifiersStateType["substituteCallback"] = () => { }
-//         const { getVariableUniqueIdentifier } = context
-//         const indexId = getIndexId()
-//         identifierState = {
-//             isJsx: false,
-//             isChanged: false,
-//             declaredFlag: undefined,
-//             get substituteCallback() {
-//                 return substituteCallback
-//             },
-//             set substituteCallback(newValue) {
-//                 if (this.isJsx && this.isChanged && this.declaredFlag !== undefined) {
-//                     if (this.declaredFlag !== ts.NodeFlags.Const) {
-//                         newValue(NumberToUniqueString(indexId), getVariableUniqueIdentifier(this.declaredFlag));
-//                     }
-//                     substituteCallback = () => { }
-//                 } else {
-//                     substituteCallback = newValue
-//                 }
-//             }
-
-//         }
-//         context.usedIdentifiers.set(identifierName, identifierState);
-//     }
-
-//     return identifierState;
-// }
-
-
-
-
-// export const catchIdentifierState = (
-//     identifierName: string,
-//     context: CustomContextType,
-//     callback: (identifierState: IdentifiersStateType) => void
-// ) => {
-//     let prevGetIdentifierStateCallback = context.usedIdentifiers2.get(identifierName)
-
-//     context.usedIdentifiers2.set(identifierName, (blockId) => {
-//         // usedIdentifiers2+
-//         blockId
-//     })
-// }
 
 const createIdentifiersMap = (context: CustomContextType) => {
     const declaredBlockIdentifiers = new Map<string, IdentifiersStateType>();
     const addDeclaredIdentifierState = (identifierName: string, identifierState?: IdentifiersStateType) => {
-        const hasIdentifierState = declaredBlockIdentifiers.has(identifierName)
-        if (identifierState) {
-            if (hasIdentifierState) {
-                const oldIdentifierState = declaredBlockIdentifiers.get(identifierName)!
-                identifierState.isJsx ||= oldIdentifierState.isJsx
-                identifierState.isChanged ||= oldIdentifierState.isChanged
-                const { substituteCallback } = identifierState
-                const { substituteCallback: oldSubstituteCallback } = oldIdentifierState
-                identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
-                    substituteCallback(indexIdToUniqueString, declarationIdentifier);
-                    oldSubstituteCallback(indexIdToUniqueString, declarationIdentifier);
-                }
-            }
-            return declaredBlockIdentifiers.set(identifierName, identifierState)
-        } else if (!hasIdentifierState) {
+        const hasIdentifierState = declaredBlockIdentifiers.has(identifierName);
+
+
+        if (!hasIdentifierState) {
 
             let substituteCallback: IdentifiersStateType["substituteCallback"] = () => { }
             const { getVariableUniqueIdentifier } = context
             const indexId = getIndexId();
-            declaredBlockIdentifiers.set(identifierName, {
+            let newIdentifierState = {
                 isJsx: false,
                 isChanged: false,
                 declaredFlag: undefined,
@@ -85,20 +27,32 @@ const createIdentifiersMap = (context: CustomContextType) => {
                     return substituteCallback
                 },
                 set substituteCallback(newValue) {
-                    // console.log("🚀 --> file: --> this",
-                    //     !!this.isJsx, !!this.isChanged, this.declaredFlag !== undefined
-                    // );
+
+                    const substituteCallbackCache = substituteCallback
+                    substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
+                        newValue(indexIdToUniqueString, declarationIdentifier);
+                        substituteCallbackCache(indexIdToUniqueString, declarationIdentifier);
+                    }
                     if (this.isJsx && this.isChanged && this.declaredFlag !== undefined) {
                         if (this.declaredFlag !== ts.NodeFlags.Const) {
-                            newValue(NumberToUniqueString(indexId), getVariableUniqueIdentifier(this.declaredFlag));
+                            substituteCallback(NumberToUniqueString(indexId), getVariableUniqueIdentifier(this.declaredFlag));
                         }
                         substituteCallback = () => { }
-                    } else {
-                        substituteCallback = newValue
                     }
                 }
 
-            })
+            };
+
+            if (identifierState) {
+                newIdentifierState.substituteCallback = identifierState.substituteCallback
+            }
+
+            declaredBlockIdentifiers.set(identifierName, newIdentifierState)
+        } else if (identifierState) {
+            const currentIdentifierState = declaredBlockIdentifiers.get(identifierName)!
+
+            currentIdentifierState.substituteCallback = identifierState.substituteCallback
+
         }
     }
     return { declaredBlockIdentifiers, addDeclaredIdentifierState }

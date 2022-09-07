@@ -16,7 +16,7 @@ const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForInStatement>({ in
                 context.addDeclaredIdentifierState(declarationIdentifierName);
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
                     identifierState.declaredFlag = initializer.flags;
-                    const { substituteCallback } = identifierState
+                    // const { substituteCallback } = identifierState
                     identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
                         if (initializer.flags !== ts.NodeFlags.None) {
                             defaultDeclarations.push([
@@ -24,7 +24,7 @@ const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForInStatement>({ in
                                 context.factory.createIdentifier(declarationIdentifierName)
                             ]);
                         }
-                        substituteCallback(indexIdToUniqueString, declarationIdentifier)
+                        // substituteCallback(indexIdToUniqueString, declarationIdentifier)
                     }
 
                 })

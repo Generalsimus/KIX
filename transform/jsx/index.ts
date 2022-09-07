@@ -1,6 +1,6 @@
 
 import ts from "typescript";
-import { CustomContextType, TransformersObjectType } from "..";
+import { CustomContextType } from "..";
 import { ArrowFunction } from "./ArrowFunction";
 import { BinaryExpression } from "./BinaryExpression";
 import { FunctionDeclaration } from "./FunctionDeclaration";
@@ -9,7 +9,6 @@ import { Identifier } from "./Identifier";
 import { jsxToObject } from "./jsxToObject";
 import { CallExpression } from "./CallExpression";
 import { createJsxChildrenNode } from "./utils/createJsxChildrenNode";
-import { PostfixPrefixUnaryExpression } from "./utils/PostfixPostfix-UnaryExpression";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 import { VariableStatement } from "./VariableStatement";
 import { IfStatement } from './IfStatement';
@@ -21,6 +20,8 @@ import { MethodDeclaration } from './MethodDeclaration';
 import { ClassStaticBlockDeclaration } from './ClassStaticBlockDeclaration';
 import { TryStatement } from './TryStatement';
 import { WhileStatement } from "./WhileStatement";
+import { PostfixUnaryExpression } from "./PostfixUnaryExpression";
+import { PrefixUnaryExpression } from "./PrefixUnaryExpression";
 
 
 export const jsxTransformers = {
@@ -72,7 +73,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.Identifier]: Identifier,
     [ts.SyntaxKind.BinaryExpression]: BinaryExpression,
     [ts.SyntaxKind.VariableStatement]: VariableStatement,
-    [ts.SyntaxKind.PostfixUnaryExpression]: PostfixPrefixUnaryExpression,
-    [ts.SyntaxKind.PrefixUnaryExpression]: PostfixPrefixUnaryExpression,
+    [ts.SyntaxKind.PostfixUnaryExpression]: PostfixUnaryExpression,
+    [ts.SyntaxKind.PrefixUnaryExpression]: PrefixUnaryExpression,
 
 }

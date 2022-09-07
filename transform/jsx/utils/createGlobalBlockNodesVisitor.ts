@@ -12,7 +12,7 @@ type BlockNodesType = ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDecl
 
 const createGlobalBlockVisitor = newBlockVisitor(<N extends BlockNodesType>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
     const declarationProperties: createObjectArgsType = [];
-
+ 
     if (!ts.isClassStaticBlockDeclaration(node)) {
         for (const parameter of node.parameters) {
             const declarationNamesObject = getVariableDeclarationNames(parameter);
@@ -20,10 +20,10 @@ const createGlobalBlockVisitor = newBlockVisitor(<N extends BlockNodesType>(node
 
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
                     identifierState.declaredFlag = ts.NodeFlags.None
-                    const { substituteCallback } = identifierState
+                    // const { substituteCallback } = identifierState
                     identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
                         declarationProperties.push([indexIdToUniqueString, identifier(declarationIdentifierName)]);
-                        substituteCallback(indexIdToUniqueString, declarationIdentifier);
+                        // substituteCallback(indexIdToUniqueString, declarationIdentifier);
                     }
                 });
 

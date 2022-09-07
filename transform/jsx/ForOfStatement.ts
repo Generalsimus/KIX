@@ -13,10 +13,10 @@ const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForOfStatement>({ in
             const declarationNamesObject = getVariableDeclarationNames(variableDeclaration);
             for (const declarationIdentifierName in declarationNamesObject) {
                 context.addDeclaredIdentifierState(declarationIdentifierName);
-                
+
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
                     identifierState.declaredFlag = initializer.flags;
-                    const { substituteCallback } = identifierState
+                    // const { substituteCallback } = identifierState
                     identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
                         if (initializer.flags !== ts.NodeFlags.None) {
                             defaultDeclarations.push([
@@ -24,7 +24,7 @@ const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForOfStatement>({ in
                                 context.factory.createIdentifier(declarationIdentifierName)
                             ]);
                         }
-                        substituteCallback(indexIdToUniqueString, declarationIdentifier)
+                        // substituteCallback(indexIdToUniqueString, declarationIdentifier)
                     }
                 })
 

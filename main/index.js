@@ -248,7 +248,7 @@ function createApp(createElementName, setAttribute) {
 
     const setAttributeTagNode = (node, attributeName, value) => {
         if (abstractAttributes.hasOwnProperty(attributeName)) {
-            abstractAttributes[attributeName](node, attributeName, value, setAttributeTagNode);
+            abstractAttributes[attributeName](node, attributeName, value, setAttribute);
         } else if (value instanceof Function) {
             setAttributeTagNode(node, value(node), attributeName);
         } else {
@@ -439,13 +439,16 @@ export const Router = {
     history: window.history
 }
 export const createElement = (tagName, renderCallback) => {
-    abstractNodes[tagName] = renderCallback
+    abstractNodes[tagName] = (objectNode, tagName, kix, createElement, setAttribute, createObjectElement) => {
+        objectNode[attributeNameForCatchDynamicNameAndEvents]?.();
+        return renderCallback(objectNode, tagName, kix, createElement, setAttribute, createObjectElement)
+    };
 }
 export const createAttribute = (attributeName, renderCallback, autoSet) => {
     abstractAttributes[attributeName] = (node, attributeName, value, setAttribute) => {
         const setValue = renderCallback(node, attributeName, value, setAttribute)
         if (autoSet) {
-            setAttribute(setValue);
+            setAttribute(node, attributeName, setValue);
         }
     }
 }
@@ -458,17 +461,15 @@ export const createAttribute = (attributeName, renderCallback, autoSet) => {
 
 //     return <h3>NAME: {name}</h3>
 // })
-export const useListener = (objectValue, propertyName, callback) => {
+export const useListener = (objectValue, propertyName, callback = () => { }) => {
     const createCallbackChannel = (childCallback = () => { }) => {
-        let isOpen = false;
+        let isOpen = true;
         const listenerService = {
             addCallback: (newCallback) => {
                 const parentCallback = childCallback;
                 childCallback = () => {
-                    if (isOpen) {
-                        parentCallback(currentValue, propertyName, objectValue);
-                        newCallback(currentValue, propertyName, objectValue);
-                    }
+                    parentCallback(currentValue, propertyName, objectValue);
+                    newCallback(currentValue, propertyName, objectValue);
                 };
                 return listenerService
             },
@@ -476,8 +477,8 @@ export const useListener = (objectValue, propertyName, callback) => {
                 const childChannel = createCallbackChannel(newCallback);
                 const parentCallback = childCallback;
                 childCallback = () => {
-                    if (isOpen) {
-                        parentCallback(currentValue, propertyName, objectValue);
+                    parentCallback(currentValue, propertyName, objectValue);
+                    if (childChannel.isOpen()) {
                         childChannel.init(currentValue, propertyName, objectValue);
                     }
                 };
@@ -505,7 +506,9 @@ export const useListener = (objectValue, propertyName, callback) => {
     const channel = createCallbackChannel(callback);
     let currentValue = propertyRegistration((r) => (r(objectValue, propertyName)), (value) => {
         currentValue = value;
-        channel.init();
+        if (channel.isOpen()) {
+            channel.init()
+        }
     });
 
     return channel
