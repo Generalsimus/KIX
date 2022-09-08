@@ -38,5 +38,5 @@ export const PrefixUnaryExpression = (node: ts.PrefixUnaryExpression, visitor: t
             }
         });
     }
-
+return visitedNode
 }

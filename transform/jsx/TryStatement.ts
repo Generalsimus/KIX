@@ -5,15 +5,15 @@ import { createObject, createObjectArgsType } from "../factoryCode/createObject"
 import { identifier } from "../factoryCode/identifier";
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 // import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 
-const TryStatementVisitor = newBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+const TryStatementVisitor = createBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
 
     return visitor(node);
 }, false);
 
-const TryStatementCatchClauseVisitor = newBlockVisitor(<N extends ts.CatchClause>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+const TryStatementCatchClauseVisitor = createBlockVisitor(<N extends ts.CatchClause>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
     let propertyDeclaration: createObjectArgsType = [];
     if (node.variableDeclaration) {
         const declarationNamesObject = getVariableDeclarationNames(node.variableDeclaration);

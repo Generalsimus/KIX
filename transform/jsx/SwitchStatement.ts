@@ -2,10 +2,10 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { createObject } from "../factoryCode/createObject";
 import { variableStatement } from "../factoryCode/variableStatement";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 
 
-const SwitchStatementBlockVisitor = newBlockVisitor(<N extends ts.NodeArray<ts.Statement>>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+const SwitchStatementBlockVisitor = createBlockVisitor(<N extends ts.NodeArray<ts.Statement>>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
     return node.map(el => visitor(el));
 }, false);
 

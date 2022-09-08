@@ -2,10 +2,10 @@ import ts from "typescript"
 import { CustomContextType } from ".."
 import { createObject } from "../factoryCode/createObject"
 import { variableStatement } from "../factoryCode/variableStatement"
-import { newBlockVisitor, VariableStateType } from "../jsx/utils/createBlockVisitor"
+import { createBlockVisitor, VariableStateType } from "../jsx/utils/createBlockVisitor"
 import { creteManageIdentifierState } from "../jsx/utils/getIdentifierState"
 
-const moduleBodyNodesVisitor = newBlockVisitor(<N extends ts.SourceFile>(sourceFileNode: N, visitor: ts.Visitor, context: CustomContextType) => {
+const moduleBodyNodesVisitor = createBlockVisitor(<N extends ts.SourceFile>(sourceFileNode: N, visitor: ts.Visitor, context: CustomContextType) => {
 
     return ts.visitEachChild(sourceFileNode, visitor, context);
 }, true);

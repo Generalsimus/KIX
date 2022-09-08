@@ -2,11 +2,11 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { createObject } from "../factoryCode/createObject";
 import { variableStatement } from "../factoryCode/variableStatement";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 
 
-const WhileStatementBlockVisitor = newBlockVisitor(<N extends ts.IterationStatement["statement"]>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
-    return visitor(node);
+const WhileStatementBlockVisitor = createBlockVisitor(<N extends ts.IterationStatement["statement"]>(statement: N, visitor: ts.Visitor, context: CustomContextType) => {
+    return visitor(statement);
 }, false);
 
 export const WhileStatement = (
@@ -14,7 +14,7 @@ export const WhileStatement = (
     visitor: ts.Visitor,
     context: CustomContextType
 ) => {
-    const [statement, variableState] = WhileStatementBlockVisitor(node, visitor, context);
+    const [statement, variableState] = WhileStatementBlockVisitor(node.statement, visitor, context);
 
 
     return context.factory.updateWhileStatement(

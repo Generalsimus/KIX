@@ -3,10 +3,10 @@ import { CustomContextType } from "..";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 
 // type DefaultDeclarationsType = [string, string][]
-const ForInStatementVisitor = newBlockVisitor(<N extends ts.ForInStatement>({ initializer, statement }: N, visitor: ts.Visitor, context: CustomContextType) => {
+const ForInStatementVisitor = createBlockVisitor(<N extends ts.ForInStatement>({ initializer, statement }: N, visitor: ts.Visitor, context: CustomContextType) => {
     const defaultDeclarations: createObjectArgsType = [];
 
     if (ts.isVariableDeclarationList(initializer)) {

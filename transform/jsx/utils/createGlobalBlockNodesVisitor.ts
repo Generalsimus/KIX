@@ -5,14 +5,14 @@ import { createObject, createObjectArgsType } from "../../factoryCode/createObje
 import { identifier } from "../../factoryCode/identifier"
 import { variableStatement } from "../../factoryCode/variableStatement"
 import { getVariableDeclarationNames } from "../../utils/getVariableDeclarationNames"
-import { newBlockVisitor, VariableStateType } from "./createBlockVisitor"
+import { createBlockVisitor, VariableStateType } from "./createBlockVisitor"
 import { creteManageIdentifierState } from "./getIdentifierState"
 // import { getIdentifierState } from "./getIdentifierState"
 type BlockNodesType = ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration | ts.ClassStaticBlockDeclaration
 
-const createGlobalBlockVisitor = newBlockVisitor(<N extends BlockNodesType>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+const createGlobalBlockVisitor = createBlockVisitor(<N extends BlockNodesType>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
     const declarationProperties: createObjectArgsType = [];
- 
+
     if (!ts.isClassStaticBlockDeclaration(node)) {
         for (const parameter of node.parameters) {
             const declarationNamesObject = getVariableDeclarationNames(parameter);
@@ -20,10 +20,9 @@ const createGlobalBlockVisitor = newBlockVisitor(<N extends BlockNodesType>(node
 
                 context.addIdentifiersChannelCallback(declarationIdentifierName, (identifierState) => {
                     identifierState.declaredFlag = ts.NodeFlags.None
-                    // const { substituteCallback } = identifierState
                     identifierState.substituteCallback = (indexIdToUniqueString, declarationIdentifier) => {
                         declarationProperties.push([indexIdToUniqueString, identifier(declarationIdentifierName)]);
-                        // substituteCallback(indexIdToUniqueString, declarationIdentifier);
+
                     }
                 });
 

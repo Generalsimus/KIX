@@ -2,9 +2,9 @@ import ts from "typescript";
 import { CustomContextType } from "..";
 import { createObject } from "../factoryCode/createObject";
 import { variableStatement } from "../factoryCode/variableStatement";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 
-const visitIfStatementBlockNode = newBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
+const visitIfStatementBlockNode = createBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
 
     return visitor(node);
 }, false);

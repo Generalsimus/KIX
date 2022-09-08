@@ -6,31 +6,36 @@ import { nodeToken } from "../factoryCode/nodeToken";
 import { propertyAccessExpression } from "../factoryCode/propertyAccessExpression";
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
-import { newBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 import { PropertyAccessExpressionOrElementAccessExpression } from "./utils/PropertyAccessExpressionOrElementAccessExpression";
 // import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
 // import { getIdentifierState } from "./utils/getIdentifierState";
-
-// type DefaultDeclarationsType = [string, string][]
+// context.getVariableUniqueIdentifier
 interface InitializerArgType {
-    addIdentifiersChannelCallbackParent: CustomContextType["addIdentifiersChannelCallback"],
-    addDeclaredIdentifierStateParent: CustomContextType["addDeclaredIdentifierState"],
+    getVariableUniqueIdentifierParent: CustomContextType["getVariableUniqueIdentifier"],
+    // addDeclaredIdentifierStateParent: CustomContextType["addDeclaredIdentifierState"],
     node: ts.ForStatement
 }
-const ForStatementBlockVisitor = newBlockVisitor(<N extends InitializerArgType>(
-    { statement, initializer }: ts.ForStatement,
+const ForStatementBlockVisitor = createBlockVisitor(<N extends InitializerArgType>(
+    {
+        node: { statement, initializer },
+        getVariableUniqueIdentifierParent
+    }: N,
     visitor: ts.Visitor,
     context: CustomContextType
 ) => {
+    const getVariableUniqueIdentifierCache = context.getVariableUniqueIdentifier
+    context.getVariableUniqueIdentifier = getVariableUniqueIdentifierParent
 
     statement = visitor(statement) as typeof statement;
 
+    context.getVariableUniqueIdentifier = getVariableUniqueIdentifierCache
 
     return statement
 
 }, false);
 
-const ForStatementVisitor = newBlockVisitor((
+const ForStatementVisitor = createBlockVisitor((
     node: ts.ForStatement,
     visitor: ts.Visitor,
     context: CustomContextType
@@ -50,7 +55,10 @@ const ForStatementVisitor = newBlockVisitor((
             }
         }
     }
-    const [statement, variableState] = ForStatementBlockVisitor(node, visitor, context);
+    const [statement, _] = ForStatementBlockVisitor({
+        node,
+        getVariableUniqueIdentifierParent: context.getVariableUniqueIdentifier
+    }, visitor, context);
 
 
     return {
@@ -84,6 +92,11 @@ export const ForStatement = (node: ts.ForStatement, visitor: ts.Visitor, context
         statement,
     );
 }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
 const updateLetInitializerAndConditionForBlock = (
     initializer: ts.VariableDeclarationList,
     condition: ts.ForStatement["condition"],
@@ -118,6 +131,8 @@ const updateLetInitializerAndConditionForBlock = (
 
     return { initializer, condition }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
 const updateStatementNode = (
     statement: ts.ForStatement["statement"],
     { blockScopeIdentifiers }: VariableStateType,
