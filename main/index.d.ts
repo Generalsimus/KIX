@@ -57,7 +57,7 @@ export declare const useListener: <T extends string, U extends Record<any, any>>
 
 /// START ABSTRACT NODE ///////////////////////////////////////// 
 export declare const createElement: <T extends Lowercase<string>>(tagName: T, renderCallback: (
-  objectNode: { [K: T]: any } & Record<any, any>,
+  objectNode: { [K in T]: any } & Record<any, any>,
   tagName: T,
   kix: typeof kix,
   createElement: (tagName: string) => NODE,
@@ -97,7 +97,6 @@ declare global {
   type JSXHtmlElementsList = {
     [TagName in keyof HTMLElements]: Partial<{
       [EventName in keyof HTMLElementEventMap as `on${Capitalize<EventName>}`]: (
-        this: HTMLElements[TagName],
         event: HTMLElementEventMap[EventName],
         element: HTMLElements[TagName]
       ) => any;

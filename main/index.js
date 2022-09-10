@@ -3,18 +3,20 @@ const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 
-//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს 
+//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს
+
 const GlobalRouteParams = {}
 const RoutePathParams = {}
-const attributeNameForCatchDynamicNameAndEvents = " $_%^%_$"
+const kixUniqueAppUsableKey = `$_%^${Math.random()}}^%_$`
+const WindowObject = window
 const abstractNodes = {
     $(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const eventsGetFunc = objectNode["E"];
         const dynamicAttributesObject = objectNode["D"];
         const JsxElementObject = {
             ...objectNode[objectPropertyName],
-            [attributeNameForCatchDynamicNameAndEvents]: (htmlTagNode) => {
-                delete JsxElementObject[attributeNameForCatchDynamicNameAndEvents]
+            [kixUniqueAppUsableKey]: (htmlTagNode) => {
+                delete JsxElementObject[kixUniqueAppUsableKey]
                 if (dynamicAttributesObject) {
                     for (const dynamicAttributeName in dynamicAttributesObject) {
                         const onChangeAttribute = (value) => {
@@ -134,15 +136,15 @@ const abstractNodes = {
         const renderJsxObject = {
             a: objectNode[objectPropertyName],
             ...objectNode,
-            [attributeNameForCatchDynamicNameAndEvents]: (htmlNode) => {
-                objectNode[attributeNameForCatchDynamicNameAndEvents]?.(htmlNode);
+            [kixUniqueAppUsableKey]: (htmlNode) => {
+                objectNode[kixUniqueAppUsableKey]?.(htmlNode);
                 htmlNode.addEventListener("click", (e) => {
                     e.preventDefault();
                     // const state = {
                     //     routeTime: new Date().getTime()
                     // }
-                    window.history.pushState({ routeTime: new Date().getTime() }, document.title, htmlNode.getAttribute("href"));
-                    window.dispatchEvent(new CustomEvent('popstate'));
+                    WindowObject.history.pushState({ routeTime: new Date().getTime() }, document.title, htmlNode.getAttribute("href"));
+                    WindowObject.dispatchEvent(new CustomEvent('popstate'));
                 })
             }
         }
@@ -155,32 +157,47 @@ const abstractNodes = {
         const children = objectNode[objectPropertyName];
         let emptyComponent
         let renderedEmptyComponent
+        let currentComponent
         const render = () => {
+            console.log("🚀 --> RENDER");
             const children = getChildren();
-
             for (const htmlNode of children) {
-                const isTextNode = htmlNode.nodeType === Node.TEXT_NODE
-                if (!isTextNode || isTextNode && htmlNode.textContent.trim().length) {
-                    return ""
+                const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
+                if (!isTextNode || (isTextNode && htmlNode.textContent.trim().length)) {
+                    return currentComponent = ""
                 }
             }
-            setTimeout(() => {
-                renderedEmptyComponent = getRenderedChildren();
-                // console.log("🚀 --> file: index.js --> line 173 --> setTimeout --> renderedEmptyComponent", renderedEmptyComponent);
-            });
 
-            return renderedEmptyComponent || emptyComponent
+            currentComponent = emptyComponent
+            return [renderedEmptyComponent || emptyComponent, () => {
+                renderedEmptyComponent = getRenderedChildren();
+            }]
         }
-        const renderComponent = () => RenderEmptyMarker(render())
+
+        const renderComponent = () => {
+            let prevComponent = currentComponent
+            let newComponent = render();
+            if (prevComponent !== currentComponent) {
+                RenderEmptyMarker(newComponent)
+            }
+        }
         useListener(objectNode, "ifEmptyComponent", (value) => {
             renderedEmptyComponent = undefined;
             emptyComponent = value
         }).init().addCallback(renderComponent);
-        setTimeout(() => window.addEventListener("popstate", renderComponent));
-        return [startMarker, children, endMarker, startMarkerEmptyMarker, render, endMarkerEmptyMarker]
+
+        WindowObject.addEventListener(kixUniqueAppUsableKey, renderComponent)
+        return [
+            startMarker,
+            children,
+            endMarker,
+            startMarkerEmptyMarker,
+            render,
+            endMarkerEmptyMarker,
+        ]
     },
     "route-switch"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
-        objectNode[attributeNameForCatchDynamicNameAndEvents]?.();
+        objectNode[kixUniqueAppUsableKey]?.();
         let path;
         let unique;
         let component;
@@ -218,9 +235,9 @@ const abstractNodes = {
 
             return renderedComponent || component
         }
-
-        const resetComponent = () => Render(renderComponent());
-        window.addEventListener("popstate", resetComponent);
+        // 
+        const resetComponent = () => (Render(renderComponent()), WindowObject.dispatchEvent(new CustomEvent(kixUniqueAppUsableKey)));
+        WindowObject.addEventListener("popstate", resetComponent);
         useListener(objectNode, "path", (value) => {
             path = value;
         }).init().addCallback(resetComponent);
@@ -239,7 +256,7 @@ const abstractNodes = {
 }
 
 const abstractAttributes = {
-    [attributeNameForCatchDynamicNameAndEvents](node, attributeName, value, setAttribute) {
+    [kixUniqueAppUsableKey](node, attributeName, value, setAttribute) {
         value(node);
     }
 }
@@ -396,9 +413,8 @@ const createMarker = () => {
 
     const renderNodes = (replaceNode) => {
         const startSibling = startMarker.nextSibling;
-        // if (!startSibling) {
-        //     return startMarker.addEventListener('DOMNodeInsertedIntoDocument', () => renderNodes(replaceNode), false);
-        // }
+        if (!startSibling) return
+
         let sibling = replaceNodes(startSibling, replaceNode);
         const parent = sibling.parentNode;
 
@@ -436,11 +452,11 @@ export const Router = {
     getGlobalParams() {
         return GlobalRouteParams
     },
-    history: window.history
+    history: WindowObject.history
 }
 export const createElement = (tagName, renderCallback) => {
     abstractNodes[tagName] = (objectNode, tagName, kix, createElement, setAttribute, createObjectElement) => {
-        objectNode[attributeNameForCatchDynamicNameAndEvents]?.();
+        objectNode[kixUniqueAppUsableKey]?.();
         return renderCallback(objectNode, tagName, kix, createElement, setAttribute, createObjectElement)
     };
 }
@@ -453,7 +469,7 @@ export const createAttribute = (attributeName, renderCallback, autoSet) => {
     }
 }
 // const abstractAttributes = {
-//     [attributeNameForCatchDynamicNameAndEvents](node, value, attributeName, setAttribute) {
+//     [kixUniqueAppUsableKey](node, value, attributeName, setAttribute) {
 //         value(node);
 //     }
 // }
