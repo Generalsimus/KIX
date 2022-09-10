@@ -35,8 +35,8 @@ export interface RouteParamsType {
   readonly [key: string]: string
 }
 export const Router: {
-  readonly getPathParams: (path: string) => RouteParamsType
-  readonly getGlobalParams: () => RouteParamsType
+  readonly getPathParams: <R extends RouteParamsType>(path: string) => R
+  readonly getGlobalParams: <R extends RouteParamsType>() => R
   readonly history: typeof window.history
 }
 /// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////

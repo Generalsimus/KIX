@@ -159,7 +159,6 @@ const abstractNodes = {
         let renderedEmptyComponent
         let currentComponent
         const render = () => {
-            console.log("🚀 --> RENDER");
             const children = getChildren();
             for (const htmlNode of children) {
                 const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
@@ -267,7 +266,7 @@ function createApp(createElementName, setAttribute) {
         if (abstractAttributes.hasOwnProperty(attributeName)) {
             abstractAttributes[attributeName](node, attributeName, value, setAttribute);
         } else if (value instanceof Function) {
-            setAttributeTagNode(node, value(node), attributeName);
+            setAttributeTagNode(node, attributeName, value(node));
         } else {
             setAttribute(node, attributeName, String(value ?? ""));
         }
