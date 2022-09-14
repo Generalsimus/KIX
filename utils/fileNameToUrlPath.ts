@@ -1,9 +1,9 @@
-import path from "path"
-import { App } from "../app"
+import path from "path" 
+import { runDirectory } from "../app"
 
 
 export const fileNameToUrlPath = (fileName: string) => {
 
-    return ("./" + path.relative(App.runDirName, fileName)).replace(/(^[\.\.\/]+)|([\\]+)/g, "/")
+    return ("./" + path.relative(runDirectory, fileName)).replace(/(^[\.\.\/]+)|([\\]+)/g, "/")
 }
 
