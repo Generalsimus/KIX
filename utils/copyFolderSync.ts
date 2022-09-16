@@ -21,7 +21,7 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
             fs.mkdirSync(to);
         } catch (e) { }
         fs.readdirSync(from).forEach((element) => {
-            copyFolderSync(path.join(from, element), path.join(to, element), ignorePaths, copyEmptyFolders);
+            copyFolderSync(path.resolve(from, element), path.resolve(to, element), ignorePaths, copyEmptyFolders);
         })
         if (fs.readdirSync(to).length === 0 && !copyEmptyFolders) {
             fs.rmSync(to, {

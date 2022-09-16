@@ -9,13 +9,17 @@ import { chdir } from "process";
 // import consola from "consola";
 import { createTemplate } from "../templates";
 import { runDirectory } from "../app";
+import { selfUpdateAndRunCommand } from "./selfUpdateAndRunCommand";
 
-export const runCommands = (argv: yargs.ArgumentsCamelCase<{}>) => {
+export const runCommands = async (argv: yargs.ArgumentsCamelCase<{}>) => {
 
-    // console.log("🚀 --> file: runCommands.ts --> line 25 --> spawn --> process", process.argv);
     switch (argv._[0]) {
         case "new":
-            createTemplate()
+            const { isUpdated } = await selfUpdateAndRunCommand(argv, "kix new");
+            console.log("🚀 --> file: runCommands.ts --> line 19 --> runCommands --> isUpdated", isUpdated);
+            if (isUpdated) {
+                createTemplate();
+            }
             break;
         default:
             spawn("npm exec -- npm run ", [...process.argv.slice(2)], {
@@ -23,13 +27,6 @@ export const runCommands = (argv: yargs.ArgumentsCamelCase<{}>) => {
                 cwd: runDirectory,
                 stdio: "inherit",
             }).on("error", consola.error);
-        // case "start":
-        // App.devMode = true;
-        // readIndexHtml();
-        // break;
-        // case "build":
-        // readIndexHtml().buildProduct();
-        // break;
     }
 
 

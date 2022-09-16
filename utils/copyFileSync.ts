@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { makePathExistSafe } from './makePathExistSafe';
+import { makeFilePathExistSafe } from './makeFilePathExistSafe';
 
 
 export const copyFileSync = (fromPath: string, toPath: string) => {
-    makePathExistSafe(toPath);
-    makePathExistSafe(toPath);
+    makeFilePathExistSafe(toPath);
+    makeFilePathExistSafe(toPath);
     fs.copyFileSync(fromPath, toPath)
 
 }

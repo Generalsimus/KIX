@@ -1,10 +1,10 @@
 import fs from "fs"
 import path from "path"
-import { makePathExistSafe } from "./makePathExistSafe";
+import { makeFilePathExistSafe } from "./makeFilePathExistSafe";
 
 export const moveFileSync = (fromPath: string, toPath: string) => {
 
-    makePathExistSafe(toPath);
+    makeFilePathExistSafe(toPath);
     fs.renameSync(fromPath, toPath);
 
 }

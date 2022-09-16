@@ -1,14 +1,18 @@
 export const getTsconfigContent = () => {
-    return /* json */`{
-    "compilerOptions": {
-      "outDir": "./public/",
-      "sourceMap": true,
-      "noImplicitAny": true,
-      "module": "commonjs",
-      "target": "es5",
-      "jsx": "preserve",
-      "allowJs": true,
-      "moduleResolution": "node"
-    }
-  }`
+    return /* json */`
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "target": "ES2017",
+    "jsx": "preserve",
+    "allowJs": true,
+    "moduleResolution": "node"
+  }
+}
+
+    `
 }

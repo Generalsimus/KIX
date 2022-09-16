@@ -17,6 +17,8 @@ export const readCommandsAndRun = async () => {
   // console.log("🚀 --> file: index.ts --> line 28 --> readCommandsAndRun --> new", __dirname);
   // console.log("🚀 --> file: index.ts --> line 28 --> readCommandsAndRun --> new", path.resolve("./"));
   runCommands(argv);
+  // const 
+  // git push --set-upstream origin migration-webpack
   // switch (argv._[0]) {
   //   case "new":
   //     createTemplate()

@@ -4,8 +4,13 @@ import { appDirectory } from "../app";
 import fs from "fs"
 import consola from "consola";
 
+
 export const getPromptsQuestions = async () => {
-    const validateProjectName = (value: any): boolean => (value && /^[a-zA-Z0-9_.-]*$/gm.test(value))
+    const validateProjectName = (value: any): boolean => (value && /^[a-zA-Z0-9_.-]*$/gm.test(value));
+    const templateTypes: Record<string, undefined | { path: string, indexFile: string }> = {
+        js: { path: path.resolve(appDirectory, "./templates/langs/javascript"), indexFile: "index.jsx" },
+        ts: { path: path.resolve(appDirectory, "./templates/langs/typescript"), indexFile: "index.tsx" },
+    }
 
 
     const appName = await prompts([{
@@ -15,27 +20,34 @@ export const getPromptsQuestions = async () => {
         validate: (value) => validateProjectName(value.trim())
     }]).then(({ value }) => value.trim());
 
-    const appCopyDirectory = await prompts([{
+    const appConfigLocation = await prompts([{
         type: 'select',
         name: 'value',
         message: 'Choose a template',
         choices: [
-            { title: 'Javascript Template ', value: path.join(appDirectory, "./templates/langs/javascript") },
-            { title: 'Typescript Template ', value: path.join(appDirectory, "./templates/langs/typescript") }
+            { title: 'Javascript Template ', value: "js" },
+            { title: 'Typescript Template ', value: "ts" }
         ]
     }]).then(({ value }) => {
-        if (!fs.existsSync(value)) {
-            throw consola.error(`template not found \n at(${value})`)
+        const appConfig = templateTypes[String(value)]
+        const { path: filePath, indexFile } = appConfig || {}
+
+        if (!appConfig) {
+            throw consola.error(`template not found`)
         }
-        return value
+        if (!fs.existsSync(filePath!)) {
+            throw consola.error(`template not found \n at(${path})`)
+        }
+        const indexFilePath = path.resolve(filePath!, indexFile!)
+        if (!indexFilePath) {
+            throw consola.error(`template not found \n at(${indexFilePath})`)
+        }
+        return appConfig
     })
 
-    // console.log("ZZZZ", {
-    //     appName,
-    //     appCopyDirectory
-    // })
+
     return {
         appName,
-        appCopyDirectory
+        ...appConfigLocation
     }
-}
+} 
