@@ -1,12 +1,6 @@
 import consola from "consola";
-// import { App } from "../app"
-// import { createAppTemplate } from "../app/template";
-// import { readIndexHtml } from "../app/readIndexHtml";
 import yargs from "yargs";
-import { spawn, exec } from "child_process";
-// import { isChildPath } from "../utils/isChildPath";
-import { chdir } from "process";
-// import consola from "consola";
+import { spawn } from "child_process";
 import { createTemplate } from "../templates";
 import { runDirectory } from "../app";
 import { selfUpdateAndRunCommand } from "./selfUpdateAndRunCommand";
@@ -15,11 +9,10 @@ export const runCommands = async (argv: yargs.ArgumentsCamelCase<{}>) => {
 
     switch (argv._[0]) {
         case "new":
-            const { isUpdated } = await selfUpdateAndRunCommand(argv, "kix new");
-            // console.log("🚀 --> file: runCommands.ts --> line 19 --> runCommands --> isUpdated", isUpdated);
+            const { isUpdated } = await selfUpdateAndRunCommand(argv, "kix");
 
             if (isUpdated) {
-                const argvAppName = argv._[2]
+                const argvAppName = argv._[1]
                 createTemplate(argvAppName ? String(argvAppName) : undefined);
             }
             break;

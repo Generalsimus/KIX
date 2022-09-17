@@ -1,5 +1,4 @@
-import { spawn, exec } from "child_process";
-import consola from "consola";
+import { spawn } from "child_process";
 import yargs from "yargs";
 import { runDirectory } from "../app";
 
@@ -7,7 +6,7 @@ import { runDirectory } from "../app";
 const runKeywordForPackage = "APP_RUN_KEYW_OOOOO_ORD_FOR_PACKAGER"
 export const selfUpdateAndRunCommand = async (argv: yargs.ArgumentsCamelCase<{}>, command: string) => {
     const isUpdated = argv[runKeywordForPackage] === runKeywordForPackage
-    //  argv[runKeywordForPackage] !== runKeywordForPackage
+
     if (!isUpdated) {
         await new Promise((resolve) => {
             spawn("npm update -g kix", [], {

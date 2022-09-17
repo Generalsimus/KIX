@@ -1,13 +1,8 @@
 import yargs, { ArgumentsCamelCase } from "yargs"
-// import { App } from "../app";
-// import { readTsConfigFile } from "../utils/readTsConfigFile";
 import packageJson from "../package.json"
 
 
 export const parseArgs = (): Promise<ArgumentsCamelCase> => {
-    // const configFile = readTsConfigFile().options
-    // const outDir = configFile.outDir || App.outDir
-
 
     const argv = yargs(process.argv.slice(2))
         .scriptName(packageJson.name)
