@@ -3,7 +3,7 @@ import { makeFilePathExistSafe } from "./makeFilePathExistSafe";
 import path from "path"
 
 export const writeFileSync = (filePath: string, fileContent: string) => {
-    console.log("🚀 --> file: writeFileSync.ts --> line 6 --> writeFileSync --> filePath", filePath);
+    // console.log("🚀 --> file: writeFileSync.ts --> line 6 --> writeFileSync --> filePath", filePath);
     makeFilePathExistSafe(filePath)
     // makePathExistSafe(path.dirname(filePath))
     // const ext = fs.existsSync(path.dirname(filePath))

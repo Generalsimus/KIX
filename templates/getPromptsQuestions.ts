@@ -5,19 +5,19 @@ import fs from "fs"
 import consola from "consola";
 
 
-export const getPromptsQuestions = async () => {
-    const validateProjectName = (value: any): boolean => (value && /^[a-zA-Z0-9_.-]*$/gm.test(value));
+export const getPromptsQuestions = async (argvAppName: string | undefined) => {
+    const validateProjectName = (value: any): boolean => ((value = value.trim()) && /^[a-zA-Z0-9_.-]*$/gm.test(value));
     const templateTypes: Record<string, undefined | { path: string, indexFile: string }> = {
         js: { path: path.resolve(appDirectory, "./templates/langs/javascript"), indexFile: "index.jsx" },
         ts: { path: path.resolve(appDirectory, "./templates/langs/typescript"), indexFile: "index.tsx" },
     }
 
 
-    const appName = await prompts([{
+    const appName = (argvAppName && validateProjectName(argvAppName)) ? argvAppName.trim() : await prompts([{
         type: 'text',
         name: 'value',
         message: 'Please specify the project name:',
-        validate: (value) => validateProjectName(value.trim())
+        validate: (value) => validateProjectName(value)
     }]).then(({ value }) => value.trim());
 
     const appConfigLocation = await prompts([{

@@ -36,5 +36,5 @@ export const getPackageContents = (kixVersion: string, typescriptVersion: string
                 "kix": "${kixVersion}"
         }
 }
-    `
+        `
 }

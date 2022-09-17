@@ -83,7 +83,10 @@ module.exports = function (env, argv) {
       new CopyWebpackPlugin({
         patterns: [{ from: publicDirectory, to: outputDirectory }],
       }),
-      new ForkTsCheckerWebpackPlugin()
+      new ForkTsCheckerWebpackPlugin({
+        typescript: { configFile: tsconfigFile },
+        devServer: isEnvDevelopment
+      })
     ],
   };
 }

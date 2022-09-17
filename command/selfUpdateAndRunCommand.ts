@@ -6,7 +6,7 @@ import { runDirectory } from "../app";
 
 const runKeywordForPackage = "APP_RUN_KEYW_OOOOO_ORD_FOR_PACKAGER"
 export const selfUpdateAndRunCommand = async (argv: yargs.ArgumentsCamelCase<{}>, command: string) => {
-    const isUpdated = true
+    const isUpdated = argv[runKeywordForPackage] === runKeywordForPackage
     //  argv[runKeywordForPackage] !== runKeywordForPackage
     if (!isUpdated) {
         await new Promise((resolve) => {

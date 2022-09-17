@@ -12,13 +12,14 @@ import currentPackage from "../package.json"
 import { runDirectory } from "../app";
 
 
-export const createTemplate = async () => {
-    const { appName, path: appCopyDirectory, indexFile } = await getPromptsQuestions();
+export const createTemplate = async (argvAppName: string | undefined) => {
+    const { appName, path: appCopyDirectory, indexFile } = await getPromptsQuestions(argvAppName);
+    
     const toPath = path.resolve(runDirectory, appName);
     const fromPath = appCopyDirectory;
+    
 
-
-    const configToPath =path.resolve(fromPath, "../../config");
+    const configToPath = path.resolve(fromPath, "../../config");
 
     writeFileSync(path.resolve(toPath, "webpack.config.js"), getWebpackConfigContents(indexFile))
     writeFileSync(path.resolve(toPath, "tsconfig.json"), getTsconfigContent())

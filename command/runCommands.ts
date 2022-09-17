@@ -16,9 +16,11 @@ export const runCommands = async (argv: yargs.ArgumentsCamelCase<{}>) => {
     switch (argv._[0]) {
         case "new":
             const { isUpdated } = await selfUpdateAndRunCommand(argv, "kix new");
-            console.log("🚀 --> file: runCommands.ts --> line 19 --> runCommands --> isUpdated", isUpdated);
+            // console.log("🚀 --> file: runCommands.ts --> line 19 --> runCommands --> isUpdated", isUpdated);
+
             if (isUpdated) {
-                createTemplate();
+                const argvAppName = argv._[2]
+                createTemplate(argvAppName ? String(argvAppName) : undefined);
             }
             break;
         default:
