@@ -3,7 +3,7 @@ import path from "path";
 import { copyFileSync } from "./copyFileSync";
 
 
-export const copyFolderSync = (from: string, to: string, ignorePaths: string[] = []) => {
+export const copyFolderSync = (from: string, to: string, ignorePaths: string[] = [], copyEmptyFolders = false) => {
     const stat = fs.lstatSync(from);
 
     if (ignorePaths.includes(from)) {
@@ -21,9 +21,9 @@ export const copyFolderSync = (from: string, to: string, ignorePaths: string[] =
             fs.mkdirSync(to);
         } catch (e) { }
         fs.readdirSync(from).forEach((element) => {
-            copyFolderSync(path.join(from, element), path.join(to, element), ignorePaths);
+            copyFolderSync(path.resolve(from, element), path.resolve(to, element), ignorePaths, copyEmptyFolders);
         })
-        if (!fs.readdirSync(to).length) {
+        if (fs.readdirSync(to).length === 0 && !copyEmptyFolders) {
             fs.rmSync(to, {
                 recursive: true
             })

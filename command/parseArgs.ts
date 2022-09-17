@@ -1,12 +1,12 @@
 import yargs, { ArgumentsCamelCase } from "yargs"
-import { App } from "../app";
-import { readTsConfigFile } from "../utils/readTsConfigFile";
+// import { App } from "../app";
+// import { readTsConfigFile } from "../utils/readTsConfigFile";
 import packageJson from "../package.json"
 
 
 export const parseArgs = (): Promise<ArgumentsCamelCase> => {
-    const configFile = readTsConfigFile().options
-    const outDir = configFile.outDir || App.outDir
+    // const configFile = readTsConfigFile().options
+    // const outDir = configFile.outDir || App.outDir
 
 
     const argv = yargs(process.argv.slice(2))
@@ -14,15 +14,15 @@ export const parseArgs = (): Promise<ArgumentsCamelCase> => {
         .usage('For more details please visit ' + packageJson.homepage)
         .command('new', `Creates a new workspace and an initial Kix application.`)
         .command('start', 'Builds and run your app, rebuilding on file changes.')
-        .command('build', `Compiles an Kix app into an output directory default named ${outDir} at the given output path.`)
+        // .command('build', `Compiles an Kix app into an output directory default named ${outDir} at the given output path.`)
         .options({
             outDir: {
-                default: outDir,
+                // default: outDir,
                 describe: 'Specify an output folder for all emitted files.',
                 type: "string",
             },
             port: {
-                default: App.port,
+                // default: App.port,
                 describe: 'choose your port',
                 type: "number",
             }
