@@ -23,6 +23,7 @@ import { WhileStatement } from "./WhileStatement";
 import { PostfixUnaryExpression } from "./PostfixUnaryExpression";
 import { PrefixUnaryExpression } from "./PrefixUnaryExpression";
 import { SourceFile } from "./SourceFile";
+import { DoStatement } from "./DoStatement";
 
 
 export const jsxTransformers = {
@@ -59,6 +60,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.TryStatement]: TryStatement,
     [ts.SyntaxKind.SwitchStatement]: SwitchStatement,
     [ts.SyntaxKind.WhileStatement]: WhileStatement,
+    [ts.SyntaxKind.WhileStatement]: DoStatement,
     [ts.SyntaxKind.ForStatement]: ForStatement,
     [ts.SyntaxKind.ForInStatement]: ForInStatement,
     [ts.SyntaxKind.ForOfStatement]: ForOfStatement,

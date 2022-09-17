@@ -12,7 +12,7 @@ export const getTsconfigContent = () => {
     "allowJs": true,
     "moduleResolution": "node"
   },
-  "exclude": ["webpack.config.js"]
+  "exclude": ["webpack.config.js", "./dist"]
 }
 
     `
