@@ -42,18 +42,27 @@ export const Router: {
 /// END EXPORT ROUTE PARAMS ////////////////////////////////////////////////////
 
 /// START PROPERTY LISTENER /////////////////////////////////////////
-export declare type ListenerCallback<T extends string, U extends Record<any, any>> = (value: U[T], propertyName: T, object: U) => any;
-export interface ListenerReturnType<T extends string, U extends Record<any, any>> {
-  addCallback: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-  addChildListener: (callback: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
-  close: () => ListenerReturnType<T, U>;
-  open: () => ListenerReturnType<T, U>;
-  init: () => ListenerReturnType<T, U>;
-  isOpen: () => boolean;
-  getValue: () => U[T];
+export declare type ListenerCallback<O extends Record<any, any>, K extends keyof O> = (value: O[K], propertyName: K, object: O) => void;
+export interface ListenerReturnType<O extends Record<any, any>, K extends keyof O> {
+    addCallback: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
+    addChildListener: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
+    close: () => ListenerReturnType<O, K>;
+    open: () => ListenerReturnType<O, K>;
+    init: () => ListenerReturnType<O, K>;
+    isOpen: () => boolean;
+    getValue: () => O[K];
 }
-export declare const useListener: <T extends string, U extends Record<any, any>>(objectValue: U, propertyName: T, callback?: ListenerCallback<T, U>) => ListenerReturnType<T, U>;
+export declare const useListener: <O extends Record<any, any>, K extends keyof O>(objectValue: O, propertyName: K, callback?: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////
+
+/// START OBJECT LISTENER /////////////////////////////////////////
+export declare type ObjectListenerCallback<O extends Record<any, any>, K extends keyof O> = (object: O, propertyName: K, value: O[K]) => void;
+export declare const useObserver: <O extends Record<any, any>, K extends keyof O>(
+    object: O,
+    callback: ObjectListenerCallback<O, K>,
+    listenKeys?: K[],
+) => void
+/// END OBJECT LISTENER ///////////////////////////////////////////
 
 /// START ABSTRACT NODE ///////////////////////////////////////// 
 export declare const createElement: <T extends Lowercase<string>>(tagName: T, renderCallback: (

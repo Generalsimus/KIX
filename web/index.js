@@ -467,15 +467,8 @@ export const createAttribute = (attributeName, renderCallback, autoSet) => {
         }
     }
 }
-// const abstractAttributes = {
-//     [kixUniqueAppUsableKey](node, value, attributeName, setAttribute) {
-//         value(node);
-//     }
-// }
-//  ("newnode", function ({ name }, NODE_NAME) {
 
-//     return <h3>NAME: {name}</h3>
-// })
+
 export const useListener = (objectValue, propertyName, callback = () => { }) => {
     const createCallbackChannel = (childCallback = () => { }) => {
         let isOpen = true;
@@ -527,4 +520,21 @@ export const useListener = (objectValue, propertyName, callback = () => { }) => 
     });
 
     return channel
+}
+
+export const useObserver = (
+    object,
+    callBack,
+    listenKeys,
+) => {
+    const listen = (key) => useListener(object, key, (value) => callBack(object, key, value));
+    if (listenKeys) {
+        for (const propKey of listenKeys) {
+            listen(propKey);
+        }
+    } else {
+        for (const propKey in object) {
+            listen(propKey);
+        }
+    }
 }
