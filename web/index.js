@@ -522,7 +522,7 @@ export const useListener = (objectValue, propertyName, callback = () => { }) => 
     return channel
 }
 
-export const useObserver = (
+export const useObjectListener = (
     object,
     callBack,
     listenKeys,

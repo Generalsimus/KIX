@@ -57,7 +57,7 @@ export declare const useListener: <O extends Record<any, any>, K extends keyof O
 
 /// START OBJECT LISTENER /////////////////////////////////////////
 export declare type ObjectListenerCallback<O extends Record<any, any>, K extends keyof O> = (object: O, propertyName: K, value: O[K]) => void;
-export declare const useObserver: <O extends Record<any, any>, K extends keyof O>(
+export declare const useObjectListener: <O extends Record<any, any>, K extends keyof O>(
     object: O,
     callback: ObjectListenerCallback<O, K>,
     listenKeys?: K[],
@@ -76,9 +76,9 @@ export declare const createElement: <T extends Lowercase<string>>(tagName: T, re
 /// END ABSTRACT NODE ///////////////////////////////////////////
 
 /// START ABSTRACT ATTRIBUTE ///////////////////////////////////////// 
-export declare const createAttribute: <A extends Lowercase<string>>(
+export declare const createAttribute: <A extends string>(
   attributeName: A,
-  setCallback: (node: HTMLElement, attributeName: A, value: string, setAttribute: (node: HTMLElement, attributeName: A, value: string) => void) => any,
+  setCallback: (node: HTMLElement, attributeName: A, value: any, setAttribute: (node: HTMLElement, attributeName: A, value: string) => void) => any,
   autoSet?: boolean
 ) => void
 /// END ABSTRACT ATTRIBUTE ///////////////////////////////////////////

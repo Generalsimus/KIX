@@ -60,7 +60,7 @@ export const jsxTransformers = {
     [ts.SyntaxKind.TryStatement]: TryStatement,
     [ts.SyntaxKind.SwitchStatement]: SwitchStatement,
     [ts.SyntaxKind.WhileStatement]: WhileStatement,
-    [ts.SyntaxKind.WhileStatement]: DoStatement,
+    [ts.SyntaxKind.DoStatement]: DoStatement,
     [ts.SyntaxKind.ForStatement]: ForStatement,
     [ts.SyntaxKind.ForInStatement]: ForInStatement,
     [ts.SyntaxKind.ForOfStatement]: ForOfStatement,
