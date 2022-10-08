@@ -44,24 +44,33 @@ export const Router: {
 /// START PROPERTY LISTENER /////////////////////////////////////////
 export declare type ListenerCallback<O extends Record<any, any>, K extends keyof O> = (value: O[K], propertyName: K, object: O) => void;
 export interface ListenerReturnType<O extends Record<any, any>, K extends keyof O> {
-    addCallback: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
-    addChildListener: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
-    close: () => ListenerReturnType<O, K>;
-    open: () => ListenerReturnType<O, K>;
-    init: () => ListenerReturnType<O, K>;
-    isOpen: () => boolean;
-    getValue: () => O[K];
+  addCallback: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
+  addChildListener: (callback: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
+  close: () => ListenerReturnType<O, K>;
+  open: () => ListenerReturnType<O, K>;
+  init: () => ListenerReturnType<O, K>;
+  isOpen: () => boolean;
+  getValue: () => O[K];
 }
 export declare const useListener: <O extends Record<any, any>, K extends keyof O>(objectValue: O, propertyName: K, callback?: ListenerCallback<O, K>) => ListenerReturnType<O, K>;
 /// END PROPERTY LISTENER ///////////////////////////////////////////
 
 /// START OBJECT LISTENER /////////////////////////////////////////
 export declare type ObjectListenerCallback<O extends Record<any, any>, K extends keyof O> = (object: O, propertyName: K, value: O[K]) => void;
+export interface ObjectListenerReturnType<O extends Record<any, any>, K extends keyof O> {
+  addCallback: (callback: ObjectListenerCallback<O, K>) => ObjectListenerReturnType<O, K>;
+  addChildListener: (callback: ObjectListenerCallback<O, K>) => ObjectListenerReturnType<O, K>;
+  close: () => ObjectListenerReturnType<O, K>;
+  open: () => ObjectListenerReturnType<O, K>;
+  initEach: (eachProperties?: K[]) => ObjectListenerReturnType<O, K>;
+  isOpen: () => boolean;
+  getValue: () => O;
+}
 export declare const useObjectListener: <O extends Record<any, any>, K extends keyof O>(
-    object: O,
-    callback: ObjectListenerCallback<O, K>,
-    listenKeys?: K[],
-) => void
+  object: O,
+  callback: ObjectListenerCallback<O, K>,
+  listenKeys?: K[],
+) => ObjectListenerReturnType<O, K>;
 /// END OBJECT LISTENER ///////////////////////////////////////////
 
 /// START ABSTRACT NODE ///////////////////////////////////////// 
