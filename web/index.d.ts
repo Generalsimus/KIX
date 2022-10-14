@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
 
-
-declare const kix: (parent?: HTMLElement | null | undefined, child: any) => any
+declare const kix: <T extends HTMLElement | Text, R extends T | Array<T>>(parent?: HTMLElement | null | undefined, child: any) => R
 
 export { kix };
 export default kix;

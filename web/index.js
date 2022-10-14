@@ -322,32 +322,61 @@ function createApp(createElementName, setAttribute) {
 }
 
 
-
-let registrationId = 0;
+const cleanDescriptor = (startPoint, funcArgs, index, registrationId) => {
+    for (let inc = index + 1; inc < funcArgs.length; ++inc) {
+        const keyValue = funcArgs[inc];
+        if (typeof startPoint === "object") {
+            let { set } = Object.getOwnPropertyDescriptor(startPoint, keyValue) || {}
+            const idList = set?.[idKey] || [];
+            const keyIndex = idList.indexOf(registrationId);
+            if (keyIndex !== -1) {
+                idList.splice(keyIndex, 1);
+            }
+            startPoint = startPoint?.[startPoint]
+        }
+    }
+}
+let incrementId = 0;
+const idKey = "_$IDS"
 const propertyRegistration = (registrationFunc, callback = () => { }) => {
-    const currentRegistrationId = ++registrationId;
+    const registrationId = incrementId++;
     const getValue = () => registrationFunc(function () {
         const ARGUMENTS = arguments
-        const registers = []
         return Array.prototype.reduce.call(ARGUMENTS, (prevValue, propertyKey, index) => {
-            if (prevValue === undefined) return prevValue
+            let value = prevValue?.[propertyKey];
+
             if (typeof prevValue === "object") {
-                register(
-                    prevValue,
-                    propertyKey,
-                    registers,
-                    index,
-                    currentRegistrationId,
-                    () => {
-                        callback(getValue())
+                let { set, get, configurable } = Object.getOwnPropertyDescriptor(prevValue, propertyKey) || {};
+                let isEnded = false
+                const idList = set?.[idKey] || [];
+                if (!idList.includes(registrationId) && configurable !== false) {
+                    const setter = (newValue) => {
+                        const oldGetterValue = prevValue?.[propertyKey]
+                        value = newValue;
+                        if (set) {
+                            set(newValue);
+                        }
+                        const newGetterValue = prevValue?.[propertyKey];
+                        if (typeof oldGetterValue === "object" && oldGetterValue !== newGetterValue) {
+                            cleanDescriptor(oldGetterValue, ARGUMENTS, index, registrationId)
+                        }
+                        isEnded = isEnded || !idList.includes(registrationId)
+                        if (!isEnded) {
+                            callback(getValue());
+                        }
                     }
-                );
+                    setter[idKey] = idList
+                    idList.push(registrationId);
+                    Object.defineProperty(prevValue, propertyKey, {
+                        enumerable: true,
+                        configurable: true,
+                        get: get || (() => value),
+                        set: setter
+                    });
+                }
             }
-            const value = prevValue?.[propertyKey];
-            if (typeof value === "function") {
-                return value.bind(prevValue);
-            }
-            return value
+
+            return typeof value === "function" ? value.bind(prevValue) : value
         })
     });
     return getValue()
