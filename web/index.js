@@ -381,40 +381,7 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
     });
     return getValue()
 }
-const register = (obj, key, registers, index, currentRegistrationId, changeCallback) => {
-    let descriptor = Object.getOwnPropertyDescriptor(obj, key)
-    let { set, get, value, configurable } = descriptor || {}
 
-    const idList = set?._$IDS || [];
-    if (!idList.includes(currentRegistrationId) && configurable !== false) {
-        idList.push(currentRegistrationId);
-        registers[index] = idList;
-        if (!descriptor) {
-            value = obj[key]
-        }
-        const getCurrentValue = () => (get ? get() : value)
-        const setter = (setValue) => {
-            if (set) {
-                set(setValue);
-            } else {
-                value = setValue;
-            }
-            if (idList.includes(currentRegistrationId)) {
-                if (typeof newValue === "object" && oldValue !== newValue) {
-
-                }
-                changeCallback();
-            }
-        }
-        setter._$IDS = idList;
-        Object.defineProperty(obj, key, {
-            enumerable: true,
-            configurable: true,
-            get: get || getCurrentValue,
-            set: setter
-        });
-    }
-}
 const createMarker = () => {
     const startMarker = kix(null, "");
     const endMarker = kix(null, "");
