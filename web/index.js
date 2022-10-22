@@ -3,20 +3,24 @@ const type = (arg) => Object.prototype.toString.call(arg);
 const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
 
-//TODO: ტეგზე სპრეადის უსაფრთხო ასინგისთვის  სჯობს სბსტრაქტული ატრიბუტი შეიქმნას და ევენთის ფროფერთები გაიფილტროს
+
 
 const GlobalRouteParams = {}
 const RoutePathParams = {}
-const kixUniqueAppUsableKey = `$_%^${Math.random()}}^%_$`
-const WindowObject = window
+const KIX_UNIQUE_APP_USABLE_KEY = `$_%^${Math.random()}}^%_$`
+const NODE_MOUNT_STATE_KEY = KIX_UNIQUE_APP_USABLE_KEY + "@#$%"
+const NODE_MOUNT_AWAITER_KEY = NODE_MOUNT_STATE_KEY + "$%^&*"
+const SETTER_ID_KEY = "_$IDS"
+const WindowObject = window;
+const DocumentObject = WindowObject.document;
 const abstractNodes = {
     $(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const eventsGetFunc = objectNode["E"];
         const dynamicAttributesObject = objectNode["D"];
         const JsxElementObject = {
             ...objectNode[objectPropertyName],
-            [kixUniqueAppUsableKey]: (htmlTagNode) => {
-                delete JsxElementObject[kixUniqueAppUsableKey]
+            [KIX_UNIQUE_APP_USABLE_KEY]: (htmlTagNode) => {
+                delete JsxElementObject[KIX_UNIQUE_APP_USABLE_KEY]
                 if (dynamicAttributesObject) {
                     for (const dynamicAttributeName in dynamicAttributesObject) {
                         const onChangeAttribute = (value) => {
@@ -97,7 +101,7 @@ const abstractNodes = {
         if (defaultXmlnsNamespaceURI) {
             createElement = (elementName) => {
 
-                return document.createElementNS(defaultXmlnsNamespaceURI, elementName);
+                return DocumentObject.createElementNS(defaultXmlnsNamespaceURI, elementName);
             }
         }
 
@@ -106,7 +110,7 @@ const abstractNodes = {
             const setAttributeCache = setAttribute;
             createElement = (elementName) => {
                 if (elementName.startsWith(`${xmlnsName}:`)) {
-                    return document.createElementNS(xmlnsList[xmlnsName], elementName);
+                    return DocumentObject.createElementNS(xmlnsList[xmlnsName], elementName);
                 }
                 return createElementCache(elementName);
             }
@@ -123,12 +127,21 @@ const abstractNodes = {
         return createApp(createElement, setAttribute)(null, JsxElement);
     },
     $D(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
-        const [startMarker, endMarker, ReplaceNode] = createMarker();
+        const [
+            renderNodes,
+            replaceChildren,
+        ] = newCreateMarker()
+        const storage = new Map();
 
         return [
-            startMarker,
-            propertyRegistration(objectNode[objectPropertyName], (v) => (ReplaceNode(v))),
-            endMarker
+            renderNodes,
+            () => replaceChildren(
+                storage,
+                propertyRegistration(
+                    objectNode[objectPropertyName],
+                    (renderElement) => replaceChildren(storage, renderElement)
+                )
+            )
         ]
     },
     "route-link"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
@@ -136,14 +149,12 @@ const abstractNodes = {
         const renderJsxObject = {
             a: objectNode[objectPropertyName],
             ...objectNode,
-            [kixUniqueAppUsableKey]: (htmlNode) => {
-                objectNode[kixUniqueAppUsableKey]?.(htmlNode);
+            [KIX_UNIQUE_APP_USABLE_KEY]: (htmlNode) => {
+                objectNode[KIX_UNIQUE_APP_USABLE_KEY]?.(htmlNode);
                 htmlNode.addEventListener("click", (e) => {
                     e.preventDefault();
-                    // const state = {
-                    //     routeTime: new Date().getTime()
-                    // }
-                    WindowObject.history.pushState({ routeTime: new Date().getTime() }, document.title, htmlNode.getAttribute("href"));
+
+                    WindowObject.history.pushState({ routeTime: new Date().getTime() }, DocumentObject.title, htmlNode.getAttribute("href"));
                     WindowObject.dispatchEvent(new CustomEvent('popstate'));
                 })
             }
@@ -152,59 +163,46 @@ const abstractNodes = {
         return renderJsxObject;
     },
     "route-block"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
-        const [startMarker, endMarker, _, getChildren] = createMarker()
-        const [startMarkerEmptyMarker, endMarkerEmptyMarker, RenderEmptyMarker, getRenderedChildren] = createMarker()
-        const children = objectNode[objectPropertyName];
-        let emptyComponent
-        let renderedEmptyComponent
-        let currentComponent
-        const render = () => {
+        const [renderChildComponentNodes, replaceChildren, getChildren] = newCreateMarker();
+        const [renderEmptyNodes, replaceEmptyChildren,] = newCreateMarker();
+
+        const renderComponent = () => {
+            const { ifEmptyComponent } = objectNode
             const children = getChildren();
+
             for (const htmlNode of children) {
                 const isTextNode = htmlNode.nodeType === Node.TEXT_NODE;
                 if (!isTextNode || (isTextNode && htmlNode.textContent.trim().length)) {
-                    return currentComponent = ""
+                    return ""
                 }
             }
 
-            currentComponent = emptyComponent
-            return [renderedEmptyComponent || emptyComponent, () => {
-                renderedEmptyComponent = getRenderedChildren();
-            }]
-        }
 
-        const renderComponent = () => {
-            let prevComponent = currentComponent
-            let newComponent = render();
-            if (prevComponent !== currentComponent) {
-                RenderEmptyMarker(newComponent)
-            }
+            return ifEmptyComponent
         }
-        useListener(objectNode, "ifEmptyComponent", (value) => {
-            renderedEmptyComponent = undefined;
-            emptyComponent = value
-        }).init().addCallback(renderComponent);
+        const storage = new Map();
+        const emptyComponentStorage = new Map();
+        const resetComponent = () => {
+            replaceEmptyChildren(storage, renderComponent());
+        }
+        useObjectListener(objectNode, resetComponent)
 
-        WindowObject.addEventListener(kixUniqueAppUsableKey, renderComponent)
+        WindowObject.addEventListener(KIX_UNIQUE_APP_USABLE_KEY, resetComponent);
         return [
-            startMarker,
-            children,
-            endMarker,
-            startMarkerEmptyMarker,
-            render,
-            endMarkerEmptyMarker,
-        ]
+            renderChildComponentNodes,
+            renderEmptyNodes,
+            () => {
+                replaceChildren(storage, objectNode[objectPropertyName])
+                replaceEmptyChildren(emptyComponentStorage, renderComponent())
+            }
+        ];
     },
     "route-switch"(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
-        objectNode[kixUniqueAppUsableKey]?.();
-        let path;
-        let unique;
-        let component;
-        let renderedComponent
-        const [startMarker, endMarker, Render, getChildren] = createMarker();
+        objectNode[KIX_UNIQUE_APP_USABLE_KEY]?.();
+
         const escapeRegExp = [/[-[\]{}()*+!<=?.\/\\^$|#\s,]/g, "\\$&"];
         const renderComponent = () => {
-
+            const { path, unique, component } = objectNode
             const queryRegExpList = (unique ? [
                 escapeRegExp,
                 [/\((.*?)\)/g, "(?:$1)?"],
@@ -216,46 +214,32 @@ const abstractNodes = {
             ]).reduce((repl, reg) => repl.replace(reg[0], reg[1]), path);
 
             const queryRegExp = new RegExp(unique ? "^" + queryRegExpList + "$" : queryRegExpList, "i");
-            const localPath = decodeURI(document.location.pathname);
+            const localPath = decodeURI(DocumentObject.location.pathname);
             const matchPath = localPath.match(queryRegExp) || [];
             const pathParams = Router.getPathParams(path);
 
             path.replace(/\/:/g, "/").match(queryRegExp).forEach((paramName, index) => {
-                (GlobalRouteParams[paramName] = (pathParams[paramName] = matchPath[index]))
+                GlobalRouteParams[paramName] = pathParams[paramName] = matchPath[index]
             });
 
-            if (!queryRegExp.test(localPath)) {
-                return ""
-            }
 
-            setTimeout(() => {
-                renderedComponent = getChildren();
-            });
-
-            return renderedComponent || component
+            return queryRegExp.test(localPath) ? component : ""
         }
-        // 
-        const resetComponent = () => (Render(renderComponent()), WindowObject.dispatchEvent(new CustomEvent(kixUniqueAppUsableKey)));
+        const [renderNodes, replaceChildren] = newCreateMarker();
+        const storage = new Map();
+        const resetComponent = () => {
+            replaceChildren(storage, renderComponent());
+            WindowObject.dispatchEvent(new CustomEvent(KIX_UNIQUE_APP_USABLE_KEY));
+        }
+        useObjectListener(objectNode, resetComponent)
         WindowObject.addEventListener("popstate", resetComponent);
-        useListener(objectNode, "path", (value) => {
-            path = value;
-        }).init().addCallback(resetComponent);
 
-        useListener(objectNode, "unique", (value) => {
-            unique = value;
-        }).init().addCallback(resetComponent);
-
-        useListener(objectNode, "component", (value) => {
-            renderedComponent = undefined;
-            component = value;
-        }).init().addCallback(resetComponent);
-
-        return [startMarker, renderComponent, endMarker]
+        return [renderNodes, resetComponent];
     },
 }
 
 const abstractAttributes = {
-    [kixUniqueAppUsableKey](node, attributeName, value, setAttribute) {
+    [KIX_UNIQUE_APP_USABLE_KEY](node, attributeName, value, setAttribute) {
         value(node);
     }
 }
@@ -298,16 +282,16 @@ function createApp(createElementName, setAttribute) {
             case "[object Object]":
                 return kix(parent, createObjectElement(children))
             case "[object Promise]":
-                const [startMarker, endMarker, Render] = createMarker();
-                children.then((result) => Render(result));
-                return kix(parent, [startMarker, endMarker]);
+                const [renderNodes, replaceChildren] = newCreateMarker();
+                children.then((result) => replaceChildren(result));
+                return kix(parent, renderNodes);
             case "[object Undefined]":
             case "[object Null]":
             case "[object Boolean]":
                 children = ""
             default:
                 if (!isHtml(children)) {
-                    children = document.createTextNode(children + "");
+                    children = DocumentObject.createTextNode(children + "");
                 }
 
         }
@@ -327,7 +311,7 @@ const cleanDescriptor = (startPoint, funcArgs, index, registrationId) => {
         const keyValue = funcArgs[inc];
         if (typeof startPoint === "object") {
             let { set } = Object.getOwnPropertyDescriptor(startPoint, keyValue) || {}
-            const idList = set?.[idKey] || [];
+            const idList = set?.[SETTER_ID_KEY] || [];
             const keyIndex = idList.indexOf(registrationId);
             if (keyIndex !== -1) {
                 idList.splice(keyIndex, 1);
@@ -337,7 +321,6 @@ const cleanDescriptor = (startPoint, funcArgs, index, registrationId) => {
     }
 }
 let incrementId = 0;
-const idKey = "_$IDS"
 const propertyRegistration = (registrationFunc, callback = () => { }) => {
     const registrationId = incrementId++;
     const getValue = () => registrationFunc(function () {
@@ -348,7 +331,7 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
             if (typeof prevValue === "object") {
                 let { set, get, configurable } = Object.getOwnPropertyDescriptor(prevValue, propertyKey) || {};
                 let isEnded = false
-                const idList = set?.[idKey] || [];
+                const idList = set?.[SETTER_ID_KEY] || [];
                 if (!idList.includes(registrationId) && configurable !== false) {
                     const setter = (newValue) => {
                         const oldGetterValue = prevValue?.[propertyKey]
@@ -365,7 +348,7 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
                             callback(getValue());
                         }
                     }
-                    setter[idKey] = idList
+                    setter[SETTER_ID_KEY] = idList
                     idList.push(registrationId);
                     Object.defineProperty(prevValue, propertyKey, {
                         enumerable: true,
@@ -381,48 +364,107 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
     });
     return getValue()
 }
+const loopEachElements = (element, callback) => {
+    if (element instanceof Array) {
+        for (const item of element) {
+            loopEachElements(item, callback);
+        }
+    } else {
+        callback(element);
+    }
+}
 
-const createMarker = () => {
-    const startMarker = kix(null, "");
-    const endMarker = kix(null, "");
-    const replaceNodes = (sibling, replaceNode) => {
 
-        if (replaceNode instanceof Array) {
-            for (const childNode of replaceNode) {
-                sibling = replaceNodes(sibling, childNode)
+const newCreateMarker = () => {
+    const [startMarker, endMarker] = kix(null, ["", ""]);
+    let ID = 0
+    const replaceNode = (sibling, replaceElement, storage) => {
+        if (replaceElement instanceof Array) {
+            for (const item of replaceElement) {
+                sibling = replaceNode(sibling, item, storage);
             }
         } else {
             const parent = sibling.parentNode;
-            const replaceableNode = kix(null, flatFunction(replaceNode, parent));
-            if (replaceableNode instanceof Array) {
-                return replaceNodes(sibling, replaceableNode)
-            } else if (sibling === endMarker) {
-                parent.insertBefore(replaceableNode, endMarker);
+            let cacheNodes = storage.get(replaceElement);
+            let storageNode;
+            if (cacheNodes) {
+                for (const item of cacheNodes) {
+                    if (item.id !== ID) {
+                        if (item.isMount) {
+                            loopEachElements(item.node, (node) => {
+                                if (sibling === node) {
+                                    sibling = node.nextSibling;
+                                }
+                                parent.removeChild(node);
+                            });
+                        }
+                        storageNode = item;
+                        break
+                    }
+
+                }
             } else {
-                parent.replaceChild(replaceableNode, sibling);
-                sibling = replaceableNode.nextSibling;
+                storage.set(replaceElement, cacheNodes = [])
+            }
+            if (!storageNode) {
+                cacheNodes.push(storageNode = {
+                    isMount: false,
+                    id: ID,
+                    node: kix(null, flatFunction(replaceElement, parent))
+                });
+            }
+            storageNode.isMount = true;
+            storageNode.id = ID;
+            loopEachElements(storageNode.node, (node) => {
+
+                node[NODE_MOUNT_STATE_KEY] = storageNode;
+                if (sibling === endMarker) {
+                    parent.insertBefore(node, endMarker);
+                } else {
+                    const mountState = sibling[NODE_MOUNT_STATE_KEY];
+                    if (mountState) {
+                        mountState.isMount = false;
+                    }
+                    parent.replaceChild(node, sibling);
+                    sibling = node.nextSibling;
+                }
+                node[NODE_MOUNT_AWAITER_KEY]?.()
+            });
+
+        }
+        return sibling
+    }
+    const replaceChildren = (storage, replaceElements) => {
+        const startSibling = startMarker.nextSibling;
+        if (startSibling) {
+            ID++;
+            let sibling = replaceNode(startSibling, replaceElements, storage);
+            const parent = sibling.parentNode;
+
+            while (sibling && sibling !== endMarker) {
+                const nextSibling = sibling.nextSibling;
+                const mountState = sibling[NODE_MOUNT_STATE_KEY];
+                if (mountState) {
+                    mountState.isMount = false;
+                }
+                parent.removeChild(sibling);
+                sibling = nextSibling;
+            }
+        } else {
+            startMarker[NODE_MOUNT_AWAITER_KEY] = endMarker[NODE_MOUNT_AWAITER_KEY] = () => {
+                if (startMarker.parentNode && endMarker.parentNode) {
+                    startMarker[NODE_MOUNT_AWAITER_KEY] = endMarker[NODE_MOUNT_AWAITER_KEY] = undefined
+                    replaceChildren(storage, replaceElements);
+                }
             }
         }
-        return sibling;
+
     }
 
-    const renderNodes = (replaceNode) => {
-        const startSibling = startMarker.nextSibling;
-        if (!startSibling) return
 
-        let sibling = replaceNodes(startSibling, replaceNode);
-        const parent = sibling.parentNode;
-
-        while (sibling && sibling !== endMarker) {
-            const nextSibling = sibling.nextSibling;
-            parent.removeChild(sibling);
-            sibling = nextSibling;
-        }
-    }
     return [
-        startMarker,
-        endMarker,
-        renderNodes,
+        [startMarker, endMarker],
+        replaceChildren,
         (currentNodes = [], sibling = startMarker) => {
             while ((sibling = sibling.nextSibling) && sibling !== endMarker) {
                 currentNodes.push(sibling);
@@ -432,13 +474,12 @@ const createMarker = () => {
     ]
 }
 
-
 export const kix = createApp(
-    (elementName) => document.createElement(elementName),
+    (elementName) => DocumentObject.createElement(elementName),
     (node, attributeName, value) => node.setAttribute(attributeName, value)
 );
 export default kix;
-export const styleCssDom = kix(document.body, { style: "" });
+export const styleCssDom = kix(DocumentObject.body, { style: "" });
 export class Component { render() { } }
 export const Router = {
     getPathParams(path) {
@@ -451,7 +492,7 @@ export const Router = {
 }
 export const createElement = (tagName, renderCallback) => {
     abstractNodes[tagName] = (objectNode, tagName, kix, createElement, setAttribute, createObjectElement) => {
-        objectNode[kixUniqueAppUsableKey]?.();
+        objectNode[KIX_UNIQUE_APP_USABLE_KEY]?.();
         return renderCallback(objectNode, tagName, kix, createElement, setAttribute, createObjectElement)
     };
 }
