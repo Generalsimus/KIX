@@ -479,7 +479,6 @@ export const kix = createApp(
     (node, attributeName, value) => node.setAttribute(attributeName, value)
 );
 export default kix;
-export const styleCssDom = kix(DocumentObject.body, { style: "" });
 export class Component { render() { } }
 export const Router = {
     getPathParams(path) {
