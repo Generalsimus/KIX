@@ -1,8 +1,17 @@
 import kix from "kix";
 import "./style.scss";
 
-var HTML = (
-  <div class="contain">
+
+function App() {
+
+  let time = new Date().toTimeString();
+  setInterval(() => {
+    time = new Date().toTimeString();
+  }, 1000);
+
+
+  return <div class="contain">
+    <h3 class="time">{time}</h3>
     <a href="https://kixjs.ml" target="_blank">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -16,6 +25,7 @@ var HTML = (
       </svg>
     </a>
   </div>
-);
+}
 
-kix(document.body, HTML);
+
+kix(document.body, <App />);

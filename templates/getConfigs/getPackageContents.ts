@@ -12,7 +12,8 @@ export const getPackageContents = (kixVersion: string, typescriptVersion: string
                 "start": "webpack-dev-server --mode=development",
                 "build": "webpack --mode=production",
                 "dist": "webpack --mode=production",
-                "serve": "webpack-dev-server --mode=development"
+                "serve": "webpack-dev-server --mode=development",
+                "dev": "webpack-dev-server --mode=development"
         },
         "author": "",
         "license": "ISC",
