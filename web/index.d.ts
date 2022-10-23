@@ -122,14 +122,16 @@ declare global {
 
 
   interface JSXElementsMap extends JSXHtmlElementsList {
-    "route-link": JSXHtmlElementsList["a"],
+    "route-link": JSXHtmlElementsList["a"] & {
+      routeScroll?: boolean // true
+    },
     "route-switch": {
       path: string,
-      unique?: boolean,
+      unique?: boolean // false,
       component: any
     },
     "route-block": {
-      ifEmptyComponent?: any
+      ifEmptyComponent?: any,
     }
 
   }
@@ -148,4 +150,4 @@ declare global {
 
 
 
-} 
+}

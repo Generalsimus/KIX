@@ -153,9 +153,13 @@ const abstractNodes = {
                 objectNode[KIX_UNIQUE_APP_USABLE_KEY]?.(htmlNode);
                 htmlNode.addEventListener("click", (e) => {
                     e.preventDefault();
-
                     WindowObject.history.pushState({ routeTime: new Date().getTime() }, DocumentObject.title, htmlNode.getAttribute("href"));
                     WindowObject.dispatchEvent(new CustomEvent('popstate'));
+
+                    const { routeScroll } = objectNode
+                    if (routeScroll === undefined || routeScroll) {
+                        WindowObject.scrollTo(0, 0);
+                    }
                 })
             }
         }
