@@ -287,7 +287,8 @@ function createApp(createElementName, setAttribute) {
                 return kix(parent, createObjectElement(children))
             case "[object Promise]":
                 const [renderNodes, replaceChildren] = newCreateMarker();
-                children.then((result) => replaceChildren(result));
+                const storage = new Map()
+                children.then((result) => replaceChildren(storage, result));
                 return kix(parent, renderNodes);
             case "[object Undefined]":
             case "[object Null]":
