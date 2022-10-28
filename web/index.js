@@ -1,18 +1,16 @@
 
 const type = (arg) => Object.prototype.toString.call(arg);
-const isHtml = (tag) => (tag?.__proto__.ELEMENT_NODE === Node.ELEMENT_NODE);
+const isHtml = (tag) => (tag?.__proto__?.ELEMENT_NODE === Node.ELEMENT_NODE);
 const flatFunction = (ifFunc, ...args) => typeof ifFunc === "function" ? flatFunction(ifFunc(...args)) : ifFunc;
-
-
-
 const GlobalRouteParams = {}
 const RoutePathParams = {}
-const KIX_UNIQUE_APP_USABLE_KEY = `$_%^${Math.random()}}^%_$`
-const NODE_MOUNT_STATE_KEY = KIX_UNIQUE_APP_USABLE_KEY + "@#$%"
-const NODE_MOUNT_AWAITER_KEY = NODE_MOUNT_STATE_KEY + "$%^&*"
 const SETTER_ID_KEY = "_$IDS"
+const KIX_UNIQUE_APP_USABLE_KEY = Math.random() + SETTER_ID_KEY
+const NODE_MOUNT_STATE_KEY = KIX_UNIQUE_APP_USABLE_KEY + SETTER_ID_KEY
+const NODE_MOUNT_AWAITER_KEY = NODE_MOUNT_STATE_KEY + SETTER_ID_KEY
 const WindowObject = window;
 const DocumentObject = WindowObject.document;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const abstractNodes = {
     $(objectNode, objectPropertyName, kix, createElement, setAttribute, createObjectElement) {
         const eventsGetFunc = objectNode["E"];
@@ -242,12 +240,14 @@ const abstractNodes = {
     },
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const abstractAttributes = {
     [KIX_UNIQUE_APP_USABLE_KEY](node, attributeName, value, setAttribute) {
         value(node);
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function createApp(createElementName, setAttribute) {
 
     const setAttributeTagNode = (node, attributeName, value) => {
@@ -260,20 +260,25 @@ function createApp(createElementName, setAttribute) {
         }
     }
 
-    function createObjectElement(objectNode, elementNode) {
+    function createObjectElement(parent, objectNode, elementNode) {
 
         for (const objectPropertyName in objectNode) {
             if (elementNode) {
                 setAttributeTagNode(elementNode, objectPropertyName, objectNode[objectPropertyName]);
             } else {
-                if (abstractNodes.hasOwnProperty(objectPropertyName)) {
-                    return abstractNodes[objectPropertyName](objectNode, objectPropertyName, kix, createElementName, setAttributeTagNode, createObjectElement);
+                if (objectPropertyName in abstractNodes) {
+                    return kix(
+                        parent,
+                        abstractNodes[objectPropertyName](objectNode, objectPropertyName, kix, createElementName, setAttributeTagNode, createObjectElement)
+                    )
                 }
 
                 kix((elementNode = createElementName(objectPropertyName)), objectNode[objectPropertyName]);
             }
+
         }
-        return elementNode
+
+        return (isHtml(parent) && parent.appendChild(elementNode)), elementNode
     }
 
     const kix = (parent, children) => {
@@ -284,7 +289,7 @@ function createApp(createElementName, setAttribute) {
             case "[object Function]":
                 return kix(parent, children(parent));
             case "[object Object]":
-                return kix(parent, createObjectElement(children))
+                return createObjectElement(parent, children)
             case "[object Promise]":
                 const [renderNodes, replaceChildren] = newCreateMarker();
                 const storage = new Map()
@@ -302,15 +307,12 @@ function createApp(createElementName, setAttribute) {
         }
 
 
-        if (isHtml(parent)) {
-            parent.appendChild(children)
-        }
-        return children;
+        return (isHtml(parent) && parent.appendChild(children)), children
     }
     return kix
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const cleanDescriptor = (startPoint, funcArgs, index, registrationId) => {
     for (let inc = index + 1; inc < funcArgs.length; ++inc) {
         const keyValue = funcArgs[inc];
@@ -369,6 +371,7 @@ const propertyRegistration = (registrationFunc, callback = () => { }) => {
     });
     return getValue()
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const loopEachElements = (element, callback) => {
     if (element instanceof Array) {
         for (const item of element) {
@@ -479,6 +482,7 @@ const newCreateMarker = () => {
     ]
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const kix = createApp(
     (elementName) => DocumentObject.createElement(elementName),
     (node, attributeName, value) => node.setAttribute(attributeName, value)
@@ -494,12 +498,14 @@ export const Router = {
     },
     history: WindowObject.history
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const createElement = (tagName, renderCallback) => {
     abstractNodes[tagName] = (objectNode, tagName, kix, createElement, setAttribute, createObjectElement) => {
         objectNode[KIX_UNIQUE_APP_USABLE_KEY]?.();
         return renderCallback(objectNode, tagName, kix, createElement, setAttribute, createObjectElement)
     };
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const createAttribute = (attributeName, renderCallback, autoSet) => {
     abstractAttributes[attributeName] = (node, attributeName, value, setAttribute) => {
         const setValue = renderCallback(node, attributeName, value, setAttribute)
@@ -511,7 +517,7 @@ export const createAttribute = (attributeName, renderCallback, autoSet) => {
 
 
 
-/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const useListener = (objectValue, propertyName, callback = () => { }) => {
     const createCallbackChannel = (childCallback = () => { }) => {
         let isOpen = true;
@@ -565,6 +571,7 @@ export const useListener = (objectValue, propertyName, callback = () => { }) => 
     return channel
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export const useObjectListener = (objectValue, callback = () => { }, listenKeys) => {
     const eachCall = (keys, call) => {
         if (keys) {
@@ -631,4 +638,5 @@ export const useObjectListener = (objectValue, callback = () => { }, listenKeys)
         }
     }));
     return channel
-} 
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
