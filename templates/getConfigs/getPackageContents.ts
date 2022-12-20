@@ -1,6 +1,9 @@
+import { getConfigVersions } from "./utils/getConfigVersions"
 
 // TODO: packagex.json ში test არ დაგავიწყდეს  \\ ეს სლეში გაუკეთე
-export const getPackageContents = (kixVersion: string, typescriptVersion: string) => {
+export const getPackageContents = async () => { 
+        const { kixVersion, typescriptVersion } = await getConfigVersions()
+        
         return /* json */`
 {
         "name": "kix",

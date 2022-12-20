@@ -2,7 +2,7 @@ import prompts from "prompts"
 import path from "path"
 import { appDirectory } from "../app";
 import fs from "fs"
-import consola from "consola";
+import { log } from "../utils/log";
 
 
 export const getPromptsQuestions = async (argvAppName: string | undefined) => {
@@ -33,14 +33,14 @@ export const getPromptsQuestions = async (argvAppName: string | undefined) => {
         const { path: filePath, indexFile } = appConfig || {}
 
         if (!appConfig) {
-            throw consola.error(`template not found`)
+            throw log.error(`template not found`)
         }
         if (!fs.existsSync(filePath!)) {
-            throw consola.error(`template not found \n at(${path})`)
+            throw log.error(`template not found \n at(${path})`)
         }
         const indexFilePath = path.resolve(filePath!, indexFile!)
         if (!indexFilePath) {
-            throw consola.error(`template not found \n at(${indexFilePath})`)
+            throw log.error(`template not found \n at(${indexFilePath})`)
         }
         return appConfig
     })
