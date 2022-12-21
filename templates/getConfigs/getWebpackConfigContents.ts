@@ -14,7 +14,7 @@ module.exports = function (env, argv) {
   const outputDirectory = path.resolve(__dirname, "dist");
   const indexHtmlFile = path.resolve(__dirname, "index.html");
   const tsconfigFile = path.resolve(__dirname, "tsconfig.json");
-  const devPort = parseInt(argv.port) || 2222
+  const devPort = parseInt(argv.port) || 2206
 
 
   return {

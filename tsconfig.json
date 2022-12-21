@@ -39,8 +39,8 @@
     "sourceMap": false /* Generates corresponding '.map' file. */,
     // "outFile": "./",                             /* Concatenate and emit output to single file. */
     "outDir": "./dist/",
-    // "outDir": "C:/Users/PC/Desktop/PROJECTS/TTTTEEESSTTT/Ktest/node_modules/kix/dist",
     // "outDir": "C:/Users/PC/Desktop/PROJECTS/KIXDOC/node_modules/kix/dist",
+    // "outDir": "C:/Users/PC/Desktop/PROJECTS/TTTTEEESSTTT/Ktest/node_modules/kix/dist",
     // "outDir": "C:/Users/PC/Desktop/PROJECTS/TTTTEEESSTTT/asdasdasd/node_modules/kix/dist",
     // "outDir": "C:/Users/PC/AppData/Roaming/npm/node_modules/kix/dist",
     /* Redirect output structure to the directory. */
@@ -143,5 +143,5 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "exclude": ["node_modules", "dist", "templates/config", "templates/langs"]
+  "exclude": ["asdasdas", "dist", "templates/config", "templates/langs"]
 }
