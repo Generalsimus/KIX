@@ -313,62 +313,68 @@ function createApp(createElementName, setAttribute) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const cleanDescriptor = (startPoint, funcArgs, index, registrationId) => {
-    for (let inc = index + 1; inc < funcArgs.length; ++inc) {
-        const keyValue = funcArgs[inc];
-        if (typeof startPoint === "object") {
-            let { set } = Object.getOwnPropertyDescriptor(startPoint, keyValue) || {}
-            const idList = set?.[SETTER_ID_KEY] || [];
-            const keyIndex = idList.indexOf(registrationId);
-            if (keyIndex !== -1) {
-                idList.splice(keyIndex, 1);
+
+let INC_REGiSTER_ID = 0
+const removePropsCallback = (id, value, startIndex, args) => {
+    for (let index = startIndex + 1; index < args.length; ++index) {
+        if (typeof value === "object") {
+            const property = args[index];
+            const setterObject = Object.getOwnPropertyDescriptor(value, property)?.set?.[SETTER_ID_KEY];
+            if (setterObject) {
+                delete setterObject[id]
             }
-            startPoint = startPoint?.[startPoint]
+            value = value?.[property]
         }
     }
 }
-let incrementId = 0;
-const propertyRegistration = (registrationFunc, callback = () => { }) => {
-    const registrationId = incrementId++;
-    const getValue = () => registrationFunc(function () {
-        const ARGUMENTS = arguments
-        return Array.prototype.reduce.call(ARGUMENTS, (prevValue, propertyKey, index) => {
-            let value = prevValue?.[propertyKey];
-
+const registerKeyProperty = (args, index, id, object, property, { get, set, configurable }, callback) => {
+    let value = object?.[property]
+    const setterObject = {
+        [id]: callback
+    }
+    if (configurable !== false) {
+        get = (get || (() => value));
+        const setter = (setValue) => {
+            if (set) {
+                set(setValue)
+            }
+            if (value !== setValue) {
+                removePropsCallback(id, value, index, args)
+            }
+            value = setValue
+            for (const keyId in setterObject) {
+                setterObject[keyId]()
+            }
+        }
+        setter[SETTER_ID_KEY] = setterObject
+        Object.defineProperty(object, property, {
+            enumerable: true,
+            configurable: true,
+            get: get,
+            set: setter
+        });
+    }
+    return value
+}
+const propertyRegistration = (register, callback) => {
+    const id = INC_REGiSTER_ID++
+    const resetCall = () => callback(getValue())
+    const getValue = () => register(function () {
+        return Array.prototype.reduce.call(arguments, (prevValue, property, index) => {
+            let value = prevValue?.[property]
             if (typeof prevValue === "object") {
-                let { set, get, configurable } = Object.getOwnPropertyDescriptor(prevValue, propertyKey) || {};
-                let isEnded = false
-                const idList = set?.[SETTER_ID_KEY] || [];
-                if (!idList.includes(registrationId) && configurable !== false) {
-                    const setter = (newValue) => {
-                        const oldGetterValue = prevValue?.[propertyKey]
-                        value = newValue;
-                        if (set) {
-                            set(newValue);
-                        }
-                        const newGetterValue = prevValue?.[propertyKey];
-                        if (typeof oldGetterValue === "object" && oldGetterValue !== newGetterValue) {
-                            cleanDescriptor(oldGetterValue, ARGUMENTS, index, registrationId)
-                        }
-                        isEnded = isEnded || !idList.includes(registrationId)
-                        if (!isEnded) {
-                            callback(getValue());
-                        }
-                    }
-                    setter[SETTER_ID_KEY] = idList
-                    idList.push(registrationId);
-                    Object.defineProperty(prevValue, propertyKey, {
-                        enumerable: true,
-                        configurable: true,
-                        get: get || (() => value),
-                        set: setter
-                    });
+                const descriptor = Object.getOwnPropertyDescriptor(prevValue, property)
+                const setterObject = descriptor?.set?.[SETTER_ID_KEY]
+                if (setterObject) {
+                    setterObject[id] = resetCall
+                } else if (descriptor) {
+                    value = registerKeyProperty(arguments, index, id, prevValue, property, descriptor, resetCall)
                 }
             }
-
             return typeof value === "function" ? value.bind(prevValue) : value
         })
-    });
+    })
+
     return getValue()
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
