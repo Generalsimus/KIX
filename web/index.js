@@ -329,9 +329,7 @@ const removePropsCallback = (id, value, startIndex, args) => {
 }
 const registerKeyProperty = (args, index, id, object, property, { get, set, configurable }, callback) => {
     let value = object?.[property]
-    const setterObject = {
-        [id]: callback
-    }
+    const setterObject = { [id]: callback };
     if (configurable !== false) {
         get = (get || (() => value));
         const setter = (setValue) => {

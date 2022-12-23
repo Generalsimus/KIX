@@ -7,7 +7,6 @@ export const parameterDeclaration = (params: (string | ts.BindingName)[] = []) =
         return factory.createParameterDeclaration(
             undefined,
             undefined,
-            undefined,
             param,
             undefined,
             undefined,

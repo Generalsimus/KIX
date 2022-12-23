@@ -3,7 +3,7 @@ import { identifier } from "./identifier";
 import { stringLiteral } from "./stringLiteral";
 const factory = ts.factory;
 
-type ArgsType = ts.ElementAccessExpression
+// type ArgsType = ts.ElementAccessExpression
 export function nodeToken(nodes: (string | ts.Expression)[], token: ts.BinaryOperator = ts.SyntaxKind.EqualsToken) {
 
 
