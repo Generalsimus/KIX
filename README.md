@@ -1,5 +1,7 @@
 # [KIX-Beta](https://kixjs.ml/)
 
+### [Doc](https://kixjs.ml/docs/)
+
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
