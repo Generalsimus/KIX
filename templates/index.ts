@@ -1,28 +1,53 @@
-import { getPromptsQuestions } from "./getPromptsQuestions";
+import { ModuleBuilder, TemplateTypes, getPromptsQuestions } from "./getPromptsQuestions";
 import path from "path";
 import { copyFolderSync } from "../utils/copyFolderSync";
 import { spawn } from "child_process";
 import { log } from "../utils/log";
 import { writeFileSync } from "../utils/writeFileSync";
-import { getPackageContents } from "./getConfigs/getPackageContents";
-import { getTsconfigContent } from "./getConfigs/getTsconfigContent";
-import { getWebpackConfigContents } from "./getConfigs/getWebpackConfigContents";
-import { runDirectory } from "../app";
-import color from "ansi-colors"
+import { appDirectory, runDirectory } from "../app";
+import { getConfigVersions } from "./utils/getConfigVersions";
+import { toRgb } from "colby/toRgb";
+import { getVitePackageConfig } from "./vite/getVitePackageConfig";
+import { getViteDefaultConfig } from "./vite/getViteDefaultConfig";
+import { getViteIndexHTML } from "./vite/getViteIndexHTML";
+import { getWebPackIndexHTML } from "./webpack/getWebPackIndexHTML";
+import { getWebpackPackageConfig } from "./webpack/getWebpackPackageConfig";
+import { getWebpackDefaultConfig } from "./webpack/getWebpackDefaultConfig";
+import { getMainFileCode } from "./getMainFileCode";
+import { getWebpackTsConfig } from "./webpack/getWebpackTsConfig";
+import { getVitTsConfig } from "./vite/getViteTsConfig";
+
 
 export const createTemplate = async (argvAppName: string | undefined) => {
-    const { appName, path: appCopyDirectory, indexFile } = await getPromptsQuestions(argvAppName);
-
+    const { appName, templateType, moduleBuilder } = await getPromptsQuestions(argvAppName);
+    const { kixVersion, typescriptVersion } = await getConfigVersions()
     const toPath = path.resolve(runDirectory, appName);
-    const fromPath = appCopyDirectory;
+    const fromPath = path.resolve(path.join(appDirectory, "templates", "config"));
 
-    const configToPath = path.resolve(fromPath, "../../config");
-
-    writeFileSync(path.resolve(toPath, "webpack.config.js"), getWebpackConfigContents(indexFile))
-    writeFileSync(path.resolve(toPath, "tsconfig.json"), getTsconfigContent())
-    writeFileSync(path.resolve(toPath, "package.json"), await getPackageContents())
-    copyFolderSync(configToPath, toPath, [], true);
     copyFolderSync(fromPath, toPath, [], true);
+
+
+    const packageJsonPath = path.resolve(toPath, "package.json");
+    const fileExt = (templateType === TemplateTypes.JS ? "js" : "ts");
+    const mainFileName = ("./src/index." + fileExt + "x");
+    if (moduleBuilder === ModuleBuilder.WEBPACK) {
+        writeFileSync(packageJsonPath, JSON.stringify(getWebpackPackageConfig(kixVersion, typescriptVersion, appName), null, 4));
+        const webpackConfigPath = path.resolve(path.join(toPath, "webpack.config.js"));
+        writeFileSync(webpackConfigPath, getWebpackDefaultConfig(mainFileName));
+        writeFileSync(path.resolve(path.join(toPath, "index.html")), getWebPackIndexHTML());
+        writeFileSync(path.resolve(path.join(toPath, "tsconfig.json")), JSON.stringify(getWebpackTsConfig(), null, 4));
+
+    } else if (moduleBuilder === ModuleBuilder.VITE) {
+        writeFileSync(packageJsonPath, JSON.stringify(getVitePackageConfig(kixVersion, typescriptVersion, appName), null, 4));
+        const viteConfigPath = path.resolve(path.join(toPath, "vite.config." + fileExt));
+        writeFileSync(viteConfigPath, getViteDefaultConfig());
+        writeFileSync(path.resolve(path.join(toPath, "index.html")), getViteIndexHTML(mainFileName));
+        writeFileSync(path.resolve(path.join(toPath, "tsconfig.json")), JSON.stringify(getVitTsConfig(), null, 4));
+
+    }
+    // getWebpackTsConfig
+    const executeMainFilePath = path.resolve(path.join(toPath, mainFileName));
+    writeFileSync(executeMainFilePath, getMainFileCode());
 
     spawn('npm', ["install"], {
         shell: true,
@@ -32,6 +57,6 @@ export const createTemplate = async (argvAppName: string | undefined) => {
         .on("error", log.error)
         .on("close", () => {
             log.clear()
-            log.log(color.green(`Project "${appName}" Created`), `\nLocation: ` + toPath)
+            log.log(toRgb(0, 128, 0)(`Project "${appName}" Created`), `\nLocation: ` + toPath);
         });
 };

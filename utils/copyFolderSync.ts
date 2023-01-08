@@ -4,6 +4,7 @@ import { copyFileSync } from "./copyFileSync";
 
 
 export const copyFolderSync = (from: string, to: string, ignorePaths: string[] = [], copyEmptyFolders = false) => {
+
     const stat = fs.lstatSync(from);
 
     if (ignorePaths.includes(from)) {

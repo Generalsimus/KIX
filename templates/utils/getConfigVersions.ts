@@ -1,7 +1,7 @@
 import pacote from "pacote"
-import { startLoader } from "../../../utils/startLoader"
-import { log } from "../../../utils/log"
-import packageConfig from "../../../package.json"
+import { startLoader } from "../../utils/startLoader"
+import { log } from "../../utils/log"
+import packageConfig from "../../package.json"
 
 export const getConfigVersions = async () => { 
     const stopLoader = startLoader("Please wait...") 

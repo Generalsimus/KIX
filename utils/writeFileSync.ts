@@ -9,6 +9,6 @@ export const writeFileSync = (filePath: string, fileContent: string) => {
     // const ext = fs.existsSync(path.dirname(filePath))
     // console.log("🚀 --> file: writeFileSync.ts --> line 7 --> writeFileSync --> ext", ext);
     fs.writeFileSync(filePath, fileContent)
-
+ 
 
 }

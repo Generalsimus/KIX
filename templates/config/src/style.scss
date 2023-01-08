@@ -10,7 +10,8 @@ body {
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  > a {
+
+  >a {
     display: flex;
     align-items: center;
     max-width: 80%;
@@ -22,10 +23,12 @@ body {
     border: 7px solid #a0111100;
     border-left-color: #e33030;
   }
+
   svg {
     width: 100%;
   }
 }
+
 .time {
   color: white;
 }

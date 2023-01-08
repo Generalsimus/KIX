@@ -1,10 +1,12 @@
+export const getMainFileCode = () => {
+    return /* typescript */ `
 import kix from "kix";
 import "./style.scss";
 
 
 function App() {
-
   let time = new Date().toTimeString();
+
   setInterval(() => {
     time = new Date().toTimeString();
   }, 1000);
@@ -28,4 +30,5 @@ function App() {
 }
 
 
-kix(document.body, <App />);
+kix(document.body, <App />);`.trim();
+}
