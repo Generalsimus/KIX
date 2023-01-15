@@ -2,25 +2,24 @@ export const getVitTsConfig = () => {
     return {
         "compilerOptions": {
             "target": "ESNext",
-            "useDefineForClassFields": true,
-            "module": "ESNext",
             "lib": ["ESNext", "DOM"],
-            "outDir": "dist",
-            "moduleResolution": "Node",
-            "strict": true,
-            "resolveJsonModule": true,
-            "isolatedModules": true,
-            "esModuleInterop": true,
-            "noEmit": false,
             "jsx": "preserve",
+            "module": "ESNext",
+            "rootDir": "./",
+            "moduleResolution": "Node",
+            "resolveJsonModule": true,
             "allowJs": true,
-            "noUnusedLocals": true,
-            "noUnusedParameters": true,
-            "noImplicitReturns": true,
-            "skipLibCheck": true,
+            "checkJs": false,
             "declaration": true,
-            "declarationMap": false
+            "declarationMap": false,
+            "outDir": "./dist",
+            "noEmit": false,
+            "esModuleInterop": true,
+            "forceConsistentCasingInFileNames": true,
+            "strict": true,
+            "skipLibCheck": true
         },
-        "include": ["src"]
+        "include": ["src", "module.d.ts"],
+        "exclude": ["./dist"]
     }
 }

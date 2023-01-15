@@ -1,17 +1,27 @@
 export const getWebpackTsConfig = () => {
     return {
         "compilerOptions": {
-            "outDir": "./dist/",
-            "noImplicitAny": true,
-            "module": "commonjs",
-            "resolveJsonModule": true,
-            "esModuleInterop": true,
-            "target": "ES2017",
+            "target": "ES2018",
+            "lib": ["ES2018", "DOM"],
             "jsx": "preserve",
+            "module": "commonjs",
+            "rootDir": "./",
+            "moduleResolution": "Node",
+            "resolveJsonModule": true,
             "allowJs": true,
-            "moduleResolution": "node"
+            "checkJs": false,
+            "declaration": true,
+            "declarationMap": false,
+            "outDir": "./dist",
+            "noEmit": false,
+            "esModuleInterop": true,
+            "forceConsistentCasingInFileNames": true,
+            "strict": true,
+            "skipLibCheck": true
         },
-        "exclude": ["webpack.config.js", "./dist"]
+        "include": ["src", "module.d.ts"],
+        "exclude": ["./dist"]
     }
+
 
 }

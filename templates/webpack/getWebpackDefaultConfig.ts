@@ -9,9 +9,8 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { getTransformers } = require("kix/transformers");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-// /.(ts|((t|j)sx?)|json)$/i
-// /\.(((t|j)sx?)|json)$/i
+const tsLoader = require("webpack-ts-load")
+
 module.exports = function (env, argv) {
   const getOption = (name) => env?.[name] || argv?.[name];
 
@@ -19,7 +18,6 @@ module.exports = function (env, argv) {
   const publicDirectory = path.resolve(__dirname, "public");
   const outputDirectory = path.resolve(__dirname, getOption("outDir") || "dist");
   const indexHtmlFile = path.resolve(__dirname, "index.html");
-  const tsconfigFile = path.resolve(__dirname, "tsconfig.json");
   const devPort = parseInt(getOption("port")) || 2206;
 
   return {
@@ -29,19 +27,36 @@ module.exports = function (env, argv) {
     module: {
       rules: [
         {
-          test: /\.(((t|j)sx?)|json)$/i,
+          test: /\.(((t|j)sx?)|json|svg)$/i,
           exclude: path.resolve(__dirname, "node_modules"),
           use: [
             {
-              loader: "ts-loader",
+              loader: "webpack-ts-load",
               options: {
-                configFile: tsconfigFile,
                 compilerOptions: {
-                  sourceMap: isEnvDevelopment,
+                  sourceMap: isEnvDevelopment
                 },
-                getCustomTransformers: getTransformers,
+                extensionsSupport: {
+                  ".svg": {
+                    extension: tsLoader.Extension.Js,
+                    scriptKind: tsLoader.ScriptKind.JS
+                  }
+                },
+                transformers: getTransformers(),
               },
-            },
+            }
+          ],
+        },
+        {
+          test: /\.svg$/,
+          use: [
+            {
+              loader: '@svgr/webpack',
+              options: {
+                jsxRuntime: "automatic",
+                babel: false,
+              }
+            }
           ],
         },
         {
@@ -61,7 +76,7 @@ module.exports = function (env, argv) {
             { loader: "postcss-loader" },
             { loader: "sass-loader" },
           ],
-        },
+        }
       ],
     },
     resolve: {
@@ -88,11 +103,7 @@ module.exports = function (env, argv) {
       }),
       new CopyWebpackPlugin({
         patterns: [{ from: publicDirectory, to: outputDirectory }],
-      }),
-      new ForkTsCheckerWebpackPlugin({
-        typescript: { configFile: tsconfigFile },
-        devServer: isEnvDevelopment,
-      }),
+      })
     ],
   };
 };

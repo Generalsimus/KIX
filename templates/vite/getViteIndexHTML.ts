@@ -14,5 +14,6 @@ export const getViteIndexHTML = (mainFileName: string) => {
   <script type="module" src="${mainFileName}"></script>
 </body>
 
-</html>`.trim()
+</html>
+    `.trim()
 }
