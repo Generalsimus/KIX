@@ -1,5 +1,6 @@
-./* 
-!./dist
-!./app/template
-!./main/index.js
-!./main/index.d.ts
+/*
+!dist/.*
+!package-lock.json
+!package.json
+!tsconfig.json
+!templates/config
