@@ -10,8 +10,6 @@ export const getVitTsConfig = () => {
             "resolveJsonModule": true,
             "allowJs": true,
             "checkJs": false,
-            "declaration": true,
-            "declarationMap": false,
             "outDir": "./dist",
             "noEmit": false,
             "esModuleInterop": true,
