@@ -17,7 +17,8 @@ export const getVitTsConfig = () => {
             "esModuleInterop": true,
             "forceConsistentCasingInFileNames": true,
             "strict": true,
-            "skipLibCheck": true
+            "skipLibCheck": true,
+            "types": ["node"]
         },
         "include": ["src", "module.d.ts"],
         "exclude": ["./dist"]

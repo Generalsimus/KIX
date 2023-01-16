@@ -431,12 +431,16 @@ const createSpaceController = () => {
         if (parentNode) {
             currentNode = startMarker.nextSibling;
             replace(node, parentNode);
-            removeUnusedNodes();
+            if (currentNode !== startMarker) {
+                removeUnusedNodes();
+            }
         } else {
             endMarker[NODE_MOUNT_FUNCTION_KEY] = () => {
                 currentNode = startMarker.nextSibling;
                 replace(node, startMarker.parentNode);
-                removeUnusedNodes();
+                if (currentNode !== startMarker) {
+                    removeUnusedNodes();
+                }
             }
 
         }
