@@ -14,11 +14,11 @@ export const getVitePackageConfig = (kixVersion: string, tsVersion: string, appN
     },
     "devDependencies": {
       "resolve": "^1.22.1",
+      "sass": "^1.57.1",
       "svg-plugin-vite": "^0.0.5",
       "typescript": tsVersion,
       "vite": "^4.0.4",
-      "vite-typescript-plugin": "^0.2.7",
-      "sass": "^1.57.1"
+      "vite-typescript-plugin": "^0.3.0"
     },
     "dependencies": {
       "kix": kixVersion

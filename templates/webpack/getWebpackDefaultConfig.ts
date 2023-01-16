@@ -9,7 +9,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { getTransformers } = require("kix/transformers");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const tsLoader = require("webpack-ts-load")
+const { ts } = require("webpack-ts-load")
 
 module.exports = function (env, argv) {
   const getOption = (name) => env?.[name] || argv?.[name];
@@ -22,12 +22,12 @@ module.exports = function (env, argv) {
 
   return {
     entry: {
-      index: "${mainFileName}",
+      index: "./src/index.tsx",
     },
     module: {
       rules: [
         {
-          test: /\.(((t|j)sx?)|json|svg)$/i,
+          test: /.(((t|j)sx?)|json|svg)$/i,
           exclude: path.resolve(__dirname, "node_modules"),
           use: [
             {
@@ -38,8 +38,8 @@ module.exports = function (env, argv) {
                 },
                 extensionsSupport: {
                   ".svg": {
-                    extension: tsLoader.Extension.Js,
-                    scriptKind: tsLoader.ScriptKind.JS
+                    extension: ts.Extension.Js,
+                    scriptKind: ts.ScriptKind.JS
                   }
                 },
                 transformers: getTransformers(),
@@ -48,7 +48,7 @@ module.exports = function (env, argv) {
           ],
         },
         {
-          test: /\.svg$/,
+          test: /.svg$/,
           use: [
             {
               loader: '@svgr/webpack',

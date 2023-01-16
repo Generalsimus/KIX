@@ -1,8 +1,8 @@
 export const getViteDefaultConfig = () => {
-    return /* js */`
+  return /* js */`
 import { defineConfig } from "vite";
 import { getTransformers } from "kix/transformers";
-import { createPlugin, Extension, ScriptKind } from "vite-typescript-plugin";
+import { createTsPlugin, ts } from "vite-typescript-plugin";
 import { createSvgPlugin } from "svg-plugin-vite"
 
 // https://vitejs.dev/config/
@@ -14,19 +14,19 @@ export default defineConfig({
         jsxRuntime: "automatic",
       }
     }),
-    createPlugin({
+    createTsPlugin({
       name: "kix",
       compilerOptions: {},
       test: /.(((t|j)sx?)|json|svg)$/i,
       transformers: getTransformers(),
       extensionsSupport: {
         ".svg": {
-          extension: Extension.Js,
-          scriptKind: ScriptKind.JS,
+          extension: ts.Extension.Js,
+          scriptKind: ts.ScriptKind.JS,
         }
       }
     }),
   ],
 });
 `.trim()
-  }
+}
