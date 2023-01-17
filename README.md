@@ -28,7 +28,7 @@ AND
 kix build
 ```
 
-## Getting Started
+## [Getting Started](https://kixjs.ml/docs/)
 
 ```js
 import kix from "kix"
