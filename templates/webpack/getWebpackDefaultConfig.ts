@@ -22,7 +22,7 @@ module.exports = function (env, argv) {
 
   return {
     entry: {
-      index: "./src/index.tsx",
+      index: "${mainFileName}",
     },
     module: {
       rules: [

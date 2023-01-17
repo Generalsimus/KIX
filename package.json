@@ -1,6 +1,6 @@
 {
   "name": "kix",
-  "version": "3.7.1-beta.48",
+  "version": "3.7.1-beta.51",
   "main": "./web/index.js",
   "author": {
     "name": "soso tsertsvadze",
