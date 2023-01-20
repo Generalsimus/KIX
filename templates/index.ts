@@ -5,7 +5,6 @@ import { spawn } from "child_process";
 import { log } from "../utils/log";
 import { writeFileSync } from "../utils/writeFileSync";
 import { appDirectory, runDirectory } from "../app";
-import { getConfigVersions } from "./utils/getConfigVersions";
 import { toRgb } from "colby/toRgb";
 import { getVitePackageConfig } from "./vite/getVitePackageConfig";
 import { getViteDefaultConfig } from "./vite/getViteDefaultConfig";
@@ -16,11 +15,12 @@ import { getWebpackDefaultConfig } from "./webpack/getWebpackDefaultConfig";
 import { getMainFileCode } from "./getMainFileCode";
 import { getWebpackTsConfig } from "./webpack/getWebpackTsConfig";
 import { getVitTsConfig } from "./vite/getViteTsConfig";
-
+import packageConfig from "../package.json"
 
 export const createTemplate = async (argvAppName: string | undefined) => {
+    const { version: kixVersion, dependencies: { typescript: typescriptVersion } } = packageConfig
     const { appName, templateType, moduleBuilder } = await getPromptsQuestions(argvAppName);
-    const { kixVersion, typescriptVersion } = await getConfigVersions()
+
     const toPath = path.resolve(runDirectory, appName);
     const fromPath = path.resolve(path.join(appDirectory, "templates", "config"));
 
@@ -45,7 +45,7 @@ export const createTemplate = async (argvAppName: string | undefined) => {
         writeFileSync(path.resolve(path.join(toPath, "tsconfig.json")), JSON.stringify(getVitTsConfig(), null, 4));
 
     }
-    // getWebpackTsConfig
+   
     const executeMainFilePath = path.resolve(path.join(toPath, mainFileName));
     writeFileSync(executeMainFilePath, getMainFileCode());
 
