@@ -1,9 +1,6 @@
 import ts from "typescript";
 import { CustomContextType, declaredBlockIdentifiersType, IdentifiersStateType } from "../..";
 import { NumberToUniqueString } from "../../../utils/numberToUniqueString";
-import { identifier } from "../../factoryCode/identifier";
-import { nodeToken } from "../../factoryCode/nodeToken";
-import { propertyAccessExpression } from "../../factoryCode/propertyAccessExpression";
 import { getIndexId } from "./getIndexId";
 
 

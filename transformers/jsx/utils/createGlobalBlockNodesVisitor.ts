@@ -1,13 +1,11 @@
 import ts from "typescript"
 import { CustomContextType } from "../.."
-import { NumberToUniqueString } from "../../../utils/numberToUniqueString"
 import { createObject, createObjectArgsType } from "../../factoryCode/createObject"
 import { identifier } from "../../factoryCode/identifier"
 import { variableStatement } from "../../factoryCode/variableStatement"
 import { getVariableDeclarationNames } from "../../utils/getVariableDeclarationNames"
-import { createBlockVisitor, VariableStateType } from "./createBlockVisitor"
-import { creteManageIdentifierState } from "./getIdentifierState"
-// import { getIdentifierState } from "./getIdentifierState"
+import { createBlockVisitor } from "./createBlockVisitor"
+
 type BlockNodesType = ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration | ts.ClassStaticBlockDeclaration
 
 const createGlobalBlockVisitor = createBlockVisitor(<N extends BlockNodesType>(node: N, visitor: ts.Visitor, context: CustomContextType) => {

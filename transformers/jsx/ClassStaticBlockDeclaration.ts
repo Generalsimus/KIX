@@ -1,8 +1,4 @@
 import ts from "typescript";
-import { CustomContextType } from "..";
-import { createObject } from "../factoryCode/createObject";
-import { variableStatement } from "../factoryCode/variableStatement";
-import { VariableStateType } from "./utils/createBlockVisitor";
 import { createGlobalBlockNodesVisitor } from "./utils/createGlobalBlockNodesVisitor";
 
 export const ClassStaticBlockDeclaration = createGlobalBlockNodesVisitor(

@@ -1,12 +1,11 @@
 import ts from "typescript";
 import { CustomContextType } from "..";
-import { NumberToUniqueString } from "../../utils/numberToUniqueString";
 import { createObject, createObjectArgsType } from "../factoryCode/createObject";
 import { identifier } from "../factoryCode/identifier";
 import { variableStatement } from "../factoryCode/variableStatement";
 import { getVariableDeclarationNames } from "../utils/getVariableDeclarationNames";
 import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
-// import { createBlockVisitor, VariableStateType } from "./utils/createBlockVisitor";
+
 
 const TryStatementVisitor = createBlockVisitor(<N extends ts.Node>(node: N, visitor: ts.Visitor, context: CustomContextType) => {
 

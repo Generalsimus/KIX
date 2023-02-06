@@ -282,7 +282,7 @@ function createApp(createElementName, setAttribute) {
             case "[object Promise]":
                 const [markers, Render] = createSpaceController();
 
-                children.then((result) => Render(storage, result));
+                children.then((result) => Render(result));
 
                 return kix(parent, markers);
             case "[object Undefined]":
