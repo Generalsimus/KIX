@@ -1,14 +1,15 @@
 {
   "name": "kix",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "main": "./web/index.js",
   "author": {
     "name": "soso tsertsvadze",
     "email": "sosotsertsvadze2@gmail.com"
   },
   "publishConfig": {
-    "tag": "4.0.1",
-    "dist-tag": "4.0.1"
+    "tag": "4.0.2",
+    "dist-tag": "4.0.2",
+    "registry":"https://registry.npmjs.org/"
   },
   "repository": {
     "type": "git",
