@@ -8,6 +8,7 @@ import { createJsxChildrenNode } from "./createJsxChildrenNode"
 import { forEachJsxAttributes } from "./forEachJsxAttributes"
 import { getExpressionNames } from "./getExpressionNames"
 import { useJsxPropRegistration } from "./useJsxPropRegistration"
+import { stringLiteral } from "../../factoryCode/stringLiteral"
 
 //TODO:კლასის კომპენენტის შემთXვევაში უნდა იყოს ასე new ClassName().method() და არა ესე new ClassName.method()
 export const createJSXComponent = (
@@ -22,9 +23,11 @@ export const createJSXComponent = (
         context,
         children
     )
+    
+    const safeComponentName = ts.isJsxNamespacedName(componentName) ? stringLiteral("componentName") : componentName
 
     const propsObjectNodesForFactoryCode: [ts.Identifier | string, ts.Expression][] = [
-        ["$C", componentName],
+        ["$C", safeComponentName],
     ]
 
     if (childrenNode) {

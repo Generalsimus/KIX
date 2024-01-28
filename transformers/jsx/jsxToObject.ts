@@ -50,7 +50,7 @@ export const jsxToObject = (
         const dynamicObjectNodeProperties: createObjectArgsType = [];
         let haveDefaultXmlns: boolean = false;
         forEachJsxAttributes(attributes.properties, (attributeName, attributeValueNode) => {
-            const attributeNameString = ts.idText(attributeName)
+            const attributeNameString = typeof attributeName === "string" ? attributeName : ts.idText(attributeName)
 
 
             if (/^(on+[A-Z])/.test(attributeNameString)) {

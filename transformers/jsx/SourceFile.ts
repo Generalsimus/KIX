@@ -3,7 +3,8 @@ import { CustomContextType } from "..";
 import { moduleSourceFileBodyVisitor } from "./utils/moduleSourceFileBodyVisitor";
 
 export const SourceFile = (node: ts.SourceFile, visitor: ts.Visitor, context: CustomContextType) => {
-    if (ts.ScriptTarget.JSON === node.languageVersion) return node
+    if (ts.ScriptTarget.JSON === node.languageVersion) return node;
+
     const substituteNodesList = context.substituteNodesList = new Map();
 
     context.addDeclaredIdentifierState = () => { }

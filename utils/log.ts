@@ -1,10 +1,12 @@
 
-import consola from "consola"
+// import consola from "consola"
+import { createConsola } from "consola";
 
-
-export const log = {
-    log: consola.log.bind(consola),
-    error: consola.error.bind(consola),
-    warn: consola.warn.bind(consola),
-    clear: consola.clear.bind(consola)
-} 
+const consola = createConsola()
+export const log = consola
+// {
+//     log: consola.log.bind(consola) as any,
+//     error: consola.error.bind(consola),
+//     warn: consola.warn.bind(consola),
+//     clear: console.clear.bind(console)
+// }  as const

@@ -422,7 +422,9 @@ const createSpaceController = () => {
                 break
             }
         } else {
-            currentNode = currentNode.nextSibling || startMarker;
+            while (currentNode[NODE_MOUNT_VALUE_KEY] === node && currentNode !== endMarker) {
+                currentNode = currentNode.nextSibling || startMarker;
+            }
         }
     }
     const Render = (node) => {

@@ -1,4 +1,4 @@
-import { toRgb } from "colby/toRgb";
+import { toRgb } from "colby";
 
 export const startLoader = (log = "") => {
     const cyanColor = toRgb(0, 255, 255)

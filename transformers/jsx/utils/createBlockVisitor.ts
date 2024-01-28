@@ -8,11 +8,11 @@ export type VariableStateType = {
 
 }
 
-export const createBlockVisitor = <N extends any, R extends any>(
-    nodeVisitor: (node: N, visitor: ts.Visitor, context: CustomContextType) => R,
+export const createBlockVisitor = <N extends any, R extends any, V extends ts.Visitor>(
+    nodeVisitor: (node: N, visitor: V, context: CustomContextType) => R,
     isGlobalBlock: boolean
 ) => {
-    return (node: N, visitor: ts.Visitor, context: CustomContextType): [R, VariableStateType] => {
+    return (node: N, visitor: V, context: CustomContextType): [R, VariableStateType] => {
 
         const getVariableUniqueIdentifierCache = context.getVariableUniqueIdentifier
         const variableState: VariableStateType = {

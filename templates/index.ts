@@ -5,7 +5,7 @@ import { spawn } from "child_process";
 import { log } from "../utils/log";
 import { writeFileSync } from "../utils/writeFileSync";
 import { appDirectory, runDirectory } from "../app";
-import { toRgb } from "colby/toRgb";
+import { toRgb } from "colby";
 import { getVitePackageConfig } from "./vite/getVitePackageConfig";
 import { getViteDefaultConfig } from "./vite/getViteDefaultConfig";
 import { getViteIndexHTML } from "./vite/getViteIndexHTML";
@@ -56,7 +56,7 @@ export const createTemplate = async (argvAppName: string | undefined) => {
     })
         .on("error", log.error)
         .on("close", () => {
-            log.clear()
+            console.clear()
             log.log(toRgb(0, 128, 0)(`Project "${appName}" Created`), `\nLocation: ` + toPath);
         });
 };

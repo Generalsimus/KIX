@@ -1,5 +1,5 @@
 import prompts from "prompts"
-import { toRgb } from "colby/toRgb";
+import { toRgb } from "colby";
 
 export enum TemplateTypes {
     JS,

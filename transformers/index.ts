@@ -1,4 +1,4 @@
-import ts, { visitIterationBody } from "typescript";
+import ts from "typescript";
 import { jsxTransformers } from "./jsx";
 import { getVisitor } from "./utils/getVisitor";
 
@@ -30,7 +30,7 @@ export interface CustomContextType extends ts.TransformationContext {
 
 const jsxTransformerContent: ts.CustomTransformers = {
     before: [
-        getVisitor(jsxTransformers) as any
+        getVisitor(jsxTransformers) as any,
     ]
 }
 

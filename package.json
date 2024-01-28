@@ -1,16 +1,19 @@
 {
   "name": "kix",
-  "version": "3.7.1-beta.55",
+  "version": "3.8.0",
   "main": "./web/index.js",
   "author": {
     "name": "soso tsertsvadze",
     "email": "sosotsertsvadze2@gmail.com"
   },
+  "publishConfig": {
+    "tag": "3.8.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Generalsimus/KIX.git"
   },
-  "homepage": "https://kixjs.ml/",
+  "homepage": "https://kixdev.io/",
   "bin": {
     "kix": "./dist/index.js",
     "KIX": "./dist/index.js"
@@ -51,15 +54,15 @@
   "license": "MIT",
   "dependencies": {
     "colby": "^0.2.2",
-    "consola": "^2.15.3",
-    "pacote": "^15.0.8",
+    "consola": "^3.2.3",
+    "pacote": "^17.0.6",
     "prompts": "^2.4.2",
-    "typescript": "^4.9.4",
-    "yargs": "^17.6.2"
+    "typescript": "^5.3.3",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@types/pacote": "^11.1.5",
-    "@types/prompts": "^2.4.2",
-    "@types/yargs": "^17.0.17"
+    "@types/pacote": "^11.1.8",
+    "@types/prompts": "^2.4.9",
+    "@types/yargs": "^17.0.32"
   }
 }
