@@ -1,4 +1,4 @@
-# [KIX-Beta](https://kixjs.ml/)
+# [KIX](https://kixjs.ml/)
 
 ### [Doc](https://kixjs.ml/docs/)
 
