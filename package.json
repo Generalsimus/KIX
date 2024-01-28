@@ -1,13 +1,14 @@
 {
   "name": "kix",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "main": "./web/index.js",
   "author": {
     "name": "soso tsertsvadze",
     "email": "sosotsertsvadze2@gmail.com"
   },
   "publishConfig": {
-    "tag": "3.8.0"
+    "tag": "4.0.1",
+    "dist-tag": "4.0.1"
   },
   "repository": {
     "type": "git",
