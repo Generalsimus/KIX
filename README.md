@@ -1,6 +1,6 @@
-# [KIX](https://kixjs.ml/)
+# [KIX](https://kixdev.io/)
 
-### [Doc](https://kixjs.ml/docs/)
+### [Doc](https://kixdev.io/docs/)
 
 [![Standard JS][standard-js-src]][standard-js-href]
 [![npm version][npm-version-src]][npm-version-href]
@@ -28,7 +28,7 @@ AND
 kix build
 ```
 
-## [Getting Started](https://kixjs.ml/docs/)
+## [Getting Started](https://kixdev.io/docs/)
 
 ```js
 import kix from "kix"
